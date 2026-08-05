@@ -1,0 +1,22 @@
+[
+  {
+    "category": "Tendon & ligament",
+    "query": "(tendinopathy OR tendon injury OR ligament healing) AND (platelet rich plasma OR PRP OR orthobiologic OR regenerative medicine OR rehabilitation)"
+  },
+  {
+    "category": "Joint & cartilage",
+    "query": "(cartilage OR osteoarthritis OR joint injury) AND (platelet rich plasma OR PRP OR stem cell OR orthobiologic OR regenerative medicine)"
+  },
+  {
+    "category": "Muscle recovery",
+    "query": "(skeletal muscle injury OR muscle regeneration OR exercise recovery) AND (regenerative medicine OR biologic OR rehabilitation)"
+  },
+  {
+    "category": "Bone health",
+    "query": "(bone stress injury OR osteoporosis OR bone regeneration) AND (athlete OR exercise OR regenerative medicine OR rehabilitation)"
+  },
+  {
+    "category": "Performance & well-being",
+    "query": "(athlete recovery OR return to sport OR performance longevity) AND (sleep OR nutrition OR regenerative medicine OR rehabilitation)"
+  }
+]

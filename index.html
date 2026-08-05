@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="A multidisciplinary AI journal club for regenerative health, performance, and well-being." />
+  <title>Optimize Research Team</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,500;6..72,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#">Optimize <span>Research Team</span></a>
+    <nav><button class="nav-button active" data-view="journal">Journal club</button><button class="nav-button" data-view="library">Evidence library</button></nav>
+    <p class="status"><span></span> Research monitor</p>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div>
+        <p class="eyebrow">REGENERATIVE HEALTH · PERFORMANCE · WELL-BEING</p>
+        <h1>Evidence reviewed by<br><em>a team, not a voice.</em></h1>
+        <p class="intro">Five specialized perspectives examine emerging research, surface disagreement, and translate uncertainty for practitioner judgment.</p>
+      </div>
+      <aside class="brief-card">
+        <p class="label">Current scan</p>
+        <strong id="study-count">—</strong>
+        <span>recent studies indexed</span>
+        <p id="updated">Loading the evidence feed…</p>
+      </aside>
+    </section>
+
+    <section class="team-strip" aria-label="Research team">
+      <div><span>01</span><b>Research Librarian</b><small>Finds context</small></div>
+      <div><span>02</span><b>Regenerative Specialist</b><small>Tests mechanism</small></div>
+      <div><span>03</span><b>Performance Scientist</b><small>Checks outcomes</small></div>
+      <div><span>04</span><b>Evidence Reviewer</b><small>Challenges methods</small></div>
+      <div><span>05</span><b>Research Director</b><small>Synthesizes</small></div>
+    </section>
+
+    <section id="journal-view" class="view">
+      <div class="section-heading"><div><p class="eyebrow">MULTIDISCIPLINARY REVIEW</p><h2>Latest journal clubs</h2></div><p id="panel-count"></p></div>
+      <section id="journal-feed" class="journal-feed" aria-live="polite"></section>
+    </section>
+
+    <section id="library-view" class="view hidden">
+      <section class="controls" aria-label="Evidence filters">
+        <label class="search-wrap"><span>Search evidence</span><input id="search" type="search" placeholder="Try PRP, tendon, cartilage…" /></label>
+        <label><span>Clinical area</span><select id="category"><option value="all">All areas</option></select></label>
+        <label><span>Evidence type</span><select id="design"><option value="all">All study types</option></select></label>
+      </section>
+      <div class="section-heading"><div><p class="eyebrow">SOURCE LIBRARY</p><h2>Evidence feed</h2></div><p id="result-count"></p></div>
+      <section id="feed" class="feed" aria-live="polite"></section>
+    </section>
+  </main>
+
+  <footer><p><strong>Clinical boundary:</strong> This tool supports literature review. It does not diagnose, prescribe, or replace clinical judgment. AI commentary must be checked against the source.</p></footer>
+  <script src="app.js"></script>
+</body>
+</html>
