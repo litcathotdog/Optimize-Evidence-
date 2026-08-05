@@ -1,0 +1,45 @@
+name: Refresh research library
+
+on:
+  workflow_dispatch:
+
+  schedule:
+    - cron: "17 14 * * 1-5"
+
+permissions:
+  contents: write
+
+jobs:
+  refresh-research:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run Research Librarian
+        env:
+          NCBI_EMAIL: ${{ secrets.NCBI_EMAIL }}
+        run: python research_librarian.py
+
+      - name: Commit updated research
+        run: |
+          git config user.name "optimize-evidence-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/papers.json
+
+          if git diff --cached --quiet; then
+            echo "No new research to commit."
+          else
+            git commit -m "Update PubMed research library"
+            git push
+          fi
