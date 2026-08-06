@@ -10,7 +10,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: refresh-research-library
+  group: optimize-evidence-pipeline
   cancel-in-progress: false
 
 jobs:
@@ -36,16 +36,21 @@ jobs:
           MAX_TOTAL_PAPERS: "150"
         run: python research_librarian.py
 
-      - name: Commit updated research
+      - name: Run Evidence Appraiser
+        run: python evidence_appraiser.py
+
+      - name: Commit pipeline results
         run: |
           git config user.name "optimize-evidence-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           git add data/papers.json
+          git add data/appraised_papers.json
 
           if git diff --cached --quiet; then
             echo "No research updates to commit."
           else
-            git commit -m "Refresh evidence library"
-            git push
+            git commit -m "Refresh and appraise evidence"
+            git pull --rebase origin main
+            git push origin main
           fi
