@@ -39,6 +39,9 @@ jobs:
       - name: Run Evidence Appraiser
         run: python evidence_appraiser.py
 
+      - name: Run Statistics Reviewer
+        run: python statistics_reviewer.py
+
       - name: Commit pipeline results
         run: |
           git config user.name "optimize-evidence-bot"
@@ -46,11 +49,12 @@ jobs:
 
           git add data/papers.json
           git add data/appraised_papers.json
+          git add data/statistically_reviewed_papers.json
 
           if git diff --cached --quiet; then
             echo "No research updates to commit."
           else
-            git commit -m "Refresh and appraise evidence"
+            git commit -m "Refresh, appraise, and statistically review evidence"
             git pull --rebase origin main
             git push origin main
           fi
