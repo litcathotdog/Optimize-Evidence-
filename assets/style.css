@@ -261,3 +261,109 @@ div[data-testid="stMetricLabel"] {
     color: #73778e;
     font-size: 12px;
 }
+/* -------------------------------------------------------
+   CLINICAL PROBLEMS
+------------------------------------------------------- */
+
+.clinical-problem-card {
+    min-height: 280px;
+    padding: 24px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+
+    border: 1px solid #ebeaf4;
+    border-radius: 24px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,0.98),
+            rgba(242,255,251,0.85)
+        );
+
+    box-shadow:
+        0 14px 40px rgba(34, 38, 74, 0.05);
+
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease;
+}
+
+.clinical-problem-card:hover {
+    transform: translateY(-3px);
+
+    box-shadow:
+        0 18px 46px rgba(34, 38, 74, 0.09);
+}
+
+.clinical-problem-label {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    font-weight: 800;
+
+    color: #22a995;
+
+    margin-bottom: 12px;
+}
+
+.clinical-problem-title {
+    min-height: 56px;
+
+    font-size: 21px;
+    line-height: 1.25;
+    font-weight: 800;
+
+    color: #17192d;
+}
+
+.clinical-problem-study-count {
+    margin-top: 6px;
+
+    font-size: 13px;
+
+    color: #777b93;
+}
+
+.clinical-problem-metrics {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 8px;
+
+    margin-top: 24px;
+
+    padding-top: 18px;
+
+    border-top:
+        1px solid #eeeeF5;
+}
+
+.clinical-problem-number {
+    font-size: 19px;
+    font-weight: 800;
+
+    color: #15182b;
+}
+
+.clinical-problem-small {
+    margin-top: 2px;
+
+    font-size: 9px;
+
+    color: #888ba0;
+}
+
+.clinical-problem-interventions {
+    margin-top: 22px;
+
+    min-height: 30px;
+
+    color: #5f647e;
+
+    font-size: 11px;
+
+    line-height: 1.5;
+}
+
