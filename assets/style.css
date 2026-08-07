@@ -366,4 +366,59 @@ div[data-testid="stMetricLabel"] {
 
     line-height: 1.5;
 }
+/* -------------------------------------------------------
+   PROBLEM DETAIL
+------------------------------------------------------- */
+
+.solution-card {
+    min-height: 130px;
+    border-radius: 22px;
+    padding: 20px;
+    background:
+        linear-gradient(
+            135deg,
+            #ffffff,
+            #eefcf8
+        );
+    border: 1px solid #e7eeeC;
+    box-shadow:
+        0 10px 30px rgba(40, 45, 75, 0.04);
+}
+
+.solution-title {
+    font-size: 17px;
+    font-weight: 800;
+    color: #181a2e;
+}
+
+.solution-count {
+    margin-top: 12px;
+    font-size: 12px;
+    color: #7c8096;
+}
+
+.intervention-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 10px;
+    padding: 16px 18px;
+
+    border: 1px solid #ececf4;
+    border-radius: 18px;
+
+    background: rgba(255,255,255,0.82);
+}
+
+.intervention-name {
+    font-weight: 750;
+    color: #17192d;
+}
+
+.intervention-sub {
+    margin-top: 3px;
+    color: #85889d;
+    font-size: 11px;
+}
 
