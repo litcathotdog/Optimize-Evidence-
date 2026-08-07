@@ -42,19 +42,38 @@ jobs:
       - name: Run Statistics Reviewer
         run: python statistics_reviewer.py
 
+      - name: Run Clinical Translator
+        run: python clinical_translator.py
+
+      - name: Build Evidence Database
+        run: python evidence_database.py
+
+      - name: Route Papers to Specialties
+        run: python specialty_router.py
+
+      - name: Run Specialty Reviewers
+        run: python specialty_reviewer.py
+
+      - name: Build Knowledge Graph
+        run: python knowledge_graph.py
+
+      - name: Generate Journal Club
+        run: python journal_club.py
+
+      - name: Export Practitioner Dashboard
+        run: python dashboard_export.py
+
       - name: Commit pipeline results
         run: |
           git config user.name "optimize-evidence-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add data/papers.json
-          git add data/appraised_papers.json
-          git add data/statistically_reviewed_papers.json
+          git add data/
 
           if git diff --cached --quiet; then
             echo "No research updates to commit."
           else
-            git commit -m "Refresh, appraise, and statistically review evidence"
+            git commit -m "Refresh and enrich evidence platform"
             git pull --rebase origin main
             git push origin main
           fi
