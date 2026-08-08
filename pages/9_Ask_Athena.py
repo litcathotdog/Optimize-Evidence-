@@ -1,9 +1,28 @@
-import json
-import re
+import sys
 from pathlib import Path
 
 import streamlit as st
 
+
+# ---------------------------------------------------------
+# Make root-level modules importable
+# ---------------------------------------------------------
+
+ROOT = Path(__file__).resolve().parent.parent
+
+if str(ROOT) not in sys.path:
+    sys.path.insert(
+        0,
+        str(ROOT),
+    )
+
+
+from athena import build_athena_response
+
+
+# ---------------------------------------------------------
+# Page config
+# ---------------------------------------------------------
 
 st.set_page_config(
     page_title="Ask Athena",
@@ -16,344 +35,20 @@ st.set_page_config(
 # Load CSS
 # ---------------------------------------------------------
 
-STYLE_PATH = Path("assets/style.css")
+STYLE_PATH = ROOT / "assets" / "css" / "style.css"
+
+if not STYLE_PATH.exists():
+    STYLE_PATH = ROOT / "assets" / "style.css"
 
 if STYLE_PATH.exists():
-    with STYLE_PATH.open("r", encoding="utf-8") as file:
+    with STYLE_PATH.open(
+        "r",
+        encoding="utf-8",
+    ) as file:
         st.markdown(
             f"<style>{file.read()}</style>",
             unsafe_allow_html=True,
         )
-
-
-# ---------------------------------------------------------
-# Load data
-# ---------------------------------------------------------
-
-def load_json(path, default):
-    path = Path(path)
-
-    if not path.exists():
-        return default
-
-    with path.open("r", encoding="utf-8") as file:
-        return json.load(file)
-
-
-evidence_db = load_json(
-    "data/evidence_database.json",
-    [],
-)
-
-knowledge_graph = load_json(
-    "data/knowledge_graph.json",
-    {},
-)
-
-
-# ---------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------
-
-def safe_dict(value):
-    return value if isinstance(value, dict) else {}
-
-
-def safe_list(value):
-    return value if isinstance(value, list) else []
-
-
-def normalize(text):
-    return re.sub(
-        r"[^a-z0-9\s-]",
-        " ",
-        str(text).lower(),
-    )
-
-
-def tokenize(text):
-    words = normalize(text).split()
-
-    stopwords = {
-        "the", "a", "an", "and", "or", "of", "for", "to",
-        "in", "on", "with", "is", "are", "what", "does",
-        "do", "about", "tell", "me", "show", "evidence",
-        "research", "paper", "papers",
-    }
-
-    return {
-        word
-        for word in words
-        if len(word) > 2
-        and word not in stopwords
-    }
-
-
-def paper_search_text(record):
-    metadata = safe_dict(
-        record.get("metadata")
-    )
-
-    appraisal = safe_dict(
-        record.get("appraisal")
-    )
-
-    translation = safe_dict(
-        record.get(
-            "clinical_translation"
-        )
-    )
-
-    specialties = safe_dict(
-        record.get(
-            "specialties"
-        )
-    )
-
-    parts = [
-        metadata.get("title", ""),
-        metadata.get("abstract", ""),
-        metadata.get("topic", ""),
-        translation.get(
-            "clinical_area",
-            "",
-        ),
-        translation.get(
-            "intervention_or_exposure",
-            "",
-        ),
-        translation.get(
-            "clinical_summary",
-            "",
-        ),
-        translation.get(
-            "practitioner_takeaway",
-            "",
-        ),
-        appraisal.get(
-            "study_design",
-            "",
-        ),
-    ]
-
-    for specialty_data in specialties.values():
-
-        if not isinstance(
-            specialty_data,
-            dict,
-        ):
-            continue
-
-        parts.append(
-            specialty_data.get(
-                "specialist_takeaway",
-                "",
-            )
-        )
-
-        parts.extend(
-            safe_list(
-                specialty_data.get(
-                    "domain_flags"
-                )
-            )
-        )
-
-    return normalize(
-        " ".join(
-            str(part)
-            for part in parts
-        )
-    )
-
-
-def score_record(
-    record,
-    query_tokens,
-):
-    text = paper_search_text(
-        record
-    )
-
-    score = 0
-
-    for token in query_tokens:
-
-        occurrences = text.count(
-            token
-        )
-
-        score += occurrences
-
-        metadata = safe_dict(
-            record.get(
-                "metadata"
-            )
-        )
-
-        title = normalize(
-            metadata.get(
-                "title",
-                "",
-            )
-        )
-
-        if token in title:
-            score += 4
-
-        translation = safe_dict(
-            record.get(
-                "clinical_translation"
-            )
-        )
-
-        clinical_area = normalize(
-            translation.get(
-                "clinical_area",
-                "",
-            )
-        )
-
-        if token in clinical_area:
-            score += 5
-
-    appraisal = safe_dict(
-        record.get(
-            "appraisal"
-        )
-    )
-
-    scores = safe_dict(
-        appraisal.get(
-            "scores"
-        )
-    )
-
-    evidence_score = scores.get(
-        "overall_evidence",
-        0,
-    )
-
-    relevance_score = scores.get(
-        "practitioner_relevance",
-        0,
-    )
-
-    if isinstance(
-        evidence_score,
-        (int, float),
-    ):
-        score += evidence_score * 0.15
-
-    if isinstance(
-        relevance_score,
-        (int, float),
-    ):
-        score += relevance_score * 0.15
-
-    return score
-
-
-def find_relevant_papers(
-    query,
-    limit=8,
-):
-    query_tokens = tokenize(
-        query
-    )
-
-    if not query_tokens:
-        return []
-
-    scored = []
-
-    for record in evidence_db:
-
-        score = score_record(
-            record,
-            query_tokens,
-        )
-
-        if score > 0:
-            scored.append(
-                (
-                    score,
-                    record,
-                )
-            )
-
-    scored.sort(
-        key=lambda item: item[0],
-        reverse=True,
-    )
-
-    return [
-        record
-        for _, record
-        in scored[:limit]
-    ]
-
-
-def find_graph_matches(
-    query,
-    limit=8,
-):
-    query_tokens = tokenize(
-        query
-    )
-
-    nodes = safe_list(
-        knowledge_graph.get(
-            "nodes"
-        )
-    )
-
-    scored = []
-
-    for node in nodes:
-
-        if not isinstance(
-            node,
-            dict,
-        ):
-            continue
-
-        if node.get(
-            "type"
-        ) == "paper":
-            continue
-
-        label = normalize(
-            node.get(
-                "label",
-                "",
-            )
-        )
-
-        score = sum(
-            3
-            for token in query_tokens
-            if token in label
-        )
-
-        if score > 0:
-            scored.append(
-                (
-                    score,
-                    node,
-                )
-            )
-
-    scored.sort(
-        key=lambda item: item[0],
-        reverse=True,
-    )
-
-    return [
-        node
-        for _, node
-        in scored[:limit]
-    ]
 
 
 # ---------------------------------------------------------
@@ -363,16 +58,17 @@ def find_graph_matches(
 st.markdown(
     """
     <div class="hero-eyebrow">
-        ATHENA
+        ATHENA · EVIDENCE COPILOT
     </div>
 
     <h1 class="hero-title">
-        Ask <span>Athena</span>
+        What problem are you trying to <span>solve?</span>
     </h1>
 
     <p class="hero-subtitle">
-        Ask a clinical or performance question and Athena will search
-        your curated evidence library, specialist reviews, and knowledge graph.
+        Athena searches the evidence synthesized by your research team
+        and shows what the literature collectively supports, where it
+        disagrees, and what remains uncertain.
     </p>
     """,
     unsafe_allow_html=True,
@@ -380,257 +76,596 @@ st.markdown(
 
 
 # ---------------------------------------------------------
-# Prompt suggestions
+# Example questions
 # ---------------------------------------------------------
 
 st.markdown(
-    "### Try asking"
+    "### Try asking Athena"
 )
 
-suggestion_cols = st.columns(4)
-
-suggestions = [
-    "What are researchers trying to solve in patellar tendinopathy?",
+examples = [
+    "What does the evidence say about patellar tendinopathy?",
+    "What do we know about return to sport after ligament injury?",
     "What does the evidence say about PRP?",
-    "Where are the biggest RED-S evidence gaps?",
-    "What are common problems in sprint performance research?",
+    "Where are the biggest gaps in RED-S research?",
 ]
 
-for col, suggestion in zip(
-    suggestion_cols,
-    suggestions,
+example_cols = st.columns(
+    4
+)
+
+for col, example in zip(
+    example_cols,
+    examples,
 ):
-
     with col:
-
         if st.button(
-            suggestion,
+            example,
+            key=f"example_{example}",
             use_container_width=True,
         ):
             st.session_state[
-                "athena_query"
-            ] = suggestion
+                "athena_question"
+            ] = example
 
 
 # ---------------------------------------------------------
-# Query
+# Question input
 # ---------------------------------------------------------
 
-query = st.text_area(
-    "What problem are you trying to solve?",
+question = st.text_area(
+    "Ask a question",
     value=st.session_state.get(
-        "athena_query",
+        "athena_question",
         "",
     ),
     placeholder=(
-        "Example: What does the evidence say about PRP "
-        "for patellar tendinopathy?"
+        "Example: What does the evidence say about "
+        "return-to-sport testing after ACL reconstruction?"
     ),
     height=120,
+    label_visibility="collapsed",
 )
 
-
-search_clicked = st.button(
-    "Ask Athena",
+ask_clicked = st.button(
+    "Ask Athena ✦",
     type="primary",
     use_container_width=True,
 )
 
 
 # ---------------------------------------------------------
-# Results
+# Athena response
 # ---------------------------------------------------------
 
-if search_clicked and query.strip():
+if ask_clicked and question.strip():
 
-    relevant_papers = (
-        find_relevant_papers(
-            query
+    with st.spinner(
+        "Athena is reviewing the evidence..."
+    ):
+        response = build_athena_response(
+            question
         )
-    )
 
-    graph_matches = (
-        find_graph_matches(
-            query
-        )
-    )
+    st.session_state[
+        "athena_last_response"
+    ] = response
+
+
+response = st.session_state.get(
+    "athena_last_response"
+)
+
+
+if response:
 
     st.divider()
 
-    st.markdown(
-        "## Athena's Evidence Brief"
-    )
+    if not response.get(
+        "found",
+        False,
+    ):
 
-    if not relevant_papers:
-
-        st.info(
-            "I couldn't find a strong match in the current evidence database."
+        st.warning(
+            response.get(
+                "message",
+                "No relevant evidence consensus was found.",
+            )
         )
+
+        suggestion = response.get(
+            "suggestion"
+        )
+
+        if suggestion:
+            st.caption(
+                suggestion
+            )
 
         st.stop()
 
 
     # -----------------------------------------------------
-    # Overview
+    # Topic heading
     # -----------------------------------------------------
 
-    evidence_scores = []
+    st.markdown(
+        f"""
+        <div class="athena-response-card">
 
-    practice_informing = 0
+            <div class="hero-eyebrow">
+                ATHENA'S EVIDENCE BRIEF
+            </div>
 
-    clinical_areas = []
+            <h2 style="
+                margin-top: 4px;
+                margin-bottom: 8px;
+            ">
+                {response.get("topic", "Evidence Topic")}
+            </h2>
 
-    for record in relevant_papers:
+            <div style="
+                color: #72768d;
+                font-size: 13px;
+            ">
+                {str(response.get("topic_type", "")).replace("_", " ").title()}
+            </div>
 
-        appraisal = safe_dict(
-            record.get(
-                "appraisal"
-            )
-        )
-
-        translation = safe_dict(
-            record.get(
-                "clinical_translation"
-            )
-        )
-
-        scores = safe_dict(
-            appraisal.get(
-                "scores"
-            )
-        )
-
-        evidence = scores.get(
-            "overall_evidence"
-        )
-
-        if isinstance(
-            evidence,
-            (int, float),
-        ):
-            evidence_scores.append(
-                evidence
-            )
-
-        if (
-            translation.get(
-                "practice_readiness"
-            )
-            == "Practice-informing"
-        ):
-            practice_informing += 1
-
-        area = translation.get(
-            "clinical_area"
-        )
-
-        if (
-            area
-            and area not in clinical_areas
-        ):
-            clinical_areas.append(
-                area
-            )
-
-
-    average_evidence = (
-        round(
-            sum(
-                evidence_scores
-            )
-            / len(
-                evidence_scores
-            ),
-            1,
-        )
-        if evidence_scores
-        else 0
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
 
 
-    m1, m2, m3 = st.columns(3)
+    # -----------------------------------------------------
+    # Consensus metrics
+    # -----------------------------------------------------
+
+    st.markdown(
+        "## Evidence Snapshot"
+    )
+
+    m1, m2, m3, m4, m5 = st.columns(
+        5
+    )
 
     m1.metric(
-        "Relevant Papers",
-        len(
-            relevant_papers
+        "Evidence Status",
+        response.get(
+            "evidence_status",
+            "Unknown",
         ),
     )
 
     m2.metric(
-        "Avg Evidence",
-        average_evidence,
+        "Consensus Confidence",
+        response.get(
+            "consensus_confidence",
+            "Unknown",
+        ),
+    )
+
+    confidence_score = response.get(
+        "consensus_confidence_score"
     )
 
     m3.metric(
-        "Practice-Informing",
-        practice_informing,
+        "Confidence Score",
+        (
+            f"{confidence_score}/10"
+            if confidence_score is not None
+            else "—"
+        ),
+    )
+
+    agreement = response.get(
+        "agreement_percent"
+    )
+
+    m4.metric(
+        "Agreement",
+        (
+            f"{agreement}%"
+            if agreement is not None
+            else "—"
+        ),
+    )
+
+    m5.metric(
+        "Studies",
+        response.get(
+            "paper_count",
+            0,
+        ),
     )
 
 
     # -----------------------------------------------------
-    # Athena answer
+    # Athena interpretation
     # -----------------------------------------------------
 
     st.markdown(
-        "### What I found"
+        "## Athena's Interpretation"
     )
 
-    top_record = relevant_papers[
-        0
-    ]
-
-    top_translation = safe_dict(
-        top_record.get(
-            "clinical_translation"
-        )
+    interpretation = response.get(
+        "athena_interpretation"
     )
 
-    top_takeaway = top_translation.get(
-        "practitioner_takeaway",
-        "",
-    )
-
-    if top_takeaway:
-
+    if interpretation:
         st.markdown(
             f"""
             <div class="athena-response-card">
-                {top_takeaway}
+                {interpretation}
             </div>
             """,
             unsafe_allow_html=True,
         )
 
     else:
-
-        st.write(
-            "The database contains relevant papers, but no clinical translation is available yet."
+        st.info(
+            "No consensus interpretation is available yet."
         )
 
 
     # -----------------------------------------------------
-    # Problems / concepts
+    # Quality
     # -----------------------------------------------------
 
-    if clinical_areas:
+    st.markdown(
+        "## How Strong Is the Evidence?"
+    )
+
+    q1, q2, q3 = st.columns(
+        3
+    )
+
+    evidence_quality = response.get(
+        "evidence_quality"
+    )
+
+    statistics_quality = response.get(
+        "statistical_quality"
+    )
+
+    relevance = response.get(
+        "practitioner_relevance"
+    )
+
+    q1.metric(
+        "Evidence Quality",
+        (
+            f"{evidence_quality}/10"
+            if evidence_quality is not None
+            else "—"
+        ),
+    )
+
+    q2.metric(
+        "Statistical Quality",
+        (
+            f"{statistics_quality}/10"
+            if statistics_quality is not None
+            else "—"
+        ),
+    )
+
+    q3.metric(
+        "Practitioner Relevance",
+        (
+            f"{relevance}/10"
+            if relevance is not None
+            else "—"
+        ),
+    )
+
+
+    # -----------------------------------------------------
+    # Result direction
+    # -----------------------------------------------------
+
+    st.markdown(
+        "## Where the Studies Point"
+    )
+
+    result_direction = response.get(
+        "result_direction",
+        {},
+    )
+
+    raw_counts = result_direction.get(
+        "raw_counts",
+        {},
+    )
+
+    d1, d2, d3, d4 = st.columns(
+        4
+    )
+
+    d1.metric(
+        "Favorable",
+        raw_counts.get(
+            "favorable",
+            0,
+        ),
+    )
+
+    d2.metric(
+        "Neutral",
+        raw_counts.get(
+            "neutral",
+            0,
+        ),
+    )
+
+    d3.metric(
+        "Unfavorable",
+        raw_counts.get(
+            "unfavorable",
+            0,
+        ),
+    )
+
+    d4.metric(
+        "Unclear",
+        raw_counts.get(
+            "unclear",
+            0,
+        ),
+    )
+
+
+    # -----------------------------------------------------
+    # Practice readiness
+    # -----------------------------------------------------
+
+    st.markdown(
+        "## Practice Readiness"
+    )
+
+    p1, p2 = st.columns(
+        2
+    )
+
+    p1.metric(
+        "Practice-Informing Papers",
+        response.get(
+            "practice_informing_papers",
+            0,
+        ),
+    )
+
+    p2.metric(
+        "Need Full-Text Review",
+        response.get(
+            "full_text_review_required",
+            0,
+        ),
+    )
+
+
+    # -----------------------------------------------------
+    # Specialist perspectives
+    # -----------------------------------------------------
+
+    st.markdown(
+        "## What the Specialists Think"
+    )
+
+    specialists = response.get(
+        "specialist_perspectives",
+        [],
+    )
+
+    specialist_names = {
+        "regenerative_medicine": (
+            "Atlas",
+            "Regenerative Medicine",
+            "🌱",
+        ),
+        "sports_performance": (
+            "Vector",
+            "Sports Performance",
+            "⚡",
+        ),
+        "biomechanics": (
+            "Newton",
+            "Biomechanics",
+            "⚙️",
+        ),
+        "womens_athlete_health": (
+            "Athena",
+            "Women's Athlete Health",
+            "♡",
+        ),
+    }
+
+    if specialists:
+
+        cols = st.columns(
+            min(
+                len(specialists),
+                4,
+            )
+        )
+
+        for col, specialist in zip(
+            cols,
+            specialists[:4],
+        ):
+
+            specialty = specialist.get(
+                "specialty",
+                "",
+            )
+
+            name, role, icon = (
+                specialist_names.get(
+                    specialty,
+                    (
+                        specialty.replace(
+                            "_",
+                            " ",
+                        ).title(),
+                        "Specialist",
+                        "✦",
+                    ),
+                )
+            )
+
+            score = specialist.get(
+                "average_domain_score"
+            )
+
+            confidence_distribution = (
+                specialist.get(
+                    "confidence_distribution",
+                    {},
+                )
+            )
+
+            high = (
+                confidence_distribution.get(
+                    "High",
+                    0,
+                )
+            )
+
+            moderate = (
+                confidence_distribution.get(
+                    "Moderate",
+                    0,
+                )
+            )
+
+            with col:
+
+                st.markdown(
+                    f"""
+                    <div class="ai-agent-card">
+
+                        <div class="ai-agent-top">
+
+                            <div class="ai-agent-avatar">
+                                {icon}
+                            </div>
+
+                            <div>
+                                <div class="ai-agent-name">
+                                    {name}
+                                </div>
+
+                                <div class="ai-agent-role">
+                                    {role}
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="ai-agent-stats">
+
+                            <div>
+                                <div class="ai-agent-number">
+                                    {score if score is not None else "—"}
+                                </div>
+
+                                <div class="ai-agent-small">
+                                    Domain score
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="ai-agent-number">
+                                    {high + moderate}
+                                </div>
+
+                                <div class="ai-agent-small">
+                                    Higher-confidence reviews
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+
+    else:
+
+        st.info(
+            "No specialty-level consensus is available for this topic yet."
+        )
+
+
+    # -----------------------------------------------------
+    # Research gap
+    # -----------------------------------------------------
+
+    st.markdown(
+        "## What We Still Don't Know"
+    )
+
+    research_gap = response.get(
+        "research_gap"
+    )
+
+    if research_gap:
+        st.warning(
+            research_gap
+        )
+
+
+    recurring_issues = response.get(
+        "recurring_issues",
+        [],
+    )
+
+    if recurring_issues:
+
+        with st.expander(
+            "Recurring limitations across the literature"
+        ):
+
+            for issue in recurring_issues:
+
+                if not isinstance(
+                    issue,
+                    dict,
+                ):
+                    continue
+
+                st.write(
+                    f"• {issue.get('issue', '')} "
+                    f"— seen {issue.get('count', 0)} time(s)"
+                )
+
+
+    # -----------------------------------------------------
+    # Related topics
+    # -----------------------------------------------------
+
+    related_topics = response.get(
+        "related_topics",
+        [],
+    )
+
+    if related_topics:
 
         st.markdown(
-            "### Clinical problems connected to your question"
+            "## Related Evidence"
         )
 
         cols = st.columns(
             min(
+                len(related_topics),
                 4,
-                len(
-                    clinical_areas
-                ),
             )
         )
 
-        for col, area in zip(
+        for col, topic in zip(
             cols,
-            clinical_areas[:4],
+            related_topics[:4],
         ):
 
             with col:
@@ -638,7 +673,24 @@ if search_clicked and query.strip():
                 st.markdown(
                     f"""
                     <div class="athena-concept-card">
-                        {area}
+
+                        <strong>
+                            {topic.get("concept", "")}
+                        </strong>
+
+                        <br><br>
+
+                        {topic.get("paper_count", 0)} studies
+
+                        <br>
+
+                        <span style="
+                            color:#72768d;
+                            font-size:11px;
+                        ">
+                            {topic.get("consensus", "Unknown")}
+                        </span>
+
                     </div>
                     """,
                     unsafe_allow_html=True,
@@ -646,327 +698,152 @@ if search_clicked and query.strip():
 
 
     # -----------------------------------------------------
-    # Knowledge graph matches
-    # -----------------------------------------------------
-
-    if graph_matches:
-
-        st.markdown(
-            "### Related concepts"
-        )
-
-        for node in graph_matches:
-
-            st.write(
-                f"• **{node.get('label', '')}** "
-                f"— {str(node.get('type', '')).replace('_', ' ').title()}"
-            )
-
-
-    # -----------------------------------------------------
-    # Specialist insights
+    # Supporting papers
     # -----------------------------------------------------
 
     st.markdown(
-        "### What the specialists are saying"
+        "## Supporting Studies"
     )
 
-    specialist_labels = {
-        "regenerative_medicine": "Atlas",
-        "sports_performance": "Vector",
-        "biomechanics": "Newton",
-        "womens_athlete_health": "Athena",
-    }
-
-    specialist_messages = []
-
-    for record in relevant_papers:
-
-        specialties = safe_dict(
-            record.get(
-                "specialties"
-            )
-        )
-
-        for specialty, review in (
-            specialties.items()
-        ):
-
-            if not isinstance(
-                review,
-                dict,
-            ):
-                continue
-
-            if not review.get(
-                "reviewed",
-                False,
-            ):
-                continue
-
-            takeaway = review.get(
-                "specialist_takeaway",
-                "",
-            )
-
-            if not takeaway:
-                continue
-
-            name = specialist_labels.get(
-                specialty,
-                specialty,
-            )
-
-            message = (
-                name,
-                takeaway,
-            )
-
-            if (
-                message
-                not in specialist_messages
-            ):
-                specialist_messages.append(
-                    message
-                )
-
-
-    if specialist_messages:
-
-        for name, takeaway in (
-            specialist_messages[:6]
-        ):
-
-            with st.container(
-                border=True
-            ):
-
-                st.markdown(
-                    f"**{name}**"
-                )
-
-                st.write(
-                    takeaway
-                )
-
-    else:
-
-        st.write(
-            "No specialist reviews are available for these papers yet."
-        )
-
-
-    # -----------------------------------------------------
-    # Evidence gaps
-    # -----------------------------------------------------
-
-    st.markdown(
-        "### What we still don't know"
+    supporting_papers = response.get(
+        "supporting_papers",
+        [],
     )
 
-    query_tokens = tokenize(
-        query
-    )
+    if supporting_papers:
 
-    matching_gaps = []
-
-    for gap in safe_list(
-        knowledge_graph.get(
-            "evidence_gaps"
-        )
-    ):
-
-        if not isinstance(
-            gap,
-            dict,
+        for number, paper in enumerate(
+            supporting_papers,
+            start=1,
         ):
-            continue
 
-        searchable = normalize(
-            json.dumps(
-                gap
-            )
-        )
-
-        if any(
-            token in searchable
-            for token in query_tokens
-        ):
-            matching_gaps.append(
-                gap
+            metadata = paper.get(
+                "metadata",
+                {},
             )
 
-
-    if matching_gaps:
-
-        for gap in matching_gaps[:5]:
-
-            st.warning(
-                gap.get(
-                    "concept",
-                    "Evidence gap",
-                )
+            appraisal = paper.get(
+                "appraisal",
+                {},
             )
 
-            for reason in safe_list(
-                gap.get(
-                    "reasons"
-                )
+            statistics = paper.get(
+                "statistics",
+                {},
+            )
+
+            translation = paper.get(
+                "clinical_translation",
+                {},
+            )
+
+            title = metadata.get(
+                "title",
+                "Untitled paper",
+            )
+
+            with st.expander(
+                f"{number}. {title}"
             ):
-                st.write(
-                    f"• {reason}"
+
+                citation = [
+                    metadata.get(
+                        "journal",
+                        "",
+                    ),
+                    appraisal.get(
+                        "study_design",
+                        "",
+                    ),
+                    metadata.get(
+                        "publication_date",
+                        "",
+                    ),
+                ]
+
+                st.caption(
+                    " · ".join(
+                        item
+                        for item in citation
+                        if item
+                    )
                 )
 
-    else:
-
-        st.write(
-            "No directly matched evidence gap is currently indexed."
-        )
-
-
-    # -----------------------------------------------------
-    # Papers
-    # -----------------------------------------------------
-
-    st.markdown(
-        "### Best-matching papers"
-    )
-
-    for number, record in enumerate(
-        relevant_papers,
-        start=1,
-    ):
-
-        metadata = safe_dict(
-            record.get(
-                "metadata"
-            )
-        )
-
-        appraisal = safe_dict(
-            record.get(
-                "appraisal"
-            )
-        )
-
-        statistics = safe_dict(
-            record.get(
-                "statistics"
-            )
-        )
-
-        translation = safe_dict(
-            record.get(
-                "clinical_translation"
-            )
-        )
-
-        title = metadata.get(
-            "title",
-            "Untitled paper",
-        )
-
-        with st.expander(
-            f"{number}. {title}"
-        ):
-
-            st.caption(
-                " · ".join(
-                    value
-                    for value in [
-                        translation.get(
-                            "clinical_area",
-                            "",
-                        ),
-                        appraisal.get(
-                            "study_design",
-                            "",
-                        ),
-                        metadata.get(
-                            "journal",
-                            "",
-                        ),
-                    ]
-                    if value
-                )
-            )
-
-            appraisal_scores = safe_dict(
-                appraisal.get(
-                    "scores"
-                )
-            )
-
-            statistics_scores = safe_dict(
-                statistics.get(
-                    "scores"
-                )
-            )
-
-            c1, c2, c3 = st.columns(
-                3
-            )
-
-            c1.metric(
-                "Evidence",
-                appraisal_scores.get(
-                    "overall_evidence",
-                    0,
-                ),
-            )
-
-            c2.metric(
-                "Statistics",
-                statistics_scores.get(
-                    "overall_statistics",
-                    0,
-                ),
-            )
-
-            c3.metric(
-                "Relevance",
-                appraisal_scores.get(
-                    "practitioner_relevance",
-                    0,
-                ),
-            )
-
-            takeaway = translation.get(
-                "practitioner_takeaway",
-                "",
-            )
-
-            if takeaway:
-
-                st.markdown(
-                    "**Clinical takeaway**"
+                appraisal_scores = appraisal.get(
+                    "scores",
+                    {},
                 )
 
-                st.write(
-                    takeaway
+                statistics_scores = statistics.get(
+                    "scores",
+                    {},
                 )
 
-            pubmed_url = metadata.get(
-                "pubmed_url",
-                "",
-            )
-
-            if pubmed_url:
-
-                st.link_button(
-                    "Open PubMed ↗",
-                    pubmed_url,
+                c1, c2, c3 = st.columns(
+                    3
                 )
+
+                c1.metric(
+                    "Evidence",
+                    appraisal_scores.get(
+                        "overall_evidence",
+                        0,
+                    ),
+                )
+
+                c2.metric(
+                    "Statistics",
+                    statistics_scores.get(
+                        "overall_statistics",
+                        0,
+                    ),
+                )
+
+                c3.metric(
+                    "Relevance",
+                    appraisal_scores.get(
+                        "practitioner_relevance",
+                        0,
+                    ),
+                )
+
+                takeaway = translation.get(
+                    "practitioner_takeaway",
+                    "",
+                )
+
+                if takeaway:
+
+                    st.markdown(
+                        "**Clinical takeaway**"
+                    )
+
+                    st.write(
+                        takeaway
+                    )
+
+                pubmed_url = metadata.get(
+                    "pubmed_url",
+                    "",
+                )
+
+                if pubmed_url:
+
+                    st.link_button(
+                        "Open PubMed ↗",
+                        pubmed_url,
+                    )
 
 
 # ---------------------------------------------------------
-# Explanation
+# Footer / transparency
 # ---------------------------------------------------------
 
 st.divider()
 
 st.caption(
-    "Athena v1 uses transparent keyword matching, evidence scores, "
-    "specialty reviews, and your knowledge graph. It does not generate "
-    "new medical claims or use a paid LLM API."
+    "Athena reports synthesized evidence from the Optimize Evidence "
+    "pipeline. Consensus scores are formula-based and are not a substitute "
+    "for formal systematic review, meta-analysis, clinical judgment, or "
+    "full-text appraisal."
 )
