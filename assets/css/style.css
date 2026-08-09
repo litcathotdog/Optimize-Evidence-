@@ -1,85 +1,749 @@
-/* =========================================================
-   GLOBAL
-========================================================= */
+/* ========================================================
+   OPTIMIZE EVIDENCE
+   Main stylesheet
+======================================================== */
+
+
+/* --------------------------------------------------------
+   Global app styling
+-------------------------------------------------------- */
 
 html,
 body,
 [class*="css"] {
     font-family:
         Inter,
-        ui-sans-serif,
-        system-ui,
         -apple-system,
         BlinkMacSystemFont,
         "Segoe UI",
         sans-serif;
 }
 
-:root {
-    --ink: #17182a;
-    --muted: #72768d;
-    --line: #ececf4;
-    --mint: #dff8f2;
-    --mint-strong: #22b8a2;
-    --lavender: #eee8ff;
-    --pink: #ffeaf3;
-    --blue: #e9f4ff;
-    --peach: #fff0e6;
-    --surface: rgba(255,255,255,0.90);
-}
-
 .stApp {
     background:
         radial-gradient(
-            circle at top left,
-            #effffb 0%,
-            #ffffff 32%,
-            #faf8ff 67%,
-            #fff8fb 100%
+            circle at 75% 0%,
+            rgba(242, 236, 255, 0.55),
+            transparent 31%
+        ),
+        linear-gradient(
+            180deg,
+            #fcfdff 0%,
+            #f8fbfd 100%
         );
-
-    color: var(--ink);
+    color: #111827;
 }
 
 .block-container {
-    max-width: 1500px;
-    padding-top: 2rem;
-    padding-bottom: 5rem;
+    max-width: 1550px;
+    padding-top: 1.6rem;
+    padding-left: 1.6rem;
+    padding-right: 1.6rem;
+    padding-bottom: 3rem;
+}
+
+p {
+    color: #667085;
+}
+
+h1,
+h2,
+h3 {
+    letter-spacing: -0.02em;
 }
 
 
-/* =========================================================
-   SIDEBAR
-========================================================= */
+/* --------------------------------------------------------
+   Hide Streamlit clutter
+-------------------------------------------------------- */
+
+#MainMenu {
+    visibility: hidden;
+}
+
+footer {
+    visibility: hidden;
+}
+
+header[data-testid="stHeader"] {
+    background: transparent;
+}
+
+
+/* --------------------------------------------------------
+   Sidebar
+-------------------------------------------------------- */
 
 section[data-testid="stSidebar"] {
-    background:
-        rgba(
-            255,
-            255,
-            255,
-            0.94
-        );
-
-    border-right:
-        1px solid var(--line);
+    background: rgba(255, 255, 255, 0.97);
+    border-right: 1px solid #edf0f4;
 }
 
 section[data-testid="stSidebar"] > div {
-    padding-top: 1.5rem;
+    padding-top: 1.4rem;
+    padding-left: 0.9rem;
+    padding-right: 0.9rem;
 }
 
-.brand {
+.sidebar-brand {
     display: flex;
-    gap: 14px;
+    gap: 12px;
     align-items: flex-start;
-
-    margin-bottom: 26px;
+    padding: 8px 6px 20px 6px;
 }
 
-.brand-icon {
-    width: 46px;
-    height: 46px;
+.brand-mark {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 25px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #e6fffb,
+            #eef1ff
+        );
+
+    border: 1px solid #dfeae8;
+}
+
+.brand-title {
+    font-size: 16px;
+    line-height: 1.08;
+    font-weight: 850;
+    letter-spacing: 2px;
+    color: #182230;
+}
+
+.brand-subtitle {
+    margin-top: 9px;
+    font-size: 11px;
+    line-height: 1.45;
+    color: #667085;
+}
+
+
+/* --------------------------------------------------------
+   Sidebar buttons
+-------------------------------------------------------- */
+
+section[data-testid="stSidebar"] .stButton {
+    margin-bottom: 5px;
+}
+
+section[data-testid="stSidebar"] .stButton button {
+    border-radius: 12px;
+    min-height: 42px;
+    justify-content: flex-start;
+    padding-left: 13px;
+    font-weight: 520;
+    border: 1px solid transparent;
+    box-shadow: none;
+}
+
+section[data-testid="stSidebar"]
+.stButton button[kind="secondary"] {
+    background: transparent;
+    color: #344054;
+}
+
+section[data-testid="stSidebar"]
+.stButton button[kind="secondary"]:hover {
+    background: #f6fbfa;
+    border-color: #e4f2ef;
+}
+
+section[data-testid="stSidebar"]
+.stButton button[kind="primary"] {
+    background:
+        linear-gradient(
+            90deg,
+            #e5faf7,
+            #eff9ff
+        );
+    color: #137d75;
+    border-color: #d8f0ec;
+}
+
+.sidebar-spacer {
+    height: 12px;
+}
+
+
+/* --------------------------------------------------------
+   Ask Athena sidebar card
+-------------------------------------------------------- */
+
+.athena-sidebar-card {
+    margin-top: 18px;
+    padding: 20px 17px 14px 17px;
+
+    border-radius: 18px;
+
+    background:
+        linear-gradient(
+            155deg,
+            #effefb 0%,
+            #eef8ff 55%,
+            #f8f4ff 100%
+        );
+
+    border: 1px solid #dcefeb;
+}
+
+.athena-orb {
+    width: 48px;
+    height: 48px;
+
+    border-radius: 50%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 23px;
+
+    background: white;
+
+    border: 1px solid #d9e8e6;
+
+    box-shadow:
+        0 6px 18px rgba(16, 24, 40, 0.06);
+}
+
+.athena-sidebar-title {
+    font-size: 15px;
+    font-weight: 750;
+    margin-top: 14px;
+}
+
+.athena-sidebar-copy {
+    font-size: 12px;
+    line-height: 1.55;
+    color: #667085;
+    margin-top: 9px;
+}
+
+
+/* --------------------------------------------------------
+   Header
+-------------------------------------------------------- */
+
+.greeting {
+    font-size: 14px;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 8px;
+}
+
+.hero-title {
+    font-size: 35px;
+    line-height: 1.08;
+    font-weight: 780;
+    letter-spacing: -1.3px;
+    color: #111827;
+}
+
+.hero-title span {
+    color: #16b7a4;
+}
+
+.hero-subtitle {
+    margin-top: 9px;
+
+    font-size: 14px;
+    line-height: 1.5;
+
+    color: #667085;
+
+    max-width: 640px;
+}
+
+.page-title {
+    font-size: 32px;
+    font-weight: 780;
+    letter-spacing: -1px;
+    color: #111827;
+}
+
+.page-subtitle {
+    font-size: 14px;
+    color: #667085;
+    margin-top: 8px;
+    max-width: 700px;
+}
+
+
+/* --------------------------------------------------------
+   Search and top controls
+-------------------------------------------------------- */
+
+div[data-testid="stTextInput"] input {
+    border-radius: 14px;
+    min-height: 42px;
+
+    background: rgba(255, 255, 255, 0.92);
+
+    border: 1px solid #e4e7ec;
+
+    box-shadow:
+        0 4px 16px rgba(16, 24, 40, 0.025);
+}
+
+div[data-testid="stTextInput"] input:focus {
+    border-color: #93d8d0;
+    box-shadow:
+        0 0 0 3px rgba(22, 183, 164, 0.08);
+}
+
+div[data-testid="stButton"] button {
+    border-radius: 12px;
+    border: 1px solid #e7e9ee;
+    box-shadow: none;
+}
+
+
+/* --------------------------------------------------------
+   Utility spacing
+-------------------------------------------------------- */
+
+.vertical-gap-small {
+    height: 8px;
+}
+
+.vertical-gap {
+    height: 20px;
+}
+
+
+/* --------------------------------------------------------
+   KPI shell
+-------------------------------------------------------- */
+
+.kpi-shell {
+    background: rgba(255, 255, 255, 0.88);
+
+    border: 1px solid #e9ecf1;
+
+    border-radius: 20px;
+
+    padding: 18px 16px 8px 16px;
+
+    box-shadow:
+        0 2px 4px rgba(16, 24, 40, 0.015),
+        0 12px 36px rgba(16, 24, 40, 0.025);
+}
+
+.kpi-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+
+    min-height: 86px;
+
+    padding: 4px 2px;
+}
+
+.kpi-icon {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+
+    border-radius: 14px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.kpi-icon.teal {
+    background: #e8fbf8;
+    color: #13a996;
+}
+
+.kpi-icon.gold {
+    background: #fff7e8;
+    color: #e0a01f;
+}
+
+.kpi-icon.purple {
+    background: #f2edff;
+    color: #8d5fe8;
+}
+
+.kpi-icon.pink {
+    background: #fff0f6;
+    color: #dd4e8c;
+}
+
+.kpi-icon.blue {
+    background: #edf7ff;
+    color: #4b92df;
+}
+
+.kpi-value {
+    font-size: 23px;
+    line-height: 1;
+    font-weight: 780;
+    color: #101828;
+}
+
+.kpi-label {
+    margin-top: 5px;
+
+    font-size: 11px;
+    line-height: 1.25;
+
+    font-weight: 620;
+
+    color: #344054;
+}
+
+.kpi-change {
+    margin-top: 8px;
+
+    font-size: 10px;
+    color: #0fa77c;
+}
+
+
+/* --------------------------------------------------------
+   Section headers
+-------------------------------------------------------- */
+
+.section-title {
+    font-size: 14px;
+    font-weight: 750;
+    color: #101828;
+    margin-bottom: 7px;
+}
+
+
+/* --------------------------------------------------------
+   Clinical problem cards
+-------------------------------------------------------- */
+
+.problem-card {
+    min-height: 250px;
+
+    padding: 14px;
+
+    border-radius: 18px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255, 255, 255, 0.95),
+            rgba(248, 250, 255, 0.92)
+        );
+
+    border: 1px solid #e6e9ef;
+
+    box-shadow:
+        0 6px 18px rgba(16, 24, 40, 0.025);
+}
+
+.problem-top {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.problem-icon {
+    width: 48px;
+    height: 48px;
+
+    border-radius: 16px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background:
+        linear-gradient(
+            145deg,
+            #f0fbfa,
+            #f6f1ff
+        );
+
+    font-size: 23px;
+}
+
+.problem-name {
+    font-size: 13px;
+    line-height: 1.15;
+    font-weight: 720;
+    color: #18463f;
+}
+
+.problem-meta {
+    margin-top: 14px;
+
+    font-size: 11px;
+
+    color: #667085;
+}
+
+.problem-meta.small {
+    margin-top: 14px;
+    font-size: 10px;
+}
+
+.strength-pill {
+    width: fit-content;
+
+    margin-top: 8px;
+
+    padding: 4px 9px;
+
+    border-radius: 999px;
+
+    background: #e4f5f1;
+
+    color: #20796d;
+
+    font-size: 9px;
+    font-weight: 750;
+}
+
+.confidence-row {
+    margin-top: 8px;
+
+    font-size: 12px;
+
+    color: #f0aa2d;
+}
+
+.confidence-row span {
+    color: #344054;
+    font-size: 10px;
+}
+
+.problem-insight {
+    font-size: 11px;
+    font-weight: 650;
+
+    margin-top: 3px;
+}
+
+.tag-row {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+
+    margin-top: 12px;
+}
+
+.tag {
+    padding: 4px 8px;
+
+    border-radius: 999px;
+
+    background: #eef8f7;
+
+    color: #426c66;
+
+    font-size: 9px;
+}
+
+
+/* --------------------------------------------------------
+   Specialist mini cards
+-------------------------------------------------------- */
+
+.specialist-mini-card {
+    min-height: 182px;
+
+    padding: 12px;
+
+    text-align: center;
+
+    border-radius: 17px;
+
+    background: rgba(255, 255, 255, 0.92);
+
+    border: 1px solid #e8eaf0;
+
+    box-shadow:
+        0 5px 15px rgba(16, 24, 40, 0.02);
+}
+
+.specialist-avatar {
+    width: 62px;
+    height: 62px;
+
+    margin: auto;
+
+    border-radius: 22px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background:
+        radial-gradient(
+            circle,
+            #ffffff,
+            #edf9f7
+        );
+
+    border: 1px solid #dceae8;
+
+    font-size: 30px;
+}
+
+.specialist-mini-name {
+    margin-top: 8px;
+
+    font-size: 12px;
+    font-weight: 750;
+}
+
+.specialist-mini-role {
+    margin-top: 2px;
+
+    min-height: 30px;
+
+    font-size: 9px;
+    line-height: 1.3;
+
+    color: #344054;
+}
+
+.specialist-mini-copy {
+    margin-top: 6px;
+
+    font-size: 8px;
+    line-height: 1.35;
+
+    color: #667085;
+}
+
+
+/* --------------------------------------------------------
+   Dashboard cards
+-------------------------------------------------------- */
+
+.dashboard-card,
+.rail-card {
+    background: rgba(255, 255, 255, 0.93);
+
+    border: 1px solid #e8ebf0;
+
+    border-radius: 18px;
+
+    padding: 15px;
+
+    box-shadow:
+        0 8px 24px rgba(16, 24, 40, 0.025);
+}
+
+
+/* --------------------------------------------------------
+   Paper card
+-------------------------------------------------------- */
+
+.paper-type {
+    width: fit-content;
+
+    margin-top: 4px;
+
+    padding: 4px 8px;
+
+    border-radius: 999px;
+
+    background: #e7f8f4;
+
+    color: #298172;
+
+    font-size: 8px;
+    font-weight: 750;
+}
+
+.paper-title {
+    margin-top: 10px;
+
+    font-size: 14px;
+    line-height: 1.3;
+    font-weight: 740;
+
+    color: #182230;
+}
+
+.paper-summary {
+    margin-top: 8px;
+
+    font-size: 10px;
+    line-height: 1.55;
+
+    color: #667085;
+}
+
+
+/* --------------------------------------------------------
+   Trending topics
+-------------------------------------------------------- */
+
+.trend-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 10px 0;
+
+    border-bottom: 1px solid #f0f2f5;
+
+    font-size: 11px;
+}
+
+.trend-up {
+    color: #0fa77c;
+}
+
+
+/* --------------------------------------------------------
+   Right rail
+-------------------------------------------------------- */
+
+.rail-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    font-size: 13px;
+    font-weight: 750;
+}
+
+.live-dot {
+    color: #ef2d65;
+    font-size: 10px;
+}
+
+.activity-row {
+    display: grid;
+    grid-template-columns: 42px 1fr 1.15fr;
+
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 12px 4px;
+
+    border-bottom: 1px solid #edf0f3;
+}
+
+.activity-avatar {
+    width: 39px;
+    height: 39px;
 
     display: flex;
     align-items: center;
@@ -87,1305 +751,296 @@ section[data-testid="stSidebar"] > div {
 
     border-radius: 15px;
 
-    background:
-        linear-gradient(
-            135deg,
-            var(--mint),
-            var(--lavender)
-        );
+    background: #f4fbfa;
 
-    font-size: 24px;
+    font-size: 20px;
 }
 
-.brand-name {
-    font-size: 17px;
-    font-weight: 850;
-
-    letter-spacing: 0.15em;
-    line-height: 1.05;
-}
-
-.brand-tagline {
-    margin-top: 8px;
-
+.activity-name {
     font-size: 11px;
-    line-height: 1.4;
-
-    color: var(--muted);
-}
-
-
-/* =========================================================
-   SIDEBAR RADIO
-========================================================= */
-
-div[data-testid="stSidebar"] .stRadio > div {
-    gap: 7px;
-}
-
-div[data-testid="stSidebar"] .stRadio label {
-    padding:
-        10px
-        12px;
-
-    border-radius: 12px;
-}
-
-
-/* =========================================================
-   TYPOGRAPHY
-========================================================= */
-
-.hero-eyebrow {
-    margin-bottom: 5px;
-
-    color: #646982;
-
-    font-size: 12px;
-    font-weight: 800;
-
-    letter-spacing: 0.11em;
-}
-
-.hero-title {
-    margin: 0;
-
-    color: var(--ink);
-
-    font-size: clamp(
-        40px,
-        5vw,
-        60px
-    );
-
-    line-height: 1.04;
-
-    letter-spacing: -0.045em;
-}
-
-.hero-title span {
-    color: var(--mint-strong);
-}
-
-.hero-subtitle {
-    max-width: 760px;
-
-    margin-top: 16px;
-    margin-bottom: 32px;
-
-    color: var(--muted);
-
-    font-size: 17px;
-    line-height: 1.65;
-}
-
-h2,
-h3 {
-    letter-spacing: -0.025em;
-}
-
-
-/* =========================================================
-   METRICS
-========================================================= */
-
-div[data-testid="stMetric"] {
-    padding:
-        17px
-        18px;
-
-    border:
-        1px solid var(--line);
-
-    border-radius: 20px;
-
-    background:
-        rgba(
-            255,
-            255,
-            255,
-            0.88
-        );
-
-    box-shadow:
-        0
-        10px
-        32px
-        rgba(
-            36,
-            39,
-            73,
-            0.045
-        );
-}
-
-div[data-testid="stMetricLabel"] {
-    color: var(--muted);
-}
-
-div[data-testid="stMetricValue"] {
-    color: var(--ink);
-}
-
-
-/* =========================================================
-   BUTTONS
-========================================================= */
-
-.stButton > button,
-.stLinkButton > a {
-    min-height: 42px;
-
-    border-radius: 14px;
-
-    border:
-        1px solid #e5e5ef;
-
-    font-weight: 700;
-
-    transition:
-        transform 0.15s ease,
-        box-shadow 0.15s ease;
-}
-
-.stButton > button:hover,
-.stLinkButton > a:hover {
-    transform:
-        translateY(-1px);
-
-    box-shadow:
-        0
-        8px
-        22px
-        rgba(
-            35,
-            40,
-            72,
-            0.08
-        );
-}
-
-button[kind="primary"] {
-    background:
-        linear-gradient(
-            135deg,
-            #22b8a2,
-            #6f73d8
-        ) !important;
-
-    border: none !important;
-
-    color: white !important;
-}
-
-
-/* =========================================================
-   INPUTS
-========================================================= */
-
-div[data-baseweb="input"] > div,
-div[data-baseweb="textarea"] > div,
-div[data-baseweb="select"] > div {
-    border-radius: 15px !important;
-
-    border-color:
-        #e8e8f1 !important;
-
-    background:
-        rgba(
-            255,
-            255,
-            255,
-            0.88
-        ) !important;
-}
-
-
-/* =========================================================
-   EXPANDERS
-========================================================= */
-
-details {
-    border:
-        1px solid var(--line) !important;
-
-    border-radius:
-        18px !important;
-
-    background:
-        rgba(
-            255,
-            255,
-            255,
-            0.76
-        ) !important;
-
-    margin-bottom: 8px;
-}
-
-
-/* =========================================================
-   HOME PROBLEM CARDS
-========================================================= */
-
-.problem-card {
-    min-height: 215px;
-
-    padding: 21px;
-
-    border:
-        1px solid var(--line);
-
-    border-radius: 24px;
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(255,255,255,0.97),
-            rgba(238,255,250,0.92)
-        );
-
-    box-shadow:
-        0
-        14px
-        38px
-        rgba(
-            35,
-            40,
-            72,
-            0.05
-        );
-}
-
-.problem-name {
-    min-height: 52px;
-
-    color: var(--ink);
-
-    font-size: 17px;
-    font-weight: 850;
-}
-
-.problem-count {
-    margin-top: 13px;
-
-    color: var(--muted);
-
-    font-size: 12px;
-}
-
-.problem-strength {
-    display: inline-block;
-
-    margin-top: 18px;
-
-    padding:
-        6px
-        10px;
-
-    border-radius: 999px;
-
-    background:
-        var(--mint);
-
-    color:
-        #168f7d;
-
-    font-size: 10px;
-    font-weight: 800;
-}
-
-.problem-confidence {
-    margin-top: 12px;
-
-    font-size: 23px;
-    font-weight: 850;
-}
-
-.problem-link {
-    margin-top: 14px;
-
-    color:
-        #159d89;
-
-    font-size: 12px;
     font-weight: 750;
 }
 
-
-/* =========================================================
-   CLINICAL PROBLEM CARDS
-========================================================= */
-
-.clinical-problem-card {
-    min-height: 285px;
-
-    padding: 24px;
-
-    border:
-        1px solid var(--line);
-
-    border-radius: 25px;
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(255,255,255,0.98),
-            rgba(241,255,251,0.90)
-        );
-
-    box-shadow:
-        0
-        14px
-        40px
-        rgba(
-            35,
-            40,
-            72,
-            0.05
-        );
-}
-
-.clinical-problem-label {
-    margin-bottom: 11px;
-
-    color:
-        #18a690;
-
-    font-size: 10px;
-    font-weight: 850;
-
-    letter-spacing: 0.11em;
-}
-
-.clinical-problem-title {
-    min-height: 55px;
-
-    color: var(--ink);
-
-    font-size: 21px;
-    font-weight: 850;
-
-    line-height: 1.25;
-}
-
-.clinical-problem-study-count {
-    margin-top: 7px;
-
-    color: var(--muted);
-
-    font-size: 12px;
-}
-
-.clinical-problem-metrics {
-    display: grid;
-
-    grid-template-columns:
-        repeat(
-            3,
-            1fr
-        );
-
-    gap: 10px;
-
-    margin-top: 22px;
-    padding-top: 18px;
-
-    border-top:
-        1px solid var(--line);
-}
-
-.clinical-problem-number {
-    font-size: 19px;
-    font-weight: 850;
-}
-
-.clinical-problem-small {
+.activity-role {
     margin-top: 2px;
 
-    color: #8b8ea2;
+    font-size: 8px;
 
-    font-size: 9px;
+    color: #667085;
 }
 
-.clinical-problem-interventions {
-    margin-top: 20px;
+.activity-right {
+    text-align: right;
 
-    color: #62677d;
+    font-size: 8px;
+    line-height: 1.35;
 
-    font-size: 11px;
-    line-height: 1.5;
+    color: #344054;
 }
 
-
-/* =========================================================
-   SOLUTION CARDS
-========================================================= */
-
-.solution-card {
-    min-height: 130px;
-
-    padding: 20px;
-
-    border:
-        1px solid var(--line);
-
-    border-radius: 22px;
-
-    background:
-        linear-gradient(
-            135deg,
-            white,
-            #effcf9
-        );
-
-    box-shadow:
-        0
-        10px
-        30px
-        rgba(
-            40,
-            45,
-            75,
-            0.04
-        );
-}
-
-.solution-title {
-    font-size: 17px;
-    font-weight: 850;
-}
-
-.solution-count {
-    margin-top: 12px;
-
-    color: var(--muted);
-
-    font-size: 11px;
-}
-
-
-/* =========================================================
-   INTERVENTION ROWS
-========================================================= */
-
-.intervention-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    margin-bottom: 9px;
-
-    padding:
-        15px
-        17px;
-
-    border:
-        1px solid var(--line);
-
-    border-radius: 17px;
-
-    background:
-        rgba(
-            255,
-            255,
-            255,
-            0.84
-        );
-}
-
-.intervention-name {
-    font-weight: 750;
-}
-
-.intervention-sub {
-    margin-top: 2px;
-
-    color: var(--muted);
-
-    font-size: 11px;
-}
-
-
-/* =========================================================
-   AI SPECIALISTS
-========================================================= */
-
-.ai-agent-card {
-    min-height: 290px;
-
-    padding: 24px;
-
-    border:
-        1px solid var(--line);
-
-    border-radius: 27px;
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(255,255,255,0.98),
-            rgba(248,247,255,0.96)
-        );
-
-    box-shadow:
-        0
-        14px
-        40px
-        rgba(
-            35,
-            40,
-            72,
-            0.05
-        );
-}
-
-.ai-agent-top {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-}
-
-.ai-agent-avatar {
-    width: 70px;
-    height: 70px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    border-radius: 22px;
-
-    background:
-        linear-gradient(
-            135deg,
-            var(--mint),
-            var(--lavender)
-        );
-
-    font-size: 31px;
-}
-
-.ai-agent-name {
-    color: var(--ink);
-
-    font-size: 22px;
-    font-weight: 850;
-}
-
-.ai-agent-role {
+.activity-insight {
     margin-top: 3px;
 
-    color: var(--muted);
-
-    font-size: 12px;
-}
-
-.ai-agent-description {
-    min-height: 72px;
-
-    margin-top: 19px;
-
-    color: #666b82;
-
-    font-size: 13px;
-    line-height: 1.55;
-}
-
-.ai-agent-stats {
-    display: grid;
-
-    grid-template-columns:
-        repeat(
-            2,
-            1fr
-        );
-
-    gap: 12px;
-
-    margin-top: 19px;
-    padding-top: 18px;
-
-    border-top:
-        1px solid var(--line);
-}
-
-.ai-agent-number {
-    font-size: 22px;
-    font-weight: 850;
-}
-
-.ai-agent-small {
-    color: #898da0;
-
-    font-size: 10px;
+    color: #168f7d;
 }
 
 
-/* =========================================================
-   SPECIALIST WORKSPACE
-========================================================= */
+/* --------------------------------------------------------
+   Evidence gaps
+-------------------------------------------------------- */
 
-.specialist-workspace-header {
+.gap-row {
     display: flex;
-    align-items: center;
+    gap: 10px;
 
-    gap: 18px;
+    padding: 12px 3px;
 
-    margin-top: 30px;
-    margin-bottom: 26px;
+    border-bottom: 1px solid #eef0f3;
 }
 
-.specialist-workspace-avatar {
-    width: 84px;
-    height: 84px;
+.gap-number {
+    width: 22px;
+    height: 22px;
+    min-width: 22px;
+
+    border-radius: 50%;
 
     display: flex;
     align-items: center;
     justify-content: center;
 
-    border-radius: 27px;
+    background: #fff0f6;
 
-    background:
-        linear-gradient(
-            135deg,
-            var(--mint),
-            var(--lavender)
-        );
+    color: #db497f;
 
-    font-size: 38px;
-
-    box-shadow:
-        0
-        10px
-        30px
-        rgba(
-            40,
-            45,
-            80,
-            0.07
-        );
-}
-
-.specialist-workspace-name {
-    color: var(--ink);
-
-    font-size: 31px;
-    font-weight: 850;
-}
-
-.specialist-workspace-role {
-    margin-top: 4px;
-
-    color: var(--muted);
-
-    font-size: 13px;
-}
-
-
-/* =========================================================
-   ATHENA
-========================================================= */
-
-.athena-card {
-    margin-top: 20px;
-
-    padding: 18px;
-
-    border:
-        1px solid
-        #e5eee9;
-
-    border-radius: 20px;
-
-    background:
-        linear-gradient(
-            135deg,
-            #e9fffa,
-            #f4edff
-        );
-}
-
-.athena-title {
-    margin-bottom: 6px;
-
-    color: #178e80;
-
-    font-weight: 850;
-}
-
-.athena-card p {
-    color: var(--muted);
-
-    font-size: 11px;
-}
-
-.athena-response-card {
-    padding: 24px;
-
-    border:
-        1px solid
-        #def1eb;
-
-    border-radius: 22px;
-
-    background:
-        linear-gradient(
-            135deg,
-            #effffb,
-            #f7f1ff
-        );
-
-    color: #313449;
-
-    font-size: 16px;
-    line-height: 1.65;
-}
-
-.athena-concept-card {
-    padding: 16px;
-
-    border:
-        1px solid
-        #e6ebf2;
-
-    border-radius: 18px;
-
-    background:
-        rgba(
-            255,
-            255,
-            255,
-            0.86
-        );
-
-    text-align: center;
-
+    font-size: 9px;
     font-weight: 750;
-}
-
-
-/* =========================================================
-   JOURNAL CLUB
-========================================================= */
-
-.journal-story-card {
-    padding: 24px;
-
-    border:
-        1px solid #e8e9f1;
-
-    border-radius: 23px;
-
-    background:
-        linear-gradient(
-            135deg,
-            #f1fffb,
-            #faf6ff,
-            #fff5f9
-        );
-
-    color: #3b3e53;
-
-    font-size: 16px;
-    line-height: 1.65;
-}
-
-.journal-agent-card {
-    min-height: 245px;
-
-    padding: 22px;
-
-    border:
-        1px solid var(--line);
-
-    border-radius: 24px;
-
-    background:
-        rgba(
-            255,
-            255,
-            255,
-            0.90
-        );
-}
-
-.journal-agent-header {
-    display: flex;
-    align-items: center;
-
-    gap: 13px;
-}
-
-.journal-agent-avatar {
-    width: 52px;
-    height: 52px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    border-radius: 17px;
-
-    background:
-        linear-gradient(
-            135deg,
-            var(--mint),
-            var(--lavender)
-        );
-
-    font-size: 24px;
-}
-
-.journal-agent-name {
-    font-size: 18px;
-    font-weight: 850;
-}
-
-.journal-agent-label {
-    margin-top: 2px;
-
-    color: #8d90a3;
-
-    font-size: 9px;
-
-    letter-spacing: 0.1em;
-}
-
-.journal-agent-message {
-    margin-top: 18px;
-
-    color: #62677f;
-
-    font-size: 13px;
-    line-height: 1.65;
-}
-
-.journal-topic-card {
-    min-height: 130px;
-
-    padding: 19px;
-
-    border:
-        1px solid var(--line);
-
-    border-radius: 21px;
-
-    background:
-        rgba(
-            255,
-            255,
-            255,
-            0.88
-        );
-}
-
-.journal-topic-arrow {
-    color: var(--mint-strong);
-
-    font-size: 19px;
-    font-weight: 900;
-}
-
-.journal-topic-title {
-    min-height: 42px;
-
-    margin-top: 9px;
-
-    font-size: 15px;
-    font-weight: 800;
-}
-
-.journal-topic-count {
-    margin-top: 9px;
-
-    color: var(--muted);
-
-    font-size: 10px;
-}
-
-.journal-question {
-    margin-bottom: 10px;
-
-    padding:
-        15px
-        17px;
-
-    border:
-        1px solid var(--line);
-
-    border-radius: 17px;
-
-    background:
-        rgba(
-            255,
-            255,
-            255,
-            0.82
-        );
-}
-
-.journal-question span {
-    margin-right: 11px;
-
-    color: var(--mint-strong);
-
-    font-weight: 850;
-}
-
-
-/* =========================================================
-   KNOWLEDGE GRAPH
-========================================================= */
-
-.knowledge-concept-card {
-    min-height: 145px;
-
-    padding: 20px;
-
-    border:
-        1px solid var(--line);
-
-    border-radius: 22px;
-
-    background:
-        linear-gradient(
-            135deg,
-            #ffffff,
-            #f7f5ff
-        );
-}
-
-.knowledge-concept-type {
-    color: #8b8ea2;
-
-    font-size: 9px;
-    font-weight: 850;
-
-    letter-spacing: 0.09em;
-}
-
-.knowledge-concept-title {
-    min-height: 48px;
-
-    margin-top: 8px;
-
-    color: var(--ink);
-
-    font-size: 17px;
-    font-weight: 850;
-}
-
-.knowledge-concept-count {
-    color: var(--muted);
-
-    font-size: 11px;
-}
-
-
-/* =========================================================
-   EVIDENCE GAPS
-========================================================= */
-
-.gap-card {
-    min-height: 175px;
-
-    padding: 21px;
-
-    border:
-        1px solid
-        #f1e5ea;
-
-    border-radius: 23px;
-
-    background:
-        linear-gradient(
-            135deg,
-            #fff,
-            #fff6fa
-        );
-}
-
-.gap-priority {
-    color: #d76f93;
-
-    font-size: 9px;
-    font-weight: 850;
-
-    letter-spacing: 0.1em;
 }
 
 .gap-title {
-    min-height: 50px;
-
-    margin-top: 10px;
-
-    font-size: 18px;
-    font-weight: 850;
-}
-
-.gap-type {
-    margin-top: 5px;
-
-    color: var(--muted);
-
     font-size: 10px;
+    line-height: 1.35;
+
+    font-weight: 600;
+
+    color: #344054;
 }
 
-.gap-study-count {
-    margin-top: 18px;
+.gap-meta {
+    margin-top: 2px;
 
-    color: #555b71;
+    font-size: 8px;
 
-    font-size: 11px;
+    color: #98a2b3;
 }
 
-.recurring-problem-row {
+
+/* --------------------------------------------------------
+   List view cards
+-------------------------------------------------------- */
+
+.list-card {
     display: flex;
-    justify-content: space-between;
-    gap: 20px;
+    gap: 16px;
 
-    margin-bottom: 9px;
+    padding: 17px;
 
-    padding:
-        15px
-        17px;
+    border-radius: 18px;
 
-    border:
-        1px solid var(--line);
+    border: 1px solid #e7eaf0;
+
+    background: rgba(255, 255, 255, 0.92);
+}
+
+.list-icon {
+    width: 56px;
+    height: 56px;
+    min-width: 56px;
 
     border-radius: 17px;
 
-    background:
-        rgba(
-            255,
-            255,
-            255,
-            0.85
-        );
-}
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-.recurring-problem-main {
-    color: #3c4055;
-
-    font-size: 13px;
-}
-
-.recurring-problem-count {
-    min-width: 110px;
-
-    color: #9b7083;
-
-    font-size: 10px;
-
-    text-align: right;
-}
-
-.understudied-card {
-    min-height: 145px;
-
-    padding: 20px;
-
-    border:
-        1px solid #eee7f3;
-
-    border-radius: 22px;
+    font-size: 25px;
 
     background:
         linear-gradient(
-            135deg,
-            #ffffff,
-            #f8f3ff
+            145deg,
+            #ebfbf8,
+            #f6f1ff
         );
 }
 
-.understudied-label {
-    color: #9673b5;
-
-    font-size: 9px;
-    font-weight: 850;
-
-    letter-spacing: 0.1em;
+.list-title {
+    font-size: 15px;
+    font-weight: 750;
 }
 
-.understudied-title {
-    min-height: 54px;
-
-    margin-top: 9px;
-
-    font-size: 16px;
-    font-weight: 850;
-}
-
-.understudied-count {
-    color: var(--muted);
+.list-copy {
+    margin-top: 6px;
 
     font-size: 11px;
+    line-height: 1.5;
+
+    color: #667085;
+}
+
+.strength-large {
+    width: fit-content;
+
+    margin-bottom: 10px;
+
+    padding: 7px 12px;
+
+    border-radius: 999px;
+
+    background: #e7f7f4;
+
+    color: #267c70;
+
+    font-size: 10px;
+    font-weight: 750;
 }
 
 
-/* =========================================================
-   STATISTICS
-========================================================= */
+/* --------------------------------------------------------
+   Large specialist cards
+-------------------------------------------------------- */
 
-.stats-confidence-card {
-    min-height: 135px;
+.specialist-large-card {
+    min-height: 285px;
 
-    padding: 20px;
+    padding: 22px;
 
-    border:
-        1px solid var(--line);
+    margin-bottom: 10px;
 
-    border-radius: 22px;
+    border-radius: 20px;
 
     background:
         linear-gradient(
-            135deg,
-            #fff,
-            #f4f3ff
+            145deg,
+            rgba(255, 255, 255, 0.95),
+            rgba(249, 250, 255, 0.94)
         );
+
+    border: 1px solid #e6e9ef;
+
+    box-shadow:
+        0 8px 24px rgba(16, 24, 40, 0.025);
 }
 
-.stats-confidence-label {
-    color: #7d72a7;
+.specialist-large-card.selected {
+    border-color: #92d9cf;
 
-    font-size: 9px;
-    font-weight: 850;
-
-    letter-spacing: 0.1em;
+    box-shadow:
+        0 0 0 3px rgba(22, 183, 164, 0.07),
+        0 8px 24px rgba(16, 24, 40, 0.025);
 }
 
-.stats-confidence-number {
+.specialist-large-avatar {
+    width: 70px;
+    height: 70px;
+
+    border-radius: 22px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 34px;
+
+    background: #f0fbf9;
+
+    border: 1px solid #deebe9;
+}
+
+.specialist-large-name {
+    margin-top: 14px;
+
+    font-size: 17px;
+    font-weight: 800;
+}
+
+.specialist-large-role {
+    margin-top: 2px;
+
+    font-size: 11px;
+    font-weight: 650;
+
+    color: #667085;
+}
+
+.specialist-large-copy {
     margin-top: 12px;
 
-    font-size: 30px;
-    font-weight: 850;
+    font-size: 11px;
+    line-height: 1.55;
+
+    color: #667085;
 }
 
-.stats-confidence-sub {
-    color: var(--muted);
+.specialist-activity {
+    margin-top: 16px;
 
     font-size: 10px;
+    font-weight: 700;
 }
 
-.stats-problem-row {
-    display: flex;
-    justify-content: space-between;
-    gap: 18px;
+.specialist-insight {
+    margin-top: 3px;
 
-    margin-bottom: 9px;
+    font-size: 9px;
 
-    padding:
-        15px
-        17px;
-
-    border:
-        1px solid var(--line);
-
-    border-radius: 17px;
-
-    background:
-        rgba(
-            255,
-            255,
-            255,
-            0.84
-        );
-}
-
-.stats-problem-text {
-    color: #3e4258;
-
-    font-size: 13px;
-}
-
-.stats-problem-count {
-    color: #777a90;
-
-    font-size: 10px;
-}
-
-.stats-method-card {
-    min-height: 130px;
-
-    padding: 19px;
-
-    border:
-        1px solid var(--line);
-
-    border-radius: 21px;
-
-    background:
-        linear-gradient(
-            135deg,
-            #ffffff,
-            #f0fbff
-        );
-}
-
-.stats-method-title {
-    min-height: 50px;
-
-    color: var(--ink);
-
-    font-size: 15px;
-    font-weight: 850;
-}
-
-.stats-method-count {
-    color: var(--muted);
-
-    font-size: 10px;
+    color: #159581;
 }
 
 
-/* =========================================================
-   MOBILE / IPAD
-========================================================= */
+/* --------------------------------------------------------
+   Native metrics
+-------------------------------------------------------- */
 
-@media (
-    max-width: 1100px
-) {
+div[data-testid="stMetric"] {
+    background: rgba(255, 255, 255, 0.74);
+
+    border: 1px solid #eceef2;
+
+    border-radius: 14px;
+
+    padding: 10px 12px;
+}
+
+div[data-testid="stMetricValue"] {
+    font-size: 20px;
+}
+
+
+/* --------------------------------------------------------
+   Containers
+-------------------------------------------------------- */
+
+div[data-testid="stVerticalBlockBorderWrapper"] {
+    border-color: #e8ebf0;
+    border-radius: 18px;
+}
+
+
+/* --------------------------------------------------------
+   Responsive
+-------------------------------------------------------- */
+
+@media (max-width: 1100px) {
 
     .hero-title {
-        font-size: 42px;
+        font-size: 29px;
     }
 
-    .ai-agent-card,
-    .clinical-problem-card,
     .problem-card {
-        min-height: auto;
-    }
-}
-
-
-@media (
-    max-width: 760px
-) {
-
-    .block-container {
-        padding-top: 1rem;
+        min-height: 225px;
     }
 
-    .hero-title {
-        font-size: 36px;
-    }
-
-    .hero-subtitle {
-        font-size: 15px;
-    }
-
-    .clinical-problem-metrics {
-        grid-template-columns:
-            1fr;
-    }
-
-    .recurring-problem-row,
-    .stats-problem-row {
-        flex-direction: column;
-    }
-
-    .recurring-problem-count {
-        text-align: left;
+    .specialist-mini-copy {
+        display: none;
     }
 }
