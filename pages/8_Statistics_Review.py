@@ -1,34 +1,12 @@
 import json
-from collections import Counter
 from pathlib import Path
 
 import streamlit as st
 
 
-st.set_page_config(
-    page_title="Statistics Review",
-    page_icon="Σ",
-    layout="wide",
-)
-
-
-# ---------------------------------------------------------
-# Load CSS
-# ---------------------------------------------------------
-
-STYLE_PATH = Path("assets/style.css")
-
-if STYLE_PATH.exists():
-    with STYLE_PATH.open("r", encoding="utf-8") as file:
-        st.markdown(
-            f"<style>{file.read()}</style>",
-            unsafe_allow_html=True,
-        )
-
-
-# ---------------------------------------------------------
-# Load data
-# ---------------------------------------------------------
+# =========================================================
+# LOAD DATA
+# =========================================================
 
 def load_json(path, default):
     path = Path(path)
@@ -36,8 +14,11 @@ def load_json(path, default):
     if not path.exists():
         return default
 
-    with path.open("r", encoding="utf-8") as file:
-        return json.load(file)
+    try:
+        with path.open("r", encoding="utf-8") as file:
+            return json.load(file)
+    except (json.JSONDecodeError, OSError):
+        return default
 
 
 evidence_db = load_json(
@@ -46,813 +27,1026 @@ evidence_db = load_json(
 )
 
 
-# ---------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------
+# =========================================================
+# HELPERS
+# =========================================================
 
-def safe_dict(value):
-    return value if isinstance(value, dict) else {}
-
-
-def safe_list(value):
-    return value if isinstance(value, list) else []
-
-
-def safe_number(value, default=0):
-    return value if isinstance(value, (int, float)) else default
-
-
-# ---------------------------------------------------------
-# Collect reviewed papers
-# ---------------------------------------------------------
-
-reviewed_papers = []
-
-for record in evidence_db:
-
-    stats = safe_dict(
-        record.get(
-            "statistics"
-        )
+def get_metadata(record):
+    value = record.get(
+        "metadata",
+        {},
     )
 
-    if stats:
-        reviewed_papers.append(
-            (
-                record,
-                stats,
-            )
-        )
-
-
-# ---------------------------------------------------------
-# Header
-# ---------------------------------------------------------
-
-st.markdown(
-    """
-    <div class="hero-eyebrow">
-        EULER'S LAB
-    </div>
-
-    <h1 class="hero-title">
-        Statistical <span>Review</span>
-    </h1>
-
-    <p class="hero-subtitle">
-        Explore how clearly studies report effect estimates, confidence
-        intervals, statistical models, sample sizes, precision, and other
-        signals of methodological rigor.
-    </p>
-    """,
-    unsafe_allow_html=True,
-)
-
-
-# ---------------------------------------------------------
-# Top metrics
-# ---------------------------------------------------------
-
-confidence_counter = Counter()
-
-flagged_papers = 0
-full_text_needed = 0
-statistics_scores = []
-
-
-for _, stats in reviewed_papers:
-
-    confidence = stats.get(
-        "statistical_confidence"
+    return (
+        value
+        if isinstance(value, dict)
+        else {}
     )
 
-    if confidence:
-        confidence_counter[
-            confidence
-        ] += 1
 
-    flags = safe_list(
-        stats.get(
-            "reporting_flags"
-        )
+def get_statistics(record):
+    value = record.get(
+        "statistics",
+        {},
     )
 
-    if flags:
-        flagged_papers += 1
+    return (
+        value
+        if isinstance(value, dict)
+        else {}
+    )
 
-    if stats.get(
-        "requires_full_text_statistical_review",
-        False,
+
+def get_appraisal(record):
+    value = record.get(
+        "appraisal",
+        {},
+    )
+
+    return (
+        value
+        if isinstance(value, dict)
+        else {}
+    )
+
+
+def get_translation(record):
+    value = record.get(
+        "clinical_translation",
+        {},
+    )
+
+    return (
+        value
+        if isinstance(value, dict)
+        else {}
+    )
+
+
+def get_title(record):
+    metadata = get_metadata(
+        record
+    )
+
+    return (
+        metadata.get("title")
+        or "Untitled paper"
+    )
+
+
+def get_year(record):
+    metadata = get_metadata(
+        record
+    )
+
+    return (
+        metadata.get(
+            "publication_year"
+        )
+        or metadata.get(
+            "year"
+        )
+        or ""
+    )
+
+
+def get_journal(record):
+    return (
+        get_metadata(
+            record
+        ).get(
+            "journal"
+        )
+        or ""
+    )
+
+
+def get_pubmed_url(record):
+    return (
+        get_metadata(
+            record
+        ).get(
+            "pubmed_url"
+        )
+        or ""
+    )
+
+
+def get_clinical_area(record):
+    translation = get_translation(
+        record
+    )
+
+    value = translation.get(
+        "clinical_area",
+        "",
+    )
+
+    if (
+        isinstance(value, str)
+        and value.strip()
     ):
-        full_text_needed += 1
+        return value.strip()
 
-    scores = safe_dict(
-        stats.get(
-            "scores"
-        )
+    return "Other"
+
+
+def get_statistics_score(record):
+    statistics = get_statistics(
+        record
     )
 
-    overall = scores.get(
-        "overall_statistics"
+    scores = statistics.get(
+        "scores",
+        {},
+    )
+
+    if not isinstance(
+        scores,
+        dict,
+    ):
+        return 0
+
+    value = scores.get(
+        "overall_statistics",
+        0,
     )
 
     if isinstance(
-        overall,
+        value,
         (int, float),
     ):
-        statistics_scores.append(
-            overall
+        return value
+
+    return 0
+
+
+def get_evidence_score(record):
+    appraisal = get_appraisal(
+        record
+    )
+
+    scores = appraisal.get(
+        "scores",
+        {},
+    )
+
+    if not isinstance(
+        scores,
+        dict,
+    ):
+        return 0
+
+    value = scores.get(
+        "overall_evidence",
+        0,
+    )
+
+    if isinstance(
+        value,
+        (int, float),
+    ):
+        return value
+
+    return 0
+
+
+def get_statistical_confidence(record):
+    statistics = get_statistics(
+        record
+    )
+
+    value = statistics.get(
+        "statistical_confidence",
+        "",
+    )
+
+    if (
+        isinstance(value, str)
+        and value.strip()
+    ):
+        return value.strip()
+
+    return "Unknown"
+
+
+def get_reporting_flags(record):
+    statistics = get_statistics(
+        record
+    )
+
+    value = statistics.get(
+        "reporting_flags",
+        [],
+    )
+
+    if isinstance(
+        value,
+        list,
+    ):
+        return [
+            str(flag)
+            for flag in value
+            if flag
+        ]
+
+    return []
+
+
+def get_review_summary(record):
+    statistics = get_statistics(
+        record
+    )
+
+    value = statistics.get(
+        "review_summary",
+        "",
+    )
+
+    if (
+        isinstance(value, str)
+        and value.strip()
+    ):
+        return value.strip()
+
+    return "No statistical review summary available."
+
+
+def needs_full_text(record):
+    translation = get_translation(
+        record
+    )
+
+    return bool(
+        translation.get(
+            "requires_full_text_review",
+            False,
+        )
+    )
+
+
+# =========================================================
+# PREPARE RECORDS
+# =========================================================
+
+reviewed_records = []
+
+for record in evidence_db:
+
+    if not isinstance(
+        record,
+        dict,
+    ):
+        continue
+
+    statistics = get_statistics(
+        record
+    )
+
+    if statistics:
+        reviewed_records.append(
+            record
         )
 
 
-average_statistics = (
-    round(
-        sum(statistics_scores)
-        / len(statistics_scores),
-        1,
+# =========================================================
+# HEADER
+# =========================================================
+
+st.caption(
+    "EULER • STATISTICAL REVIEW"
+)
+
+st.title(
+    "Statistics Review"
+)
+
+st.write(
+    "Evaluate statistical quality, reporting concerns, confidence, "
+    "and methodological weaknesses across the evidence base."
+)
+
+st.write("")
+
+
+# =========================================================
+# SUMMARY METRICS
+# =========================================================
+
+high_confidence = sum(
+    1
+    for record in reviewed_records
+    if get_statistical_confidence(
+        record
+    ) == "High"
+)
+
+moderate_confidence = sum(
+    1
+    for record in reviewed_records
+    if get_statistical_confidence(
+        record
+    ) == "Moderate"
+)
+
+flagged_records = sum(
+    1
+    for record in reviewed_records
+    if get_reporting_flags(
+        record
     )
-    if statistics_scores
-    else 0
+)
+
+full_text_needed = sum(
+    1
+    for record in reviewed_records
+    if needs_full_text(
+        record
+    )
 )
 
 
-m1, m2, m3, m4, m5 = st.columns(5)
-
-m1.metric(
-    "Papers Reviewed",
-    len(reviewed_papers),
+m1, m2, m3, m4, m5 = st.columns(
+    5,
+    gap="medium",
 )
 
-m2.metric(
-    "Avg Statistics",
-    average_statistics,
+with m1:
+
+    st.metric(
+        "Papers Reviewed",
+        len(
+            reviewed_records
+        ),
+        border=True,
+    )
+
+
+with m2:
+
+    st.metric(
+        "High Confidence",
+        high_confidence,
+        border=True,
+    )
+
+
+with m3:
+
+    st.metric(
+        "Moderate Confidence",
+        moderate_confidence,
+        border=True,
+    )
+
+
+with m4:
+
+    st.metric(
+        "With Flags",
+        flagged_records,
+        border=True,
+    )
+
+
+with m5:
+
+    st.metric(
+        "Needs Full Text",
+        full_text_needed,
+        border=True,
+    )
+
+
+st.write("")
+
+
+# =========================================================
+# SCORE DISTRIBUTION
+# =========================================================
+
+st.subheader(
+    "Statistical Quality Overview"
 )
 
-m3.metric(
-    "High Confidence",
-    confidence_counter.get(
-        "High",
-        0,
-    ),
+score_buckets = {
+    "8–10": 0,
+    "6–7": 0,
+    "4–5": 0,
+    "1–3": 0,
+    "Unscored": 0,
+}
+
+for record in reviewed_records:
+
+    score = get_statistics_score(
+        record
+    )
+
+    if score >= 8:
+        score_buckets["8–10"] += 1
+
+    elif score >= 6:
+        score_buckets["6–7"] += 1
+
+    elif score >= 4:
+        score_buckets["4–5"] += 1
+
+    elif score >= 1:
+        score_buckets["1–3"] += 1
+
+    else:
+        score_buckets[
+            "Unscored"
+        ] += 1
+
+
+bucket_cols = st.columns(
+    5,
+    gap="small",
 )
 
-m4.metric(
-    "Flagged Papers",
-    flagged_papers,
-)
-
-m5.metric(
-    "Needs Full Text",
-    full_text_needed,
-)
-
-
-# ---------------------------------------------------------
-# Confidence overview
-# ---------------------------------------------------------
-
-st.markdown(
-    "## Statistical Confidence"
-)
-
-confidence_cols = st.columns(4)
-
-confidence_categories = [
-    "High",
-    "Moderate",
-    "Low",
-    "Very low",
-]
-
-for col, category in zip(
-    confidence_cols,
-    confidence_categories,
+for col, (
+    label,
+    count,
+) in zip(
+    bucket_cols,
+    score_buckets.items(),
 ):
 
     with col:
 
-        st.markdown(
-            f"""
-            <div class="stats-confidence-card">
+        with st.container(
+            border=True,
+        ):
 
-                <div class="stats-confidence-label">
-                    {category.upper()}
-                </div>
-
-                <div class="stats-confidence-number">
-                    {confidence_counter.get(category, 0)}
-                </div>
-
-                <div class="stats-confidence-sub">
-                    studies
-                </div>
-
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-
-# ---------------------------------------------------------
-# Common statistical problems
-# ---------------------------------------------------------
-
-st.markdown(
-    "## Common Statistical Problems"
-)
-
-flag_counter = Counter()
-
-
-for _, stats in reviewed_papers:
-
-    flags = safe_list(
-        stats.get(
-            "reporting_flags"
-        )
-    )
-
-    for flag in flags:
-
-        text = str(
-            flag
-        ).strip()
-
-        if text:
-            flag_counter[
-                text
-            ] += 1
-
-
-if flag_counter:
-
-    for flag, count in (
-        flag_counter.most_common(
-            12
-        )
-    ):
-
-        st.markdown(
-            f"""
-            <div class="stats-problem-row">
-
-                <div class="stats-problem-text">
-                    {flag}
-                </div>
-
-                <div class="stats-problem-count">
-                    {count} studies
-                </div>
-
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-else:
-
-    st.info(
-        "No recurring statistical-reporting problems are currently identified."
-    )
-
-
-# ---------------------------------------------------------
-# Statistical methods
-# ---------------------------------------------------------
-
-st.markdown(
-    "## Most Common Statistical Methods"
-)
-
-test_counter = Counter()
-
-
-for _, stats in reviewed_papers:
-
-    tests = safe_list(
-        stats.get(
-            "identified_statistical_tests"
-        )
-    )
-
-    for test in tests:
-
-        test = str(
-            test
-        ).strip()
-
-        if test:
-            test_counter[
-                test
-            ] += 1
-
-
-if test_counter:
-
-    method_cols = st.columns(4)
-
-    for col, (
-        test,
-        count,
-    ) in zip(
-        method_cols,
-        test_counter.most_common(
-            4
-        ),
-    ):
-
-        with col:
-
-            st.markdown(
-                f"""
-                <div class="stats-method-card">
-
-                    <div class="stats-method-title">
-                        {test}
-                    </div>
-
-                    <div class="stats-method-count">
-                        {count} studies
-                    </div>
-
-                </div>
-                """,
-                unsafe_allow_html=True,
+            st.metric(
+                label,
+                count,
             )
 
-else:
 
-    st.info(
-        "Statistical methods will appear after studies have been reviewed."
-    )
+st.write("")
 
 
-# ---------------------------------------------------------
-# Reporting quality
-# ---------------------------------------------------------
+# =========================================================
+# FILTERS
+# =========================================================
 
-st.markdown(
-    "## Reporting Quality"
-)
-
-reporting_scores = []
-precision_scores = []
-rigor_scores = []
-interpretation_scores = []
-
-
-for _, stats in reviewed_papers:
-
-    scores = safe_dict(
-        stats.get(
-            "scores"
+clinical_areas = sorted(
+    {
+        get_clinical_area(
+            record
         )
-    )
-
-    values = {
-        "reporting": scores.get(
-            "statistical_reporting"
-        ),
-        "precision": scores.get(
-            "precision_and_power"
-        ),
-        "rigor": scores.get(
-            "analysis_rigor"
-        ),
-        "interpretation": scores.get(
-            "interpretation_quality"
-        ),
+        for record in reviewed_records
     }
-
-    if isinstance(
-        values["reporting"],
-        (int, float),
-    ):
-        reporting_scores.append(
-            values["reporting"]
-        )
-
-    if isinstance(
-        values["precision"],
-        (int, float),
-    ):
-        precision_scores.append(
-            values["precision"]
-        )
-
-    if isinstance(
-        values["rigor"],
-        (int, float),
-    ):
-        rigor_scores.append(
-            values["rigor"]
-        )
-
-    if isinstance(
-        values["interpretation"],
-        (int, float),
-    ):
-        interpretation_scores.append(
-            values["interpretation"]
-        )
-
-
-def average(values):
-    if not values:
-        return 0
-
-    return round(
-        sum(values)
-        / len(values),
-        1,
-    )
-
-
-q1, q2, q3, q4 = st.columns(4)
-
-q1.metric(
-    "Reporting",
-    average(
-        reporting_scores
-    ),
 )
 
-q2.metric(
-    "Precision / Power",
-    average(
-        precision_scores
-    ),
+confidence_options = [
+    "High",
+    "Moderate",
+    "Low",
+    "Very low",
+    "Unknown",
+]
+
+
+f1, f2, f3, f4 = st.columns(
+    4,
+    gap="medium",
 )
 
-q3.metric(
-    "Analysis Rigor",
-    average(
-        rigor_scores
-    ),
-)
+with f1:
 
-q4.metric(
-    "Interpretation",
-    average(
-        interpretation_scores
-    ),
-)
-
-
-# ---------------------------------------------------------
-# Search / filters
-# ---------------------------------------------------------
-
-st.markdown(
-    "## Euler's Study Reviews"
-)
-
-search_col, confidence_col = st.columns(
-    [3, 1]
-)
-
-with search_col:
-
-    search = st.text_input(
-        "Search statistical reviews",
-        placeholder=(
-            "Regression, confidence interval, "
-            "sample size, RCT..."
-        ),
-        label_visibility="collapsed",
-    )
-
-
-with confidence_col:
-
-    confidence_filter = st.selectbox(
-        "Confidence",
+    selected_area = st.selectbox(
+        "Clinical Area",
         [
-            "All",
-            "High",
-            "Moderate",
-            "Low",
-            "Very low",
+            "All Clinical Areas",
+            *clinical_areas,
         ],
-        label_visibility="collapsed",
     )
 
 
-# ---------------------------------------------------------
-# Filter records
-# ---------------------------------------------------------
+with f2:
 
-filtered = []
-
-
-for record, stats in reviewed_papers:
-
-    metadata = safe_dict(
-        record.get(
-            "metadata"
+    selected_confidence = (
+        st.selectbox(
+            "Statistical Confidence",
+            [
+                "All Confidence Levels",
+                *confidence_options,
+            ],
         )
     )
+
+
+with f3:
+
+    selected_flag_status = (
+        st.selectbox(
+            "Reporting Flags",
+            [
+                "All Papers",
+                "Flagged Only",
+                "No Flags",
+            ],
+        )
+    )
+
+
+with f4:
+
+    sort_option = st.selectbox(
+        "Sort By",
+        [
+            "Lowest Statistics Score",
+            "Highest Statistics Score",
+            "Most Flags",
+            "Highest Evidence Score",
+            "Newest",
+        ],
+    )
+
+
+# =========================================================
+# FILTER RECORDS
+# =========================================================
+
+filtered_records = []
+
+for record in reviewed_records:
 
     if (
-        confidence_filter != "All"
-        and stats.get(
-            "statistical_confidence"
+        selected_area
+        != "All Clinical Areas"
+        and get_clinical_area(
+            record
         )
-        != confidence_filter
+        != selected_area
     ):
         continue
 
-    if search:
-
-        searchable = json.dumps(
-            {
-                "title": metadata.get(
-                    "title"
-                ),
-                "statistics": stats,
-            },
-            ensure_ascii=False,
-        ).lower()
-
-        if (
-            search.lower()
-            not in searchable
-        ):
-            continue
-
-    filtered.append(
-        (
-            record,
-            stats,
+    if (
+        selected_confidence
+        != "All Confidence Levels"
+        and get_statistical_confidence(
+            record
         )
+        != selected_confidence
+    ):
+        continue
+
+    flags = get_reporting_flags(
+        record
+    )
+
+    if (
+        selected_flag_status
+        == "Flagged Only"
+        and not flags
+    ):
+        continue
+
+    if (
+        selected_flag_status
+        == "No Flags"
+        and flags
+    ):
+        continue
+
+    filtered_records.append(
+        record
     )
 
 
-# ---------------------------------------------------------
-# Sort worst first
-# ---------------------------------------------------------
+# =========================================================
+# SORT
+# =========================================================
 
-filtered.sort(
-    key=lambda item: (
-        safe_dict(
-            item[1].get(
-                "scores"
+if (
+    sort_option
+    == "Lowest Statistics Score"
+):
+
+    filtered_records.sort(
+        key=lambda record: (
+            get_statistics_score(
+                record
             )
-        ).get(
-            "overall_statistics",
-            0,
+            if get_statistics_score(
+                record
+            ) > 0
+            else 999
         )
     )
+
+
+elif (
+    sort_option
+    == "Highest Statistics Score"
+):
+
+    filtered_records.sort(
+        key=lambda record: (
+            get_statistics_score(
+                record
+            )
+        ),
+        reverse=True,
+    )
+
+
+elif sort_option == "Most Flags":
+
+    filtered_records.sort(
+        key=lambda record: len(
+            get_reporting_flags(
+                record
+            )
+        ),
+        reverse=True,
+    )
+
+
+elif (
+    sort_option
+    == "Highest Evidence Score"
+):
+
+    filtered_records.sort(
+        key=lambda record: (
+            get_evidence_score(
+                record
+            )
+        ),
+        reverse=True,
+    )
+
+
+else:
+
+    filtered_records.sort(
+        key=lambda record: str(
+            get_year(
+                record
+            )
+        ),
+        reverse=True,
+    )
+
+
+# =========================================================
+# FLAG SUMMARY
+# =========================================================
+
+st.subheader(
+    "Most Common Statistical Concerns"
 )
 
+flag_counts = {}
+
+for record in reviewed_records:
+
+    for flag in get_reporting_flags(
+        record
+    ):
+
+        flag_counts[
+            flag
+        ] = (
+            flag_counts.get(
+                flag,
+                0,
+            )
+            + 1
+        )
+
+
+top_flags = sorted(
+    flag_counts.items(),
+    key=lambda item: item[1],
+    reverse=True,
+)[:6]
+
+
+if top_flags:
+
+    flag_cols = st.columns(
+        3,
+        gap="medium",
+    )
+
+    for index, (
+        flag,
+        count,
+    ) in enumerate(
+        top_flags
+    ):
+
+        col = flag_cols[
+            index % 3
+        ]
+
+        with col:
+
+            with st.container(
+                border=True,
+            ):
+
+                st.markdown(
+                    f"**{flag}**"
+                )
+
+                st.metric(
+                    "Papers",
+                    count,
+                )
+
+
+else:
+
+    st.success(
+        "No statistical reporting concerns are currently flagged."
+    )
+
+
+st.write("")
+
+
+# =========================================================
+# PAPER REVIEWS
+# =========================================================
+
+st.subheader(
+    "Paper-Level Statistical Reviews"
+)
 
 st.caption(
-    f"{len(filtered)} statistical reviews"
+    f"{len(filtered_records)} papers shown"
 )
 
 
-# ---------------------------------------------------------
-# Paper review cards
-# ---------------------------------------------------------
+if not filtered_records:
 
-for record, stats in filtered[:100]:
+    st.info(
+        "No papers match the current filters."
+    )
 
-    metadata = safe_dict(
-        record.get(
-            "metadata"
+    st.stop()
+
+
+for index, record in enumerate(
+    filtered_records,
+    start=1,
+):
+
+    title = get_title(
+        record
+    )
+
+    journal = get_journal(
+        record
+    )
+
+    year = get_year(
+        record
+    )
+
+    area = get_clinical_area(
+        record
+    )
+
+    stats_score = (
+        get_statistics_score(
+            record
         )
     )
 
-    translation = safe_dict(
-        record.get(
-            "clinical_translation"
+    evidence_score = (
+        get_evidence_score(
+            record
         )
     )
 
-    title = metadata.get(
-        "title",
-        "Untitled paper",
-    )
-
-    scores = safe_dict(
-        stats.get(
-            "scores"
+    confidence = (
+        get_statistical_confidence(
+            record
         )
     )
 
-    overall = safe_number(
-        scores.get(
-            "overall_statistics"
-        )
-    )
-
-    confidence = stats.get(
-        "statistical_confidence",
-        "Unknown",
-    )
-
-    flags = safe_list(
-        stats.get(
-            "reporting_flags"
-        )
-    )
-
-    tests = safe_list(
-        stats.get(
-            "identified_statistical_tests"
-        )
-    )
-
-    effects = safe_list(
-        stats.get(
-            "reported_effect_estimates"
-        )
+    flags = get_reporting_flags(
+        record
     )
 
     with st.expander(
-        title
+        f"{index}. {title}"
     ):
 
-        st.caption(
-            " · ".join(
-                value
-                for value in [
-                    translation.get(
-                        "clinical_area",
-                        "",
-                    ),
-                    metadata.get(
-                        "journal",
-                        "",
-                    ),
-                    stats.get(
-                        "study_design",
-                        "",
-                    ),
-                ]
-                if value
+        source_parts = []
+
+        if journal:
+            source_parts.append(
+                str(journal)
             )
+
+        if year:
+            source_parts.append(
+                str(year)
+            )
+
+        if area:
+            source_parts.append(
+                area
+            )
+
+        if source_parts:
+
+            st.caption(
+                " • ".join(
+                    source_parts
+                )
+            )
+
+
+        c1, c2, c3, c4 = (
+            st.columns(4)
         )
 
-        c1, c2, c3 = st.columns(3)
 
-        c1.metric(
-            "Statistics Score",
-            overall,
-        )
+        with c1:
 
-        c2.metric(
-            "Confidence",
-            confidence,
-        )
+            st.metric(
+                "Statistics Score",
+                stats_score,
+            )
 
-        c3.metric(
-            "Sample Size",
-            stats.get(
-                "sample_size",
-                "—",
-            ),
-        )
+
+        with c2:
+
+            st.metric(
+                "Evidence Score",
+                evidence_score,
+            )
+
+
+        with c3:
+
+            st.metric(
+                "Confidence",
+                confidence,
+            )
+
+
+        with c4:
+
+            st.metric(
+                "Reporting Flags",
+                len(flags),
+            )
+
 
         st.markdown(
-            "### Euler's Summary"
+            "**Euler's review**"
         )
 
         st.write(
-            stats.get(
-                "review_summary",
-                "No statistical summary available.",
+            get_review_summary(
+                record
             )
         )
 
-        if tests:
-
-            st.markdown(
-                "**Methods identified**"
-            )
-
-            for test in tests:
-                st.write(
-                    f"• {test}"
-                )
-
-        if effects:
-
-            st.markdown(
-                "**Reported effect estimates**"
-            )
-
-            for effect in effects:
-                st.write(
-                    f"• {effect}"
-                )
 
         if flags:
 
             st.markdown(
-                "**Euler is cautious about**"
+                "**Statistical concerns**"
             )
 
             for flag in flags:
-                st.warning(
-                    flag
+
+                st.write(
+                    f"• {flag}"
                 )
 
-        st.markdown(
-            "**Component scores**"
-        )
+        else:
 
-        s1, s2, s3, s4 = st.columns(
-            4
-        )
-
-        s1.metric(
-            "Reporting",
-            scores.get(
-                "statistical_reporting",
-                0,
-            ),
-        )
-
-        s2.metric(
-            "Precision",
-            scores.get(
-                "precision_and_power",
-                0,
-            ),
-        )
-
-        s3.metric(
-            "Rigor",
-            scores.get(
-                "analysis_rigor",
-                0,
-            ),
-        )
-
-        s4.metric(
-            "Interpretation",
-            scores.get(
-                "interpretation_quality",
-                0,
-            ),
-        )
-
-        if stats.get(
-            "requires_full_text_statistical_review",
-            False,
-        ):
-
-            st.info(
-                "Euler recommends full-text statistical review before relying heavily on this paper."
+            st.success(
+                "No statistical reporting flags were identified."
             )
 
-        pubmed_url = metadata.get(
-            "pubmed_url",
-            "",
+
+        if needs_full_text(
+            record
+        ):
+
+            st.warning(
+                "Full-text review is recommended before drawing "
+                "strong statistical conclusions."
+            )
+
+
+        pubmed_url = (
+            get_pubmed_url(
+                record
+            )
         )
 
         if pubmed_url:
 
             st.link_button(
-                "Open PubMed ↗",
+                "Open PubMed",
                 pubmed_url,
             )
 
 
-# ---------------------------------------------------------
-# Euler's principles
-# ---------------------------------------------------------
+# =========================================================
+# STATISTICS WORKSPACE
+# =========================================================
 
-st.markdown(
-    "## What Euler Watches For"
+st.write("")
+
+st.divider()
+
+st.subheader(
+    "Euler Workspace"
 )
 
-st.markdown(
-    """
-    Euler currently looks for abstract-level signals including:
-
-    **Effect estimates**
-    ·
-    **Confidence intervals**
-    ·
-    **Sample size**
-    ·
-    **Statistical models**
-    ·
-    **Power calculations**
-    ·
-    **Missing-data handling**
-    ·
-    **Confounder adjustment**
-    ·
-    **Multiple-comparison correction**
-    ·
-    **Clinical vs statistical significance**
-
-    These checks assess **reporting quality and apparent rigor**.
-    They do not prove that the underlying analysis was performed correctly;
-    that requires full-text methods, tables, protocols, and raw data where
-    appropriate.
-    """
+st.write(
+    "Use this section to describe a study or analysis question. "
+    "For Stage 1 this is a structured workspace; later we can connect "
+    "Euler to an AI model for interactive statistical guidance."
 )
+
+
+workspace_1, workspace_2 = (
+    st.columns(2)
+)
+
+
+with workspace_1:
+
+    study_design = st.selectbox(
+        "Study Design",
+        [
+            "Randomized Controlled Trial",
+            "Prospective Cohort",
+            "Retrospective Cohort",
+            "Cross-Sectional Study",
+            "Case-Control Study",
+            "Method Comparison Study",
+            "Diagnostic Accuracy Study",
+            "Systematic Review",
+            "Meta-Analysis",
+            "Other",
+        ],
+        key="euler_study_design",
+    )
+
+
+with workspace_2:
+
+    analysis_goal = st.selectbox(
+        "Primary Analysis Goal",
+        [
+            "Compare two methods",
+            "Compare groups",
+            "Evaluate association",
+            "Predict an outcome",
+            "Assess reliability",
+            "Assess diagnostic accuracy",
+            "Estimate treatment effect",
+            "Other",
+        ],
+        key="euler_analysis_goal",
+    )
+
+
+variables = st.text_area(
+    "Describe the variables",
+    placeholder=(
+        "Example: body fat percentage measured by DXA and "
+        "AI-estimated body fat percentage measured once per participant."
+    ),
+)
+
+
+if st.button(
+    "Review analysis setup",
+    width="stretch",
+):
+
+    if not variables.strip():
+
+        st.warning(
+            "Describe the variables first."
+        )
+
+    else:
+
+        st.info(
+            f"Study design: {study_design}\n\n"
+            f"Analysis goal: {analysis_goal}\n\n"
+            "The interface is ready. In Stage 2, Euler can use this "
+            "information to recommend statistical tests, assumptions, "
+            "agreement analyses, effect-size reporting, and sensitivity checks."
+        )
