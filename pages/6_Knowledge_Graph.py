@@ -1,34 +1,12 @@
 import json
-from collections import Counter, defaultdict
 from pathlib import Path
 
 import streamlit as st
 
 
-st.set_page_config(
-    page_title="Knowledge Graph",
-    page_icon="🕸️",
-    layout="wide",
-)
-
-
-# ---------------------------------------------------------
-# Load CSS
-# ---------------------------------------------------------
-
-STYLE_PATH = Path("assets/style.css")
-
-if STYLE_PATH.exists():
-    with STYLE_PATH.open("r", encoding="utf-8") as file:
-        st.markdown(
-            f"<style>{file.read()}</style>",
-            unsafe_allow_html=True,
-        )
-
-
-# ---------------------------------------------------------
-# Load data
-# ---------------------------------------------------------
+# =========================================================
+# LOAD DATA
+# =========================================================
 
 def load_json(path, default):
     path = Path(path)
@@ -36,11 +14,14 @@ def load_json(path, default):
     if not path.exists():
         return default
 
-    with path.open("r", encoding="utf-8") as file:
-        return json.load(file)
+    try:
+        with path.open("r", encoding="utf-8") as file:
+            return json.load(file)
+    except (json.JSONDecodeError, OSError):
+        return default
 
 
-graph = load_json(
+knowledge_graph = load_json(
     "data/knowledge_graph.json",
     {},
 )
@@ -51,837 +32,823 @@ evidence_db = load_json(
 )
 
 
-# ---------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------
+# =========================================================
+# HELPERS
+# =========================================================
 
-def safe_dict(value):
-    return value if isinstance(value, dict) else {}
+def get_nodes():
+    if isinstance(
+        knowledge_graph,
+        dict,
+    ):
 
+        nodes = knowledge_graph.get(
+            "nodes",
+            [],
+        )
 
-def safe_list(value):
-    return value if isinstance(value, list) else []
+        if isinstance(nodes, list):
+            return nodes
 
-
-nodes = safe_list(
-    graph.get("nodes")
-)
-
-edges = safe_list(
-    graph.get("edges")
-)
-
-syntheses = safe_list(
-    graph.get("evidence_synthesis")
-)
-
-graph_stats = safe_dict(
-    graph.get("statistics")
-)
+    return []
 
 
-# ---------------------------------------------------------
-# Header
-# ---------------------------------------------------------
+def get_edges():
+    if isinstance(
+        knowledge_graph,
+        dict,
+    ):
 
-st.markdown(
-    """
-    <div class="hero-eyebrow">
-        EVIDENCE CONNECTIONS
-    </div>
+        edges = knowledge_graph.get(
+            "edges",
+            [],
+        )
 
-    <h1 class="hero-title">
-        Explore the <span>knowledge graph</span>
-    </h1>
+        if isinstance(edges, list):
+            return edges
 
-    <p class="hero-subtitle">
-        See how clinical problems connect to interventions, outcomes,
-        specialties, study designs, tissues, and emerging evidence.
-    </p>
-    """,
-    unsafe_allow_html=True,
-)
+    return []
 
 
-# ---------------------------------------------------------
-# Overview metrics
-# ---------------------------------------------------------
+def get_node_label(node):
+    if not isinstance(
+        node,
+        dict,
+    ):
+        return str(node)
 
-m1, m2, m3, m4 = st.columns(4)
-
-m1.metric(
-    "Graph Nodes",
-    graph_stats.get(
-        "total_nodes",
-        len(nodes),
-    ),
-)
-
-m2.metric(
-    "Connections",
-    graph_stats.get(
-        "total_edges",
-        len(edges),
-    ),
-)
-
-m3.metric(
-    "Evidence Concepts",
-    len(syntheses),
-)
-
-m4.metric(
-    "Indexed Papers",
-    len(evidence_db),
-)
-
-
-# ---------------------------------------------------------
-# Concept explorer
-# ---------------------------------------------------------
-
-st.markdown(
-    "## Explore a Concept"
-)
-
-concept_nodes = [
-    node
-    for node in nodes
-    if isinstance(node, dict)
-    and node.get("type")
-    not in {
-        "paper",
-        "journal",
-    }
-]
-
-
-concept_nodes.sort(
-    key=lambda node: (
-        str(
-            node.get(
-                "type",
-                "",
-            )
-        ),
-        str(
-            node.get(
-                "label",
-                "",
-            )
-        ),
-    )
-)
-
-
-concept_options = {
-    (
-        f"{node.get('label', 'Unknown')} "
-        f"— {str(node.get('type', '')).replace('_', ' ').title()}"
-    ): node
-    for node in concept_nodes
-}
-
-
-selected_label = st.selectbox(
-    "Choose a concept",
-    [
-        "Select a concept...",
-        *concept_options.keys(),
-    ],
-)
-
-
-if selected_label != "Select a concept...":
-
-    selected_node = concept_options[
-        selected_label
-    ]
-
-    selected_id = selected_node.get(
-        "id"
-    )
-
-    selected_type = selected_node.get(
-        "type",
-        "",
-    )
-
-    selected_name = selected_node.get(
-        "label",
-        "",
-    )
-
-    st.markdown(
-        f"### {selected_name}"
-    )
-
-    st.caption(
-        str(
-            selected_type
-        ).replace(
-            "_",
-            " ",
-        ).title()
+    return (
+        node.get("label")
+        or node.get("name")
+        or node.get("id")
+        or "Unnamed node"
     )
 
 
-    # -----------------------------------------------------
-    # Connected papers and concepts
-    # -----------------------------------------------------
+def get_node_type(node):
+    if not isinstance(
+        node,
+        dict,
+    ):
+        return "Unknown"
 
-    connected_papers = []
-    connected_concepts = []
-
-    for edge in edges:
-
-        if not isinstance(
-            edge,
-            dict,
-        ):
-            continue
-
-        source = edge.get(
-            "source"
-        )
-
-        target = edge.get(
-            "target"
-        )
-
-        relationship = edge.get(
-            "relationship",
-            "",
-        )
-
-        if target == selected_id:
-
-            source_node = next(
-                (
-                    node
-                    for node in nodes
-                    if isinstance(
-                        node,
-                        dict,
-                    )
-                    and node.get(
-                        "id"
-                    )
-                    == source
-                ),
-                None,
-            )
-
-            if source_node:
-
-                if source_node.get(
-                    "type"
-                ) == "paper":
-                    connected_papers.append(
-                        {
-                            "relationship": relationship,
-                            "node": source_node,
-                        }
-                    )
-
-                else:
-                    connected_concepts.append(
-                        {
-                            "relationship": relationship,
-                            "node": source_node,
-                        }
-                    )
-
-
-        elif source == selected_id:
-
-            target_node = next(
-                (
-                    node
-                    for node in nodes
-                    if isinstance(
-                        node,
-                        dict,
-                    )
-                    and node.get(
-                        "id"
-                    )
-                    == target
-                ),
-                None,
-            )
-
-            if target_node:
-
-                if target_node.get(
-                    "type"
-                ) == "paper":
-                    connected_papers.append(
-                        {
-                            "relationship": relationship,
-                            "node": target_node,
-                        }
-                    )
-
-                else:
-                    connected_concepts.append(
-                        {
-                            "relationship": relationship,
-                            "node": target_node,
-                        }
-                    )
-
-
-    # -----------------------------------------------------
-    # Metrics
-    # -----------------------------------------------------
-
-    c1, c2, c3 = st.columns(3)
-
-    c1.metric(
-        "Connected Papers",
-        len(
-            connected_papers
-        ),
+    return (
+        node.get("type")
+        or node.get("category")
+        or "Unknown"
     )
 
-    c2.metric(
-        "Connected Concepts",
-        len(
-            connected_concepts
-        ),
-    )
 
-    matching_synthesis = next(
-        (
-            synthesis
-            for synthesis in syntheses
-            if isinstance(
-                synthesis,
-                dict,
-            )
-            and synthesis.get(
-                "concept_id"
-            )
-            == selected_id
-        ),
-        None,
-    )
-
-    if matching_synthesis:
-
-        c3.metric(
-            "Avg Evidence",
-            matching_synthesis.get(
-                "average_evidence_score",
-                "—",
-            ),
-        )
-
-    else:
-
-        c3.metric(
-            "Avg Evidence",
-            "—",
-        )
-
-
-    # -----------------------------------------------------
-    # Evidence direction
-    # -----------------------------------------------------
-
-    if matching_synthesis:
-
-        st.markdown(
-            "### Evidence Direction"
-        )
-
-        directions = safe_dict(
-            matching_synthesis.get(
-                "result_direction"
-            )
-        )
-
-        d1, d2, d3, d4 = st.columns(4)
-
-        d1.metric(
-            "Favorable",
-            directions.get(
-                "favorable",
-                0,
-            ),
-        )
-
-        d2.metric(
-            "Neutral",
-            directions.get(
-                "neutral",
-                0,
-            ),
-        )
-
-        d3.metric(
-            "Unfavorable",
-            directions.get(
-                "unfavorable",
-                0,
-            ),
-        )
-
-        d4.metric(
-            "Unclear",
-            directions.get(
-                "unclear",
-                0,
-            ),
-        )
-
-
-    # -----------------------------------------------------
-    # Related concepts
-    # -----------------------------------------------------
-
-    st.markdown(
-        "### Related Concepts"
-    )
-
-    if connected_concepts:
-
-        relationship_groups = defaultdict(
-            list
-        )
-
-        for item in connected_concepts:
-
-            relationship = str(
-                item.get(
-                    "relationship",
-                    "",
-                )
-            ).replace(
-                "_",
-                " ",
-            ).title()
-
-            node = safe_dict(
-                item.get("node")
-            )
-
-            label = node.get(
-                "label",
-                "",
-            )
-
-            if label:
-                relationship_groups[
-                    relationship
-                ].append(
-                    label
-                )
-
-
-        for (
-            relationship,
-            labels,
-        ) in relationship_groups.items():
-
-            with st.expander(
-                relationship
-            ):
-
-                for label in sorted(
-                    set(labels)
-                ):
-                    st.write(
-                        f"• {label}"
-                    )
-
-    else:
-
-        st.info(
-            "No related concepts are currently connected."
-        )
-
-
-    # -----------------------------------------------------
-    # Connected papers
-    # -----------------------------------------------------
-
-    st.markdown(
-        "### Connected Papers"
-    )
-
-    if connected_papers:
-
-        connected_papers.sort(
-            key=lambda item: (
-                safe_dict(
-                    item.get(
-                        "node"
-                    )
-                ).get(
-                    "evidence_score",
-                    0,
-                )
-            ),
-            reverse=True,
-        )
-
-
-        for item in connected_papers[:20]:
-
-            paper = safe_dict(
-                item.get(
-                    "node"
-                )
-            )
-
-            relationship = str(
-                item.get(
-                    "relationship",
-                    "",
-                )
-            ).replace(
-                "_",
-                " ",
-            ).title()
-
-            title = paper.get(
-                "label",
-                "Untitled paper",
-            )
-
-            with st.expander(
-                title
-            ):
-
-                st.caption(
-                    relationship
-                )
-
-                p1, p2, p3 = st.columns(
-                    3
-                )
-
-                p1.metric(
-                    "Evidence",
-                    paper.get(
-                        "evidence_score",
-                        0,
-                    ),
-                )
-
-                p2.metric(
-                    "Statistics",
-                    paper.get(
-                        "statistics_score",
-                        0,
-                    ),
-                )
-
-                p3.metric(
-                    "Relevance",
-                    paper.get(
-                        "practitioner_relevance",
-                        0,
-                    ),
-                )
-
-                st.write(
-                    f"**Direction:** "
-                    f"{paper.get('result_direction', 'Unknown')}"
-                )
-
-                st.write(
-                    f"**Practice readiness:** "
-                    f"{paper.get('practice_readiness', 'Unknown')}"
-                )
-
-    else:
-
-        st.info(
-            "No connected papers found for this concept."
-        )
-
-
-# ---------------------------------------------------------
-# Most connected concepts
-# ---------------------------------------------------------
-
-st.markdown(
-    "## Most Connected Concepts"
-)
-
-connection_counts = Counter()
-
-for edge in edges:
-
+def get_edge_source(edge):
     if not isinstance(
         edge,
         dict,
     ):
-        continue
+        return ""
 
-    connection_counts[
-        edge.get(
-            "target"
-        )
-    ] += 1
-
-    connection_counts[
-        edge.get(
-            "source"
-        )
-    ] += 1
-
-
-ranked_concepts = []
-
-for node in concept_nodes:
-
-    node_id = node.get(
-        "id"
-    )
-
-    ranked_concepts.append(
-        (
-            node.get(
-                "label",
-                "Unknown",
-            ),
-            node.get(
-                "type",
-                "",
-            ),
-            connection_counts.get(
-                node_id,
-                0,
-            ),
-        )
+    return (
+        edge.get("source")
+        or edge.get("from")
+        or ""
     )
 
 
-ranked_concepts.sort(
-    key=lambda item: item[2],
-    reverse=True,
-)
-
-
-if ranked_concepts:
-
-    cols = st.columns(4)
-
-    for col, (
-        label,
-        node_type,
-        count,
-    ) in zip(
-        cols,
-        ranked_concepts[:4],
-    ):
-
-        with col:
-
-            st.markdown(
-                f"""
-                <div class="knowledge-concept-card">
-
-                    <div class="knowledge-concept-type">
-                        {str(node_type).replace("_", " ").upper()}
-                    </div>
-
-                    <div class="knowledge-concept-title">
-                        {label}
-                    </div>
-
-                    <div class="knowledge-concept-count">
-                        {count} connections
-                    </div>
-
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-
-
-# ---------------------------------------------------------
-# Evidence synthesis explorer
-# ---------------------------------------------------------
-
-st.markdown(
-    "## Evidence Synthesis"
-)
-
-synthesis_type_options = sorted(
-    {
-        str(
-            item.get(
-                "concept_type",
-                "",
-            )
-        )
-        for item in syntheses
-        if isinstance(
-            item,
-            dict,
-        )
-        and item.get(
-            "concept_type"
-        )
-    }
-)
-
-
-selected_type = st.selectbox(
-    "Concept type",
-    [
-        "All",
-        *[
-            option.replace(
-                "_",
-                " ",
-            ).title()
-            for option
-            in synthesis_type_options
-        ],
-    ],
-)
-
-
-filtered_syntheses = []
-
-for synthesis in syntheses:
-
+def get_edge_target(edge):
     if not isinstance(
-        synthesis,
+        edge,
         dict,
     ):
-        continue
+        return ""
 
-    concept_type = str(
-        synthesis.get(
-            "concept_type",
-            "",
-        )
+    return (
+        edge.get("target")
+        or edge.get("to")
+        or ""
     )
 
+
+def get_edge_relation(edge):
+    if not isinstance(
+        edge,
+        dict,
+    ):
+        return "related to"
+
+    return (
+        edge.get("relation")
+        or edge.get("type")
+        or edge.get("label")
+        or "related to"
+    )
+
+
+def build_node_lookup(nodes):
+    lookup = {}
+
+    for node in nodes:
+
+        if not isinstance(
+            node,
+            dict,
+        ):
+            continue
+
+        node_id = (
+            node.get("id")
+            or node.get("name")
+            or node.get("label")
+        )
+
+        if node_id:
+            lookup[
+                str(node_id)
+            ] = node
+
+    return lookup
+
+
+def count_clinical_areas():
+    areas = set()
+
+    for record in evidence_db:
+
+        if not isinstance(
+            record,
+            dict,
+        ):
+            continue
+
+        translation = record.get(
+            "clinical_translation",
+            {},
+        )
+
+        if not isinstance(
+            translation,
+            dict,
+        ):
+            continue
+
+        area = translation.get(
+            "clinical_area",
+            "",
+        )
+
+        if (
+            isinstance(area, str)
+            and area.strip()
+        ):
+            areas.add(
+                area.strip()
+            )
+
+    return len(
+        areas
+    )
+
+
+# =========================================================
+# DATA
+# =========================================================
+
+nodes = get_nodes()
+edges = get_edges()
+
+node_lookup = build_node_lookup(
+    nodes
+)
+
+
+# =========================================================
+# HEADER
+# =========================================================
+
+st.caption(
+    "RESEARCH RELATIONSHIPS"
+)
+
+st.title(
+    "Knowledge Graph"
+)
+
+st.write(
+    "Explore how clinical problems, interventions, mechanisms, "
+    "outcomes, and research concepts connect across the evidence base."
+)
+
+st.write("")
+
+
+# =========================================================
+# SUMMARY METRICS
+# =========================================================
+
+node_types = {}
+
+for node in nodes:
+
+    node_type = get_node_type(
+        node
+    )
+
+    node_types[
+        node_type
+    ] = (
+        node_types.get(
+            node_type,
+            0,
+        )
+        + 1
+    )
+
+
+m1, m2, m3, m4 = st.columns(
+    4,
+    gap="medium",
+)
+
+with m1:
+
+    st.metric(
+        "Knowledge Nodes",
+        len(nodes),
+        border=True,
+    )
+
+
+with m2:
+
+    st.metric(
+        "Relationships",
+        len(edges),
+        border=True,
+    )
+
+
+with m3:
+
+    st.metric(
+        "Node Types",
+        len(
+            node_types
+        ),
+        border=True,
+    )
+
+
+with m4:
+
+    st.metric(
+        "Clinical Areas",
+        count_clinical_areas(),
+        border=True,
+    )
+
+
+st.write("")
+
+
+# =========================================================
+# EMPTY STATE
+# =========================================================
+
+if not nodes and not edges:
+
+    st.info(
+        "No knowledge graph data is currently available. "
+        "Run the knowledge-graph stage of your research pipeline "
+        "to populate this page."
+    )
+
+    st.stop()
+
+
+# =========================================================
+# SEARCH + FILTER
+# =========================================================
+
+search_col, type_col = st.columns(
+    [3, 1],
+    gap="medium",
+)
+
+with search_col:
+
+    search = st.text_input(
+        "Search graph",
+        placeholder=(
+            "Search a condition, intervention, mechanism, "
+            "outcome, or concept..."
+        ),
+        label_visibility="collapsed",
+    )
+
+
+type_options = sorted(
+    node_types.keys()
+)
+
+with type_col:
+
+    selected_type = st.selectbox(
+        "Node type",
+        [
+            "All Types",
+            *type_options,
+        ],
+        label_visibility="collapsed",
+    )
+
+
+# =========================================================
+# FILTER NODES
+# =========================================================
+
+filtered_nodes = []
+
+for node in nodes:
+
+    label = get_node_label(
+        node
+    )
+
+    node_type = get_node_type(
+        node
+    )
+
+    if search:
+
+        query = search.lower().strip()
+
+        searchable = (
+            f"{label} {node_type}"
+        ).lower()
+
+        if query not in searchable:
+            continue
+
     if (
-        selected_type != "All"
-        and concept_type.replace(
-            "_",
-            " ",
-        ).title()
+        selected_type
+        != "All Types"
+        and node_type
         != selected_type
     ):
         continue
 
-    filtered_syntheses.append(
-        synthesis
+    filtered_nodes.append(
+        node
     )
 
 
-filtered_syntheses.sort(
-    key=lambda item: (
-        item.get(
-            "paper_count",
-            0,
-        ),
-        item.get(
-            "average_evidence_score",
-            0,
-        )
-        or 0,
-    ),
-    reverse=True,
+# =========================================================
+# NODE TYPE OVERVIEW
+# =========================================================
+
+st.subheader(
+    "Graph Overview"
 )
 
+if node_types:
 
-for synthesis in filtered_syntheses[:20]:
-
-    concept = synthesis.get(
-        "concept",
-        "Unknown",
+    type_items = sorted(
+        node_types.items(),
+        key=lambda item: item[1],
+        reverse=True,
     )
 
-    with st.expander(
-        concept
+    type_cols = st.columns(
+        min(
+            4,
+            len(type_items),
+        ),
+        gap="medium",
+    )
+
+    for col, (
+        node_type,
+        count,
+    ) in zip(
+        type_cols,
+        type_items[:4],
     ):
 
-        c1, c2, c3, c4 = st.columns(
-            4
-        )
+        with col:
 
-        c1.metric(
-            "Papers",
-            synthesis.get(
-                "paper_count",
-                0,
-            ),
-        )
-
-        c2.metric(
-            "Avg Evidence",
-            synthesis.get(
-                "average_evidence_score",
-                "—",
-            ),
-        )
-
-        c3.metric(
-            "Avg Statistics",
-            synthesis.get(
-                "average_statistics_score",
-                "—",
-            ),
-        )
-
-        c4.metric(
-            "Practice Informing",
-            synthesis.get(
-                "practice_informing_papers",
-                0,
-            ),
-        )
-
-        study_designs = safe_dict(
-            synthesis.get(
-                "study_designs"
-            )
-        )
-
-        if study_designs:
-
-            st.markdown(
-                "**Study designs**"
-            )
-
-            for design, count in (
-                study_designs.items()
+            with st.container(
+                border=True,
             ):
-                st.write(
-                    f"• {design}: {count}"
+
+                st.markdown(
+                    f"**{node_type}**"
+                )
+
+                st.metric(
+                    "Nodes",
+                    count,
                 )
 
 
-# ---------------------------------------------------------
-# Graph architecture summary
-# ---------------------------------------------------------
+st.write("")
 
-st.markdown(
-    "## How the Evidence Connects"
+
+# =========================================================
+# MOST CONNECTED NODES
+# =========================================================
+
+st.subheader(
+    "Most Connected Concepts"
 )
 
-st.markdown(
-    """
-    **Clinical Problem**
-    → **Intervention**
-    → **Outcome**
-    → **Evidence Quality**
-    → **Specialist Review**
-    → **Practice Readiness**
+connection_counts = {}
 
-    The knowledge graph is a structured map of these relationships.
-    It is not a causal graph and does not imply that a connection proves
-    effectiveness.
-    """
+for edge in edges:
+
+    source = str(
+        get_edge_source(
+            edge
+        )
+    )
+
+    target = str(
+        get_edge_target(
+            edge
+        )
+    )
+
+    if source:
+        connection_counts[
+            source
+        ] = (
+            connection_counts.get(
+                source,
+                0,
+            )
+            + 1
+        )
+
+    if target:
+        connection_counts[
+            target
+        ] = (
+            connection_counts.get(
+                target,
+                0,
+            )
+            + 1
+        )
+
+
+most_connected = sorted(
+    connection_counts.items(),
+    key=lambda item: item[1],
+    reverse=True,
+)[:8]
+
+
+if most_connected:
+
+    connected_cols = st.columns(
+        4,
+        gap="medium",
+    )
+
+    for index, (
+        node_id,
+        count,
+    ) in enumerate(
+        most_connected
+    ):
+
+        col = connected_cols[
+            index % 4
+        ]
+
+        node = node_lookup.get(
+            node_id,
+            {},
+        )
+
+        label = (
+            get_node_label(
+                node
+            )
+            if node
+            else node_id
+        )
+
+        node_type = (
+            get_node_type(
+                node
+            )
+            if node
+            else "Unknown"
+        )
+
+        with col:
+
+            with st.container(
+                border=True,
+            ):
+
+                st.markdown(
+                    f"**{label}**"
+                )
+
+                st.caption(
+                    node_type
+                )
+
+                st.metric(
+                    "Connections",
+                    count,
+                )
+
+else:
+
+    st.caption(
+        "Connection counts are not available yet."
+    )
+
+
+st.write("")
+
+
+# =========================================================
+# NODE EXPLORER
+# =========================================================
+
+st.subheader(
+    "Node Explorer"
 )
+
+st.caption(
+    f"{len(filtered_nodes)} nodes shown"
+)
+
+
+for node in filtered_nodes[:30]:
+
+    label = get_node_label(
+        node
+    )
+
+    node_type = get_node_type(
+        node
+    )
+
+    node_id = (
+        node.get("id")
+        if isinstance(
+            node,
+            dict,
+        )
+        else None
+    )
+
+    with st.expander(
+        f"{label} • {node_type}"
+    ):
+
+        if isinstance(
+            node,
+            dict,
+        ):
+
+            description = (
+                node.get(
+                    "description"
+                )
+                or node.get(
+                    "summary"
+                )
+                or ""
+            )
+
+            if description:
+
+                st.write(
+                    description
+                )
+
+        connected_edges = []
+
+        for edge in edges:
+
+            source = str(
+                get_edge_source(
+                    edge
+                )
+            )
+
+            target = str(
+                get_edge_target(
+                    edge
+                )
+            )
+
+            possible_ids = {
+                str(node_id),
+                str(label),
+            }
+
+            if (
+                source in possible_ids
+                or target in possible_ids
+            ):
+                connected_edges.append(
+                    edge
+                )
+
+        st.metric(
+            "Connections",
+            len(
+                connected_edges
+            ),
+        )
+
+        if connected_edges:
+
+            st.markdown(
+                "**Relationships**"
+            )
+
+            for edge in (
+                connected_edges[:15]
+            ):
+
+                source_id = str(
+                    get_edge_source(
+                        edge
+                    )
+                )
+
+                target_id = str(
+                    get_edge_target(
+                        edge
+                    )
+                )
+
+                relation = (
+                    get_edge_relation(
+                        edge
+                    )
+                )
+
+                source_node = (
+                    node_lookup.get(
+                        source_id,
+                        {},
+                    )
+                )
+
+                target_node = (
+                    node_lookup.get(
+                        target_id,
+                        {},
+                    )
+                )
+
+                source_label = (
+                    get_node_label(
+                        source_node
+                    )
+                    if source_node
+                    else source_id
+                )
+
+                target_label = (
+                    get_node_label(
+                        target_node
+                    )
+                    if target_node
+                    else target_id
+                )
+
+                st.write(
+                    f"• {source_label} → "
+                    f"{relation} → {target_label}"
+                )
+
+        else:
+
+            st.caption(
+                "No relationships found for this node."
+            )
+
+
+st.write("")
+
+
+# =========================================================
+# RELATIONSHIP EXPLORER
+# =========================================================
+
+st.subheader(
+    "Relationship Explorer"
+)
+
+relation_filter_options = sorted(
+    {
+        get_edge_relation(
+            edge
+        )
+        for edge in edges
+    }
+)
+
+selected_relation = st.selectbox(
+    "Relationship type",
+    [
+        "All Relationships",
+        *relation_filter_options,
+    ],
+)
+
+
+shown_edges = 0
+
+for edge in edges:
+
+    relation = (
+        get_edge_relation(
+            edge
+        )
+    )
+
+    if (
+        selected_relation
+        != "All Relationships"
+        and relation
+        != selected_relation
+    ):
+        continue
+
+    source_id = str(
+        get_edge_source(
+            edge
+        )
+    )
+
+    target_id = str(
+        get_edge_target(
+            edge
+        )
+    )
+
+    source_node = (
+        node_lookup.get(
+            source_id,
+            {},
+        )
+    )
+
+    target_node = (
+        node_lookup.get(
+            target_id,
+            {},
+        )
+    )
+
+    source_label = (
+        get_node_label(
+            source_node
+        )
+        if source_node
+        else source_id
+    )
+
+    target_label = (
+        get_node_label(
+            target_node
+        )
+        if target_node
+        else target_id
+    )
+
+    with st.container(
+        border=True,
+    ):
+
+        st.markdown(
+            f"**{source_label}**"
+        )
+
+        st.caption(
+            relation
+        )
+
+        st.write(
+            f"→ {target_label}"
+        )
+
+    shown_edges += 1
+
+    if shown_edges >= 25:
+        break
+
+
+if shown_edges == 0:
+
+    st.info(
+        "No relationships match the current filter."
+    )
