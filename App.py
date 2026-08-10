@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import streamlit as st
 
 
@@ -16,27 +14,8 @@ st.set_page_config(
 
 
 # =========================================================
-# LOAD GLOBAL CSS
+# PAGE DEFINITIONS
 # =========================================================
-
-STYLE_PATH = Path("assets/style.css")
-
-if STYLE_PATH.exists():
-    with STYLE_PATH.open(
-        "r",
-        encoding="utf-8",
-    ) as file:
-
-        st.markdown(
-            f"<style>{file.read()}</style>",
-            unsafe_allow_html=True,
-        )
-
-
-# =========================================================
-# DEFINE PAGES
-# =========================================================
-
 
 home = st.Page(
     "pages/home.py",
@@ -46,125 +25,79 @@ home = st.Page(
 )
 
 clinical_problems = st.Page(
-    "pages/clinical_problems.py",
+    "pages/1_Clinical_Problems.py",
     title="Clinical Problems",
     icon=":material/clinical_notes:",
-    default=True,
 )
 
 problem_detail = st.Page(
-    "pages/problem_detail.py",
+    "pages/2_Problem_Detail.py",
     title="Problem Detail",
     icon=":material/article:",
-    visibility="hidden",
 )
 
 ai_specialists = st.Page(
-    "pages/ai_specialists.py",
+    "pages/3_AI_Specialists.py",
     title="AI Specialists",
     icon=":material/groups:",
 )
 
 evidence_library = st.Page(
-    "pages/evidence_library.py",
+    "pages/4_Evidence_Library.py",
     title="Evidence Library",
     icon=":material/library_books:",
 )
 
 journal_club = st.Page(
-    "pages/journal_club.py",
+    "pages/5_Journal_Club.py",
     title="Journal Club",
     icon=":material/menu_book:",
 )
 
 knowledge_graph = st.Page(
-    "pages/knowledge_graph.py",
+    "pages/6_Knowledge_Graph.py",
     title="Knowledge Graph",
     icon=":material/hub:",
 )
 
 evidence_gaps = st.Page(
-    "pages/evidence_gaps.py",
+    "pages/7_Evidence_Gaps.py",
     title="Evidence Gaps",
-    icon=":material/warning:",
+    icon=":material/search_off:",
 )
 
 statistics_review = st.Page(
-    "pages/statistics_review.py",
+    "pages/8_Statistics_Review.py",
     title="Statistics Review",
     icon=":material/analytics:",
 )
 
 ask_athena = st.Page(
-    "pages/ask_athena.py",
+    "pages/9_Ask_Athena.py",
     title="Ask Athena",
     icon=":material/auto_awesome:",
 )
 
 
 # =========================================================
-# SIDEBAR BRAND
-# =========================================================
-
-with st.sidebar:
-
-    st.markdown(
-        """
-        <div class="sidebar-brand">
-
-            <div class="brand-mark">
-                🧠
-            </div>
-
-            <div>
-
-                <div class="brand-title">
-                    OPTIMIZE
-                </div>
-
-                <div class="brand-title">
-                    EVIDENCE
-                </div>
-
-                <div class="brand-subtitle">
-                    Better evidence.<br>
-                    Better outcomes.
-                </div>
-
-            </div>
-
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-
-# =========================================================
 # NAVIGATION
 # =========================================================
 
-page = st.navigation(
+navigation = st.navigation(
     {
-        "Evidence Intelligence": [
+        "Optimize Evidence": [
+            home,
             clinical_problems,
+            problem_detail,
             ai_specialists,
             evidence_library,
             journal_club,
             knowledge_graph,
             evidence_gaps,
             statistics_review,
-        ],
-
-        "Research Assistant": [
             ask_athena,
-        ],
-
-        # Hidden but still routable
-        "_hidden": [
-            problem_detail,
-        ],
-    },
-    position="sidebar",
+        ]
+    }
 )
 
 
@@ -172,4 +105,4 @@ page = st.navigation(
 # RUN SELECTED PAGE
 # =========================================================
 
-page.run()
+navigation.run()
