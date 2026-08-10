@@ -1,807 +1,88 @@
 /* ========================================================
-   OPTIMIZE EVIDENCE
-   Main stylesheet
+   AI SPECIALISTS PAGE
 ======================================================== */
 
-
-/* --------------------------------------------------------
-   Global app styling
--------------------------------------------------------- */
-
-html,
-body,
-[class*="css"] {
-    font-family:
-        Inter,
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        sans-serif;
-}
-
-.stApp {
-    background:
-        radial-gradient(
-            circle at 75% 0%,
-            rgba(242, 236, 255, 0.55),
-            transparent 31%
-        ),
-        linear-gradient(
-            180deg,
-            #fcfdff 0%,
-            #f8fbfd 100%
-        );
-    color: #111827;
-}
-
-.block-container {
-    max-width: 1550px;
-    padding-top: 1.6rem;
-    padding-left: 1.6rem;
-    padding-right: 1.6rem;
-    padding-bottom: 3rem;
-}
-
-p {
-    color: #667085;
-}
-
-h1,
-h2,
-h3 {
-    letter-spacing: -0.02em;
-}
-
-
-/* --------------------------------------------------------
-   Hide Streamlit clutter
--------------------------------------------------------- */
-
-#MainMenu {
-    visibility: hidden;
-}
-
-footer {
-    visibility: hidden;
-}
-
-header[data-testid="stHeader"] {
-    background: transparent;
-}
-
-
-/* --------------------------------------------------------
-   Sidebar
--------------------------------------------------------- */
-
-section[data-testid="stSidebar"] {
-    background: rgba(255, 255, 255, 0.97);
-    border-right: 1px solid #edf0f4;
-}
-
-section[data-testid="stSidebar"] > div {
-    padding-top: 1.4rem;
-    padding-left: 0.9rem;
-    padding-right: 0.9rem;
-}
-
-.sidebar-brand {
-    display: flex;
-    gap: 12px;
-    align-items: flex-start;
-    padding: 8px 6px 20px 6px;
-}
-
-.brand-mark {
-    width: 42px;
-    height: 42px;
-    border-radius: 14px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    font-size: 25px;
-
-    background:
-        linear-gradient(
-            135deg,
-            #e6fffb,
-            #eef1ff
-        );
-
-    border: 1px solid #dfeae8;
-}
-
-.brand-title {
-    font-size: 16px;
-    line-height: 1.08;
-    font-weight: 850;
-    letter-spacing: 2px;
-    color: #182230;
-}
-
-.brand-subtitle {
-    margin-top: 9px;
+.team-eyebrow {
     font-size: 11px;
-    line-height: 1.45;
+    font-weight: 800;
+    letter-spacing: 0.12em;
     color: #667085;
+    margin-top: 4px;
+    margin-bottom: 10px;
 }
 
-
-/* --------------------------------------------------------
-   Sidebar buttons
--------------------------------------------------------- */
-
-section[data-testid="stSidebar"] .stButton {
-    margin-bottom: 5px;
+.team-title {
+    font-size: 38px;
+    line-height: 1.06;
+    letter-spacing: -1.3px;
+    font-weight: 800;
+    color: #161a2b;
 }
 
-section[data-testid="stSidebar"] .stButton button {
-    border-radius: 12px;
-    min-height: 42px;
-    justify-content: flex-start;
-    padding-left: 13px;
-    font-weight: 520;
-    border: 1px solid transparent;
-    box-shadow: none;
-}
-
-section[data-testid="stSidebar"]
-.stButton button[kind="secondary"] {
-    background: transparent;
-    color: #344054;
-}
-
-section[data-testid="stSidebar"]
-.stButton button[kind="secondary"]:hover {
-    background: #f6fbfa;
-    border-color: #e4f2ef;
-}
-
-section[data-testid="stSidebar"]
-.stButton button[kind="primary"] {
-    background:
-        linear-gradient(
-            90deg,
-            #e5faf7,
-            #eff9ff
-        );
-    color: #137d75;
-    border-color: #d8f0ec;
-}
-
-.sidebar-spacer {
-    height: 12px;
-}
-
-
-/* --------------------------------------------------------
-   Ask Athena sidebar card
--------------------------------------------------------- */
-
-.athena-sidebar-card {
-    margin-top: 18px;
-    padding: 20px 17px 14px 17px;
-
-    border-radius: 18px;
-
-    background:
-        linear-gradient(
-            155deg,
-            #effefb 0%,
-            #eef8ff 55%,
-            #f8f4ff 100%
-        );
-
-    border: 1px solid #dcefeb;
-}
-
-.athena-orb {
-    width: 48px;
-    height: 48px;
-
-    border-radius: 50%;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    font-size: 23px;
-
-    background: white;
-
-    border: 1px solid #d9e8e6;
-
-    box-shadow:
-        0 6px 18px rgba(16, 24, 40, 0.06);
-}
-
-.athena-sidebar-title {
-    font-size: 15px;
-    font-weight: 750;
-    margin-top: 14px;
-}
-
-.athena-sidebar-copy {
-    font-size: 12px;
+.team-subtitle {
+    font-size: 14px;
     line-height: 1.55;
     color: #667085;
-    margin-top: 9px;
+    max-width: 760px;
+    margin-top: 11px;
+    margin-bottom: 30px;
 }
 
 
 /* --------------------------------------------------------
-   Header
+   Agent cards
 -------------------------------------------------------- */
 
-.greeting {
-    font-size: 14px;
-    font-weight: 700;
-    color: #111827;
-    margin-bottom: 8px;
-}
+.ai-agent-card {
+    min-height: 310px;
+    padding: 24px;
 
-.hero-title {
-    font-size: 35px;
-    line-height: 1.08;
-    font-weight: 780;
-    letter-spacing: -1.3px;
-    color: #111827;
-}
-
-.hero-title span {
-    color: #16b7a4;
-}
-
-.hero-subtitle {
-    margin-top: 9px;
-
-    font-size: 14px;
-    line-height: 1.5;
-
-    color: #667085;
-
-    max-width: 640px;
-}
-
-.page-title {
-    font-size: 32px;
-    font-weight: 780;
-    letter-spacing: -1px;
-    color: #111827;
-}
-
-.page-subtitle {
-    font-size: 14px;
-    color: #667085;
-    margin-top: 8px;
-    max-width: 700px;
-}
-
-
-/* --------------------------------------------------------
-   Search and top controls
--------------------------------------------------------- */
-
-div[data-testid="stTextInput"] input {
-    border-radius: 14px;
-    min-height: 42px;
-
-    background: rgba(255, 255, 255, 0.92);
-
-    border: 1px solid #e4e7ec;
-
-    box-shadow:
-        0 4px 16px rgba(16, 24, 40, 0.025);
-}
-
-div[data-testid="stTextInput"] input:focus {
-    border-color: #93d8d0;
-    box-shadow:
-        0 0 0 3px rgba(22, 183, 164, 0.08);
-}
-
-div[data-testid="stButton"] button {
-    border-radius: 12px;
-    border: 1px solid #e7e9ee;
-    box-shadow: none;
-}
-
-
-/* --------------------------------------------------------
-   Utility spacing
--------------------------------------------------------- */
-
-.vertical-gap-small {
-    height: 8px;
-}
-
-.vertical-gap {
-    height: 20px;
-}
-
-
-/* --------------------------------------------------------
-   KPI shell
--------------------------------------------------------- */
-
-.kpi-shell {
-    background: rgba(255, 255, 255, 0.88);
-
-    border: 1px solid #e9ecf1;
-
-    border-radius: 20px;
-
-    padding: 18px 16px 8px 16px;
-
-    box-shadow:
-        0 2px 4px rgba(16, 24, 40, 0.015),
-        0 12px 36px rgba(16, 24, 40, 0.025);
-}
-
-.kpi-card {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-
-    min-height: 86px;
-
-    padding: 4px 2px;
-}
-
-.kpi-icon {
-    width: 42px;
-    height: 42px;
-    min-width: 42px;
-
-    border-radius: 14px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    font-size: 20px;
-    font-weight: 700;
-}
-
-.kpi-icon.teal {
-    background: #e8fbf8;
-    color: #13a996;
-}
-
-.kpi-icon.gold {
-    background: #fff7e8;
-    color: #e0a01f;
-}
-
-.kpi-icon.purple {
-    background: #f2edff;
-    color: #8d5fe8;
-}
-
-.kpi-icon.pink {
-    background: #fff0f6;
-    color: #dd4e8c;
-}
-
-.kpi-icon.blue {
-    background: #edf7ff;
-    color: #4b92df;
-}
-
-.kpi-value {
-    font-size: 23px;
-    line-height: 1;
-    font-weight: 780;
-    color: #101828;
-}
-
-.kpi-label {
-    margin-top: 5px;
-
-    font-size: 11px;
-    line-height: 1.25;
-
-    font-weight: 620;
-
-    color: #344054;
-}
-
-.kpi-change {
-    margin-top: 8px;
-
-    font-size: 10px;
-    color: #0fa77c;
-}
-
-
-/* --------------------------------------------------------
-   Section headers
--------------------------------------------------------- */
-
-.section-title {
-    font-size: 14px;
-    font-weight: 750;
-    color: #101828;
-    margin-bottom: 7px;
-}
-
-
-/* --------------------------------------------------------
-   Clinical problem cards
--------------------------------------------------------- */
-
-.problem-card {
-    min-height: 250px;
-
-    padding: 14px;
-
-    border-radius: 18px;
+    border-radius: 23px;
 
     background:
         linear-gradient(
             145deg,
-            rgba(255, 255, 255, 0.95),
-            rgba(248, 250, 255, 0.92)
+            rgba(255,255,255,.98),
+            rgba(250,251,255,.97)
         );
 
     border: 1px solid #e6e9ef;
 
     box-shadow:
-        0 6px 18px rgba(16, 24, 40, 0.025);
+        0 2px 4px rgba(16,24,40,.018),
+        0 10px 32px rgba(16,24,40,.035);
+
+    margin-bottom: 10px;
+
+    transition:
+        transform .18s ease,
+        box-shadow .18s ease,
+        border-color .18s ease;
 }
 
-.problem-top {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-}
-
-.problem-icon {
-    width: 48px;
-    height: 48px;
-
-    border-radius: 16px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    background:
-        linear-gradient(
-            145deg,
-            #f0fbfa,
-            #f6f1ff
-        );
-
-    font-size: 23px;
-}
-
-.problem-name {
-    font-size: 13px;
-    line-height: 1.15;
-    font-weight: 720;
-    color: #18463f;
-}
-
-.problem-meta {
-    margin-top: 14px;
-
-    font-size: 11px;
-
-    color: #667085;
-}
-
-.problem-meta.small {
-    margin-top: 14px;
-    font-size: 10px;
-}
-
-.strength-pill {
-    width: fit-content;
-
-    margin-top: 8px;
-
-    padding: 4px 9px;
-
-    border-radius: 999px;
-
-    background: #e4f5f1;
-
-    color: #20796d;
-
-    font-size: 9px;
-    font-weight: 750;
-}
-
-.confidence-row {
-    margin-top: 8px;
-
-    font-size: 12px;
-
-    color: #f0aa2d;
-}
-
-.confidence-row span {
-    color: #344054;
-    font-size: 10px;
-}
-
-.problem-insight {
-    font-size: 11px;
-    font-weight: 650;
-
-    margin-top: 3px;
-}
-
-.tag-row {
-    display: flex;
-    gap: 5px;
-    flex-wrap: wrap;
-
-    margin-top: 12px;
-}
-
-.tag {
-    padding: 4px 8px;
-
-    border-radius: 999px;
-
-    background: #eef8f7;
-
-    color: #426c66;
-
-    font-size: 9px;
-}
-
-
-/* --------------------------------------------------------
-   Specialist mini cards
--------------------------------------------------------- */
-
-.specialist-mini-card {
-    min-height: 182px;
-
-    padding: 12px;
-
-    text-align: center;
-
-    border-radius: 17px;
-
-    background: rgba(255, 255, 255, 0.92);
-
-    border: 1px solid #e8eaf0;
+.ai-agent-card:hover {
+    transform: translateY(-3px);
 
     box-shadow:
-        0 5px 15px rgba(16, 24, 40, 0.02);
-}
-
-.specialist-avatar {
-    width: 62px;
-    height: 62px;
-
-    margin: auto;
-
-    border-radius: 22px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    background:
-        radial-gradient(
-            circle,
-            #ffffff,
-            #edf9f7
-        );
-
-    border: 1px solid #dceae8;
-
-    font-size: 30px;
-}
-
-.specialist-mini-name {
-    margin-top: 8px;
-
-    font-size: 12px;
-    font-weight: 750;
-}
-
-.specialist-mini-role {
-    margin-top: 2px;
-
-    min-height: 30px;
-
-    font-size: 9px;
-    line-height: 1.3;
-
-    color: #344054;
-}
-
-.specialist-mini-copy {
-    margin-top: 6px;
-
-    font-size: 8px;
-    line-height: 1.35;
-
-    color: #667085;
+        0 4px 7px rgba(16,24,40,.025),
+        0 16px 38px rgba(16,24,40,.06);
 }
 
 
 /* --------------------------------------------------------
-   Dashboard cards
+   Top area
 -------------------------------------------------------- */
 
-.dashboard-card,
-.rail-card {
-    background: rgba(255, 255, 255, 0.93);
-
-    border: 1px solid #e8ebf0;
-
-    border-radius: 18px;
-
-    padding: 15px;
-
-    box-shadow:
-        0 8px 24px rgba(16, 24, 40, 0.025);
-}
-
-
-/* --------------------------------------------------------
-   Paper card
--------------------------------------------------------- */
-
-.paper-type {
-    width: fit-content;
-
-    margin-top: 4px;
-
-    padding: 4px 8px;
-
-    border-radius: 999px;
-
-    background: #e7f8f4;
-
-    color: #298172;
-
-    font-size: 8px;
-    font-weight: 750;
-}
-
-.paper-title {
-    margin-top: 10px;
-
-    font-size: 14px;
-    line-height: 1.3;
-    font-weight: 740;
-
-    color: #182230;
-}
-
-.paper-summary {
-    margin-top: 8px;
-
-    font-size: 10px;
-    line-height: 1.55;
-
-    color: #667085;
-}
-
-
-/* --------------------------------------------------------
-   Trending topics
--------------------------------------------------------- */
-
-.trend-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    padding: 10px 0;
-
-    border-bottom: 1px solid #f0f2f5;
-
-    font-size: 11px;
-}
-
-.trend-up {
-    color: #0fa77c;
-}
-
-
-/* --------------------------------------------------------
-   Right rail
--------------------------------------------------------- */
-
-.rail-header {
+.ai-agent-top {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-
-    font-size: 13px;
-    font-weight: 750;
+    gap: 18px;
 }
 
-.live-dot {
-    color: #ef2d65;
-    font-size: 10px;
-}
-
-.activity-row {
-    display: grid;
-    grid-template-columns: 42px 1fr 1.15fr;
-
-    align-items: center;
-
-    gap: 8px;
-
-    padding: 12px 4px;
-
-    border-bottom: 1px solid #edf0f3;
-}
-
-.activity-avatar {
-    width: 39px;
-    height: 39px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    border-radius: 15px;
-
-    background: #f4fbfa;
-
-    font-size: 20px;
-}
-
-.activity-name {
-    font-size: 11px;
-    font-weight: 750;
-}
-
-.activity-role {
-    margin-top: 2px;
-
-    font-size: 8px;
-
-    color: #667085;
-}
-
-.activity-right {
-    text-align: right;
-
-    font-size: 8px;
-    line-height: 1.35;
-
-    color: #344054;
-}
-
-.activity-insight {
-    margin-top: 3px;
-
-    color: #168f7d;
-}
-
-
-/* --------------------------------------------------------
-   Evidence gaps
--------------------------------------------------------- */
-
-.gap-row {
-    display: flex;
-    gap: 10px;
-
-    padding: 12px 3px;
-
-    border-bottom: 1px solid #eef0f3;
-}
-
-.gap-number {
-    width: 22px;
-    height: 22px;
-    min-width: 22px;
+.ai-agent-avatar {
+    width: 102px;
+    height: 102px;
+    min-width: 102px;
 
     border-radius: 50%;
 
@@ -809,220 +90,297 @@ div[data-testid="stButton"] button {
     align-items: center;
     justify-content: center;
 
-    background: #fff0f6;
+    font-size: 46px;
 
-    color: #db497f;
+    background:
+        radial-gradient(
+            circle at 50% 40%,
+            #ffffff 0%,
+            #f1f8f7 65%,
+            #e7f1ef 100%
+        );
 
-    font-size: 9px;
-    font-weight: 750;
+    border: 1px solid #e1eae8;
+
+    box-shadow:
+        inset 0 1px 3px rgba(255,255,255,.8);
 }
 
-.gap-title {
-    font-size: 10px;
+.ai-agent-heading {
+    min-width: 0;
+}
+
+.ai-agent-name {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+
+    font-size: 19px;
+    line-height: 1.1;
+    font-weight: 800;
+}
+
+.ai-agent-role {
+    margin-top: 7px;
+
+    font-size: 12px;
     line-height: 1.35;
 
     font-weight: 600;
 
-    color: #344054;
-}
-
-.gap-meta {
-    margin-top: 2px;
-
-    font-size: 8px;
-
-    color: #98a2b3;
-}
-
-
-/* --------------------------------------------------------
-   List view cards
--------------------------------------------------------- */
-
-.list-card {
-    display: flex;
-    gap: 16px;
-
-    padding: 17px;
-
-    border-radius: 18px;
-
-    border: 1px solid #e7eaf0;
-
-    background: rgba(255, 255, 255, 0.92);
-}
-
-.list-icon {
-    width: 56px;
-    height: 56px;
-    min-width: 56px;
-
-    border-radius: 17px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    font-size: 25px;
-
-    background:
-        linear-gradient(
-            145deg,
-            #ebfbf8,
-            #f6f1ff
-        );
-}
-
-.list-title {
-    font-size: 15px;
-    font-weight: 750;
-}
-
-.list-copy {
-    margin-top: 6px;
-
-    font-size: 11px;
-    line-height: 1.5;
-
     color: #667085;
 }
 
-.strength-large {
-    width: fit-content;
+.status-dot {
+    display: inline-block;
 
-    margin-bottom: 10px;
+    width: 8px;
+    height: 8px;
 
-    padding: 7px 12px;
-
-    border-radius: 999px;
-
-    background: #e7f7f4;
-
-    color: #267c70;
-
-    font-size: 10px;
-    font-weight: 750;
+    border-radius: 50%;
 }
 
 
 /* --------------------------------------------------------
-   Large specialist cards
+   Description
 -------------------------------------------------------- */
 
-.specialist-large-card {
-    min-height: 285px;
+.ai-agent-description {
+    min-height: 76px;
 
-    padding: 22px;
+    margin-top: 23px;
 
-    margin-bottom: 10px;
+    font-size: 11px;
+    line-height: 1.7;
 
-    border-radius: 20px;
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(255, 255, 255, 0.95),
-            rgba(249, 250, 255, 0.94)
-        );
-
-    border: 1px solid #e6e9ef;
-
-    box-shadow:
-        0 8px 24px rgba(16, 24, 40, 0.025);
+    color: #475467;
 }
 
-.specialist-large-card.selected {
-    border-color: #92d9cf;
 
-    box-shadow:
-        0 0 0 3px rgba(22, 183, 164, 0.07),
-        0 8px 24px rgba(16, 24, 40, 0.025);
+/* --------------------------------------------------------
+   Divider + stats
+-------------------------------------------------------- */
+
+.ai-agent-divider {
+    width: 100%;
+    height: 1px;
+
+    margin-top: 19px;
+    margin-bottom: 16px;
+
+    background: #eaecf0;
 }
 
-.specialist-large-avatar {
-    width: 70px;
-    height: 70px;
-
-    border-radius: 22px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    font-size: 34px;
-
-    background: #f0fbf9;
-
-    border: 1px solid #deebe9;
+.ai-agent-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
 }
 
-.specialist-large-name {
-    margin-top: 14px;
+.ai-agent-stat {
+    text-align: center;
+    padding: 0 10px;
+}
 
-    font-size: 17px;
+.ai-agent-stat + .ai-agent-stat {
+    border-left: 1px solid #eaecf0;
+}
+
+.ai-agent-number {
+    font-size: 23px;
+    line-height: 1;
     font-weight: 800;
 }
 
-.specialist-large-role {
-    margin-top: 2px;
-
-    font-size: 11px;
-    font-weight: 650;
-
-    color: #667085;
-}
-
-.specialist-large-copy {
-    margin-top: 12px;
-
-    font-size: 11px;
-    line-height: 1.55;
-
-    color: #667085;
-}
-
-.specialist-activity {
-    margin-top: 16px;
+.ai-agent-small {
+    margin-top: 8px;
 
     font-size: 10px;
-    font-weight: 700;
-}
+    line-height: 1.25;
 
-.specialist-insight {
-    margin-top: 3px;
-
-    font-size: 9px;
-
-    color: #159581;
+    color: #667085;
 }
 
 
 /* --------------------------------------------------------
-   Native metrics
+   Atlas
 -------------------------------------------------------- */
 
-div[data-testid="stMetric"] {
-    background: rgba(255, 255, 255, 0.74);
-
-    border: 1px solid #eceef2;
-
-    border-radius: 14px;
-
-    padding: 10px 12px;
+.ai-agent-card.atlas .ai-agent-name,
+.ai-agent-card.atlas .ai-agent-number {
+    color: #168b75;
 }
 
-div[data-testid="stMetricValue"] {
-    font-size: 20px;
+.ai-agent-card.atlas .status-dot {
+    background: #4fcdb5;
+}
+
+.ai-agent-card.atlas .ai-agent-avatar {
+    background: #effaf6;
 }
 
 
 /* --------------------------------------------------------
-   Containers
+   Vector
 -------------------------------------------------------- */
 
-div[data-testid="stVerticalBlockBorderWrapper"] {
-    border-color: #e8ebf0;
-    border-radius: 18px;
+.ai-agent-card.vector .ai-agent-name,
+.ai-agent-card.vector .ai-agent-number {
+    color: #337bc8;
+}
+
+.ai-agent-card.vector .status-dot {
+    background: #69b5ed;
+}
+
+.ai-agent-card.vector .ai-agent-avatar {
+    background: #eef7ff;
+}
+
+
+/* --------------------------------------------------------
+   Newton
+-------------------------------------------------------- */
+
+.ai-agent-card.newton .ai-agent-name,
+.ai-agent-card.newton .ai-agent-number {
+    color: #7653c6;
+}
+
+.ai-agent-card.newton .status-dot {
+    background: #9e7de4;
+}
+
+.ai-agent-card.newton .ai-agent-avatar {
+    background: #f5f1ff;
+}
+
+
+/* --------------------------------------------------------
+   Athena
+-------------------------------------------------------- */
+
+.ai-agent-card.athena .ai-agent-name,
+.ai-agent-card.athena .ai-agent-number {
+    color: #e24a7d;
+}
+
+.ai-agent-card.athena .status-dot {
+    background: #ef7b9f;
+}
+
+.ai-agent-card.athena .ai-agent-avatar {
+    background: #fff2f7;
+}
+
+
+/* --------------------------------------------------------
+   Euler
+-------------------------------------------------------- */
+
+.ai-agent-card.euler .ai-agent-name,
+.ai-agent-card.euler .ai-agent-number {
+    color: #7544ca;
+}
+
+.ai-agent-card.euler .status-dot {
+    background: #a07ae1;
+}
+
+.ai-agent-card.euler .ai-agent-avatar {
+    background: #f5f2ff;
+}
+
+
+/* --------------------------------------------------------
+   Artemis
+-------------------------------------------------------- */
+
+.ai-agent-card.artemis .ai-agent-name,
+.ai-agent-card.artemis .ai-agent-number {
+    color: #cc861e;
+}
+
+.ai-agent-card.artemis .status-dot {
+    background: #ecba4f;
+}
+
+.ai-agent-card.artemis .ai-agent-avatar {
+    background: #fff8eb;
+}
+
+
+/* --------------------------------------------------------
+   Workspace
+-------------------------------------------------------- */
+
+.specialist-workspace-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    margin-top: 12px;
+    margin-bottom: 8px;
+}
+
+.specialist-workspace-avatar {
+    width: 62px;
+    height: 62px;
+
+    border-radius: 20px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background:
+        linear-gradient(
+            145deg,
+            #effbf8,
+            #f4f1ff
+        );
+
+    border: 1px solid #e1e8eb;
+
+    font-size: 31px;
+}
+
+.specialist-workspace-name {
+    font-size: 24px;
+    line-height: 1.1;
+    font-weight: 800;
+
+    color: #101828;
+}
+
+.specialist-workspace-role {
+    margin-top: 5px;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    color: #667085;
+}
+
+
+/* --------------------------------------------------------
+   Artemis questions
+-------------------------------------------------------- */
+
+.journal-question-card {
+    padding: 14px 16px;
+
+    margin-bottom: 10px;
+
+    border-radius: 15px;
+
+    background: rgba(255,255,255,.88);
+
+    border: 1px solid #e7e9ef;
+
+    font-size: 12px;
+    line-height: 1.55;
+
+    color: #344054;
 }
 
 
@@ -1030,17 +388,25 @@ div[data-testid="stVerticalBlockBorderWrapper"] {
    Responsive
 -------------------------------------------------------- */
 
-@media (max-width: 1100px) {
+@media (max-width: 1200px) {
 
-    .hero-title {
-        font-size: 29px;
+    .team-title {
+        font-size: 32px;
     }
 
-    .problem-card {
-        min-height: 225px;
+    .ai-agent-card {
+        padding: 18px;
+        min-height: 290px;
     }
 
-    .specialist-mini-copy {
-        display: none;
+    .ai-agent-avatar {
+        width: 78px;
+        height: 78px;
+        min-width: 78px;
+        font-size: 37px;
+    }
+
+    .ai-agent-name {
+        font-size: 16px;
     }
 }
