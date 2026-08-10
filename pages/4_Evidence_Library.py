@@ -4,39 +4,24 @@ from pathlib import Path
 import streamlit as st
 
 
-st.set_page_config(
-    page_title="Evidence Library",
-    page_icon="📚",
-    layout="wide",
-)
+# =========================================================
+# LOAD DATA
+# =========================================================
 
+def load_json(path, default=None):
+    if default is None:
+        default = []
 
-# ---------------------------------------------------------
-# Load CSS
-# ---------------------------------------------------------
-
-STYLE_PATH = Path("assets/style.css")
-
-if STYLE_PATH.exists():
-    with STYLE_PATH.open("r", encoding="utf-8") as file:
-        st.markdown(
-            f"<style>{file.read()}</style>",
-            unsafe_allow_html=True,
-        )
-
-
-# ---------------------------------------------------------
-# Load data
-# ---------------------------------------------------------
-
-def load_json(path, default):
     path = Path(path)
 
     if not path.exists():
         return default
 
-    with path.open("r", encoding="utf-8") as file:
-        return json.load(file)
+    try:
+        with path.open("r", encoding="utf-8") as file:
+            return json.load(file)
+    except (json.JSONDecodeError, OSError):
+        return default
 
 
 evidence_db = load_json(
@@ -45,796 +30,994 @@ evidence_db = load_json(
 )
 
 
-# ---------------------------------------------------------
-# Header
-# ---------------------------------------------------------
+# =========================================================
+# HELPERS
+# =========================================================
 
-st.markdown(
-    """
-    <div class="hero-eyebrow">
-        EVIDENCE LIBRARY
-    </div>
+def get_metadata(record):
+    value = record.get(
+        "metadata",
+        {},
+    )
 
-    <h1 class="hero-title">
-        Search the <span>evidence</span>
-    </h1>
+    return (
+        value
+        if isinstance(value, dict)
+        else {}
+    )
 
-    <p class="hero-subtitle">
-        Search across the full evidence database and filter studies by
-        clinical area, specialty, study design, evidence quality,
-        statistical confidence, and practice readiness.
-    </p>
-    """,
-    unsafe_allow_html=True,
+
+def get_appraisal(record):
+    value = record.get(
+        "appraisal",
+        {},
+    )
+
+    return (
+        value
+        if isinstance(value, dict)
+        else {}
+    )
+
+
+def get_statistics(record):
+    value = record.get(
+        "statistics",
+        {},
+    )
+
+    return (
+        value
+        if isinstance(value, dict)
+        else {}
+    )
+
+
+def get_translation(record):
+    value = record.get(
+        "clinical_translation",
+        {},
+    )
+
+    return (
+        value
+        if isinstance(value, dict)
+        else {}
+    )
+
+
+def get_specialties(record):
+    value = record.get(
+        "specialties",
+        {},
+    )
+
+    return (
+        value
+        if isinstance(value, dict)
+        else {}
+    )
+
+
+def get_title(record):
+    metadata = get_metadata(
+        record
+    )
+
+    return (
+        metadata.get(
+            "title"
+        )
+        or "Untitled paper"
+    )
+
+
+def get_year(record):
+    metadata = get_metadata(
+        record
+    )
+
+    return (
+        metadata.get(
+            "publication_year"
+        )
+        or metadata.get(
+            "year"
+        )
+        or ""
+    )
+
+
+def get_journal(record):
+    metadata = get_metadata(
+        record
+    )
+
+    return (
+        metadata.get(
+            "journal"
+        )
+        or ""
+    )
+
+
+def get_pubmed_url(record):
+    metadata = get_metadata(
+        record
+    )
+
+    return (
+        metadata.get(
+            "pubmed_url"
+        )
+        or ""
+    )
+
+
+def get_clinical_area(record):
+    translation = get_translation(
+        record
+    )
+
+    value = translation.get(
+        "clinical_area",
+        "",
+    )
+
+    if isinstance(
+        value,
+        str,
+    ) and value.strip():
+        return value.strip()
+
+    return "Other"
+
+
+def get_intervention(record):
+    translation = get_translation(
+        record
+    )
+
+    value = translation.get(
+        "intervention_or_exposure",
+        "",
+    )
+
+    if (
+        isinstance(value, str)
+        and value.strip()
+    ):
+        return value.strip()
+
+    appraisal = get_appraisal(
+        record
+    )
+
+    value = appraisal.get(
+        "intervention_or_exposure",
+        "",
+    )
+
+    if (
+        isinstance(value, str)
+        and value.strip()
+    ):
+        return value.strip()
+
+    return "Not clearly identified"
+
+
+def get_study_design(record):
+    metadata = get_metadata(
+        record
+    )
+
+    value = metadata.get(
+        "study_design"
+    )
+
+    if (
+        isinstance(value, str)
+        and value.strip()
+    ):
+        return value.strip()
+
+    appraisal = get_appraisal(
+        record
+    )
+
+    value = appraisal.get(
+        "study_design"
+    )
+
+    if (
+        isinstance(value, str)
+        and value.strip()
+    ):
+        return value.strip()
+
+    return "Unclear"
+
+
+def get_evidence_score(record):
+    appraisal = get_appraisal(
+        record
+    )
+
+    scores = appraisal.get(
+        "scores",
+        {},
+    )
+
+    if not isinstance(
+        scores,
+        dict,
+    ):
+        return 0
+
+    value = scores.get(
+        "overall_evidence",
+        0,
+    )
+
+    if isinstance(
+        value,
+        (int, float),
+    ):
+        return value
+
+    return 0
+
+
+def get_statistics_score(record):
+    statistics = get_statistics(
+        record
+    )
+
+    scores = statistics.get(
+        "scores",
+        {},
+    )
+
+    if not isinstance(
+        scores,
+        dict,
+    ):
+        return 0
+
+    value = scores.get(
+        "overall_statistics",
+        0,
+    )
+
+    if isinstance(
+        value,
+        (int, float),
+    ):
+        return value
+
+    return 0
+
+
+def get_practice_readiness(record):
+    translation = get_translation(
+        record
+    )
+
+    value = translation.get(
+        "practice_readiness",
+        "",
+    )
+
+    if (
+        isinstance(value, str)
+        and value.strip()
+    ):
+        return value.strip()
+
+    return "Not classified"
+
+
+def get_takeaway(record):
+    translation = get_translation(
+        record
+    )
+
+    value = translation.get(
+        "practitioner_takeaway",
+        "",
+    )
+
+    if (
+        isinstance(value, str)
+        and value.strip()
+    ):
+        return value.strip()
+
+    value = translation.get(
+        "clinical_summary",
+        "",
+    )
+
+    if (
+        isinstance(value, str)
+        and value.strip()
+    ):
+        return value.strip()
+
+    return "No practitioner takeaway available."
+
+
+def get_specialty_names(record):
+    specialties = get_specialties(
+        record
+    )
+
+    labels = []
+
+    mapping = {
+        "regenerative_medicine": "Regenerative Medicine",
+        "sports_performance": "Sports Performance",
+        "biomechanics": "Biomechanics",
+        "womens_athlete_health": "Women's Athlete Health",
+    }
+
+    for key, label in mapping.items():
+
+        review = specialties.get(
+            key,
+            {},
+        )
+
+        if (
+            isinstance(
+                review,
+                dict,
+            )
+            and review.get(
+                "relevant",
+                False,
+            )
+        ):
+            labels.append(
+                label
+            )
+
+    return labels
+
+
+def build_search_text(record):
+    metadata = get_metadata(
+        record
+    )
+
+    translation = get_translation(
+        record
+    )
+
+    appraisal = get_appraisal(
+        record
+    )
+
+    topics = metadata.get(
+        "topics",
+        [],
+    )
+
+    if not isinstance(
+        topics,
+        list,
+    ):
+        topics = []
+
+    parts = [
+        get_title(record),
+        metadata.get(
+            "abstract",
+            "",
+        ),
+        get_journal(record),
+        get_clinical_area(record),
+        get_intervention(record),
+        get_study_design(record),
+        translation.get(
+            "clinical_summary",
+            "",
+        ),
+        translation.get(
+            "practitioner_takeaway",
+            "",
+        ),
+        appraisal.get(
+            "population",
+            "",
+        ),
+        " ".join(
+            str(topic)
+            for topic in topics
+        ),
+        " ".join(
+            get_specialty_names(
+                record
+            )
+        ),
+    ]
+
+    return " ".join(
+        str(part)
+        for part in parts
+        if part
+    ).lower()
+
+
+# =========================================================
+# HEADER
+# =========================================================
+
+st.caption(
+    "RESEARCH LIBRARY"
 )
 
+st.title(
+    "Evidence Library"
+)
 
-# ---------------------------------------------------------
-# Search
-# ---------------------------------------------------------
+st.write(
+    "Search, filter, and inspect the papers collected by your "
+    "research pipeline."
+)
 
-search_query = st.text_input(
-    "Search",
+st.write("")
+
+
+# =========================================================
+# SEARCH
+# =========================================================
+
+search = st.text_input(
+    "Search evidence",
     placeholder=(
-        "Try: PRP, patellar tendinopathy, RED-S, "
-        "sprint performance, ACL..."
+        "Search by condition, intervention, author, "
+        "journal, study design, or keyword..."
     ),
     label_visibility="collapsed",
 )
 
 
-# ---------------------------------------------------------
-# Build filter options
-# ---------------------------------------------------------
+# =========================================================
+# FILTER OPTIONS
+# =========================================================
 
-clinical_areas = set()
-study_designs = set()
-practice_readiness_options = set()
-specialty_options = {
-    "Regenerative Medicine": "regenerative_medicine",
-    "Sports Performance": "sports_performance",
-    "Biomechanics": "biomechanics",
-    "Women's Athlete Health": "womens_athlete_health",
-}
-
-
-for record in evidence_db:
-
-    translation = record.get(
-        "clinical_translation",
-        {},
-    )
-
-    appraisal = record.get(
-        "appraisal",
-        {},
-    )
-
-    if isinstance(
-        translation,
-        dict,
-    ):
-        clinical_area = translation.get(
-            "clinical_area"
+clinical_areas = sorted(
+    {
+        get_clinical_area(
+            record
         )
-
-        if clinical_area:
-            clinical_areas.add(
-                clinical_area
-            )
-
-        readiness = translation.get(
-            "practice_readiness"
-        )
-
-        if readiness:
-            practice_readiness_options.add(
-                readiness
-            )
-
-    if isinstance(
-        appraisal,
-        dict,
-    ):
-        design = appraisal.get(
-            "study_design"
-        )
-
-        if design:
-            study_designs.add(
-                design
-            )
-
-
-# ---------------------------------------------------------
-# Filters
-# ---------------------------------------------------------
-
-f1, f2, f3, f4 = st.columns(4)
-
-with f1:
-    selected_area = st.selectbox(
-        "Clinical Area",
-        [
-            "All",
-            *sorted(
-                clinical_areas
-            ),
-        ],
-    )
-
-with f2:
-    selected_specialty = st.selectbox(
-        "Specialty",
-        [
-            "All",
-            *specialty_options.keys(),
-        ],
-    )
-
-with f3:
-    selected_design = st.selectbox(
-        "Study Design",
-        [
-            "All",
-            *sorted(
-                study_designs
-            ),
-        ],
-    )
-
-with f4:
-    selected_readiness = st.selectbox(
-        "Practice Readiness",
-        [
-            "All",
-            *sorted(
-                practice_readiness_options
-            ),
-        ],
-    )
-
-
-# ---------------------------------------------------------
-# Score filters
-# ---------------------------------------------------------
-
-s1, s2 = st.columns(2)
-
-with s1:
-    minimum_evidence = st.slider(
-        "Minimum Evidence Score",
-        min_value=0,
-        max_value=10,
-        value=0,
-    )
-
-with s2:
-    minimum_statistics = st.slider(
-        "Minimum Statistics Score",
-        min_value=0,
-        max_value=10,
-        value=0,
-    )
-
-
-# ---------------------------------------------------------
-# Filtering
-# ---------------------------------------------------------
-
-def paper_matches(record):
-
-    metadata = record.get(
-        "metadata",
-        {},
-    )
-
-    appraisal = record.get(
-        "appraisal",
-        {},
-    )
-
-    statistics = record.get(
-        "statistics",
-        {},
-    )
-
-    translation = record.get(
-        "clinical_translation",
-        {},
-    )
-
-    specialties = record.get(
-        "specialties",
-        {},
-    )
-
-    if not isinstance(
-        metadata,
-        dict,
-    ):
-        metadata = {}
-
-    if not isinstance(
-        appraisal,
-        dict,
-    ):
-        appraisal = {}
-
-    if not isinstance(
-        statistics,
-        dict,
-    ):
-        statistics = {}
-
-    if not isinstance(
-        translation,
-        dict,
-    ):
-        translation = {}
-
-    if not isinstance(
-        specialties,
-        dict,
-    ):
-        specialties = {}
-
-    # Search
-    if search_query:
-
-        searchable = json.dumps(
+        for record in evidence_db
+        if isinstance(
             record,
-            ensure_ascii=False,
-        ).lower()
-
-        if (
-            search_query.lower()
-            not in searchable
-        ):
-            return False
-
-    # Clinical area
-    if (
-        selected_area != "All"
-        and translation.get(
-            "clinical_area"
+            dict,
         )
-        != selected_area
-    ):
-        return False
+    }
+)
 
-    # Specialty
-    if selected_specialty != "All":
-
-        key = specialty_options[
-            selected_specialty
-        ]
-
-        specialty_data = specialties.get(
-            key,
-            {},
+study_designs = sorted(
+    {
+        get_study_design(
+            record
         )
-
-        if not (
-            isinstance(
-                specialty_data,
-                dict,
-            )
-            and specialty_data.get(
-                "relevant",
-                False,
-            )
-        ):
-            return False
-
-    # Study design
-    if (
-        selected_design != "All"
-        and appraisal.get(
-            "study_design"
+        for record in evidence_db
+        if isinstance(
+            record,
+            dict,
         )
-        != selected_design
-    ):
-        return False
+    }
+)
 
-    # Practice readiness
-    if (
-        selected_readiness != "All"
-        and translation.get(
-            "practice_readiness"
-        )
-        != selected_readiness
-    ):
-        return False
-
-    # Evidence score
-    appraisal_scores = appraisal.get(
-        "scores",
-        {},
-    )
-
-    if not isinstance(
-        appraisal_scores,
-        dict,
-    ):
-        appraisal_scores = {}
-
-    evidence_score = appraisal_scores.get(
-        "overall_evidence",
-        0,
-    )
-
-    if (
-        not isinstance(
-            evidence_score,
-            (int, float),
-        )
-    ):
-        evidence_score = 0
-
-    if (
-        evidence_score
-        < minimum_evidence
-    ):
-        return False
-
-    # Statistics score
-    statistics_scores = statistics.get(
-        "scores",
-        {},
-    )
-
-    if not isinstance(
-        statistics_scores,
-        dict,
-    ):
-        statistics_scores = {}
-
-    statistics_score = statistics_scores.get(
-        "overall_statistics",
-        0,
-    )
-
-    if (
-        not isinstance(
-            statistics_score,
-            (int, float),
-        )
-    ):
-        statistics_score = 0
-
-    if (
-        statistics_score
-        < minimum_statistics
-    ):
-        return False
-
-    return True
-
-
-filtered_papers = [
-    record
-    for record in evidence_db
-    if paper_matches(
-        record
-    )
+specialty_options = [
+    "Regenerative Medicine",
+    "Sports Performance",
+    "Biomechanics",
+    "Women's Athlete Health",
 ]
 
 
-# ---------------------------------------------------------
-# Sort
-# ---------------------------------------------------------
-
-sort_option = st.selectbox(
-    "Sort results",
-    [
-        "Highest Evidence",
-        "Highest Statistics",
-        "Highest Practitioner Relevance",
-        "Newest",
-    ],
+filter_1, filter_2, filter_3, filter_4 = (
+    st.columns(
+        4,
+        gap="medium",
+    )
 )
 
+with filter_1:
 
-def get_score(
-    record,
-    category,
+    selected_area = st.selectbox(
+        "Clinical Area",
+        [
+            "All Clinical Areas",
+            *clinical_areas,
+        ],
+    )
+
+
+with filter_2:
+
+    selected_design = st.selectbox(
+        "Study Design",
+        [
+            "All Study Designs",
+            *study_designs,
+        ],
+    )
+
+
+with filter_3:
+
+    selected_specialty = st.selectbox(
+        "Specialty",
+        [
+            "All Specialties",
+            *specialty_options,
+        ],
+    )
+
+
+with filter_4:
+
+    sort_option = st.selectbox(
+        "Sort By",
+        [
+            "Highest Evidence Score",
+            "Highest Statistics Score",
+            "Newest",
+            "Alphabetical",
+        ],
+    )
+
+
+# =========================================================
+# FILTER RECORDS
+# =========================================================
+
+filtered_records = []
+
+for record in evidence_db:
+
+    if not isinstance(
+        record,
+        dict,
+    ):
+        continue
+
+    if search:
+
+        query = search.lower().strip()
+
+        if query not in build_search_text(
+            record
+        ):
+            continue
+
+    if (
+        selected_area
+        != "All Clinical Areas"
+        and get_clinical_area(
+            record
+        )
+        != selected_area
+    ):
+        continue
+
+    if (
+        selected_design
+        != "All Study Designs"
+        and get_study_design(
+            record
+        )
+        != selected_design
+    ):
+        continue
+
+    if (
+        selected_specialty
+        != "All Specialties"
+        and selected_specialty
+        not in get_specialty_names(
+            record
+        )
+    ):
+        continue
+
+    filtered_records.append(
+        record
+    )
+
+
+# =========================================================
+# SORT
+# =========================================================
+
+if (
+    sort_option
+    == "Highest Evidence Score"
 ):
-    appraisal = record.get(
-        "appraisal",
-        {},
-    )
 
-    statistics = record.get(
-        "statistics",
-        {},
-    )
-
-    if not isinstance(
-        appraisal,
-        dict,
-    ):
-        appraisal = {}
-
-    if not isinstance(
-        statistics,
-        dict,
-    ):
-        statistics = {}
-
-    if category == "evidence":
-        return (
-            appraisal.get(
-                "scores",
-                {},
-            ).get(
-                "overall_evidence",
-                0,
+    filtered_records.sort(
+        key=lambda record: (
+            get_evidence_score(
+                record
             )
-        )
-
-    if category == "statistics":
-        return (
-            statistics.get(
-                "scores",
-                {},
-            ).get(
-                "overall_statistics",
-                0,
-            )
-        )
-
-    if category == "relevance":
-        return (
-            appraisal.get(
-                "scores",
-                {},
-            ).get(
-                "practitioner_relevance",
-                0,
-            )
-        )
-
-    return 0
-
-
-if sort_option == "Highest Evidence":
-
-    filtered_papers.sort(
-        key=lambda record: get_score(
-            record,
-            "evidence",
         ),
         reverse=True,
     )
 
-elif sort_option == "Highest Statistics":
 
-    filtered_papers.sort(
-        key=lambda record: get_score(
-            record,
-            "statistics",
+elif (
+    sort_option
+    == "Highest Statistics Score"
+):
+
+    filtered_records.sort(
+        key=lambda record: (
+            get_statistics_score(
+                record
+            )
         ),
         reverse=True,
     )
 
-elif sort_option == "Highest Practitioner Relevance":
-
-    filtered_papers.sort(
-        key=lambda record: get_score(
-            record,
-            "relevance",
-        ),
-        reverse=True,
-    )
 
 elif sort_option == "Newest":
 
-    filtered_papers.sort(
-        key=lambda record: (
-            record.get(
-                "metadata",
-                {},
-            ).get(
-                "publication_date",
-                "",
+    filtered_records.sort(
+        key=lambda record: str(
+            get_year(
+                record
             )
         ),
         reverse=True,
     )
 
 
-# ---------------------------------------------------------
-# Results summary
-# ---------------------------------------------------------
+else:
 
-st.markdown(
-    f"### {len(filtered_papers)} studies"
+    filtered_records.sort(
+        key=lambda record: (
+            get_title(
+                record
+            ).lower()
+        )
+    )
+
+
+# =========================================================
+# SUMMARY METRICS
+# =========================================================
+
+total_indexed = (
+    len(evidence_db)
+    if isinstance(
+        evidence_db,
+        list,
+    )
+    else 0
+)
+
+practice_informing = sum(
+    1
+    for record in filtered_records
+    if get_practice_readiness(
+        record
+    )
+    == "Practice-informing"
+)
+
+needs_full_text = sum(
+    1
+    for record in filtered_records
+    if get_translation(
+        record
+    ).get(
+        "requires_full_text_review",
+        False,
+    )
+)
+
+high_evidence = sum(
+    1
+    for record in filtered_records
+    if get_evidence_score(
+        record
+    )
+    >= 8
 )
 
 
-# ---------------------------------------------------------
-# Paper cards
-# ---------------------------------------------------------
+m1, m2, m3, m4 = st.columns(
+    4,
+    gap="medium",
+)
 
-for record in filtered_papers[:100]:
+with m1:
 
-    metadata = record.get(
-        "metadata",
-        {},
+    st.metric(
+        "Indexed Papers",
+        total_indexed,
+        border=True,
     )
 
-    appraisal = record.get(
-        "appraisal",
-        {},
+
+with m2:
+
+    st.metric(
+        "Results",
+        len(
+            filtered_records
+        ),
+        border=True,
     )
 
-    statistics = record.get(
-        "statistics",
-        {},
+
+with m3:
+
+    st.metric(
+        "High Evidence",
+        high_evidence,
+        border=True,
     )
 
-    translation = record.get(
-        "clinical_translation",
-        {},
+
+with m4:
+
+    st.metric(
+        "Practice-Informing",
+        practice_informing,
+        border=True,
     )
 
-    if not isinstance(
-        metadata,
-        dict,
-    ):
-        metadata = {}
 
-    if not isinstance(
-        appraisal,
-        dict,
-    ):
-        appraisal = {}
+st.caption(
+    f"{needs_full_text} of the current results require full-text review."
+)
 
-    if not isinstance(
-        statistics,
-        dict,
-    ):
-        statistics = {}
+st.write("")
 
-    if not isinstance(
-        translation,
-        dict,
-    ):
-        translation = {}
 
-    title = metadata.get(
-        "title",
-        "Untitled paper",
+# =========================================================
+# RESULT CONTROLS
+# =========================================================
+
+results_left, results_right = (
+    st.columns(
+        [4, 1],
+    )
+)
+
+with results_left:
+
+    st.subheader(
+        "Research Papers"
     )
 
-    journal = metadata.get(
-        "journal",
-        "",
+
+with results_right:
+
+    st.caption(
+        f"{len(filtered_records)} shown"
     )
 
-    publication_date = metadata.get(
-        "publication_date",
-        "",
+
+# =========================================================
+# EMPTY STATE
+# =========================================================
+
+if not filtered_records:
+
+    st.info(
+        "No papers match the current search and filters."
     )
 
-    study_design = appraisal.get(
-        "study_design",
-        "Unknown design",
+    st.stop()
+
+
+# =========================================================
+# PAPER CARDS
+# =========================================================
+
+for index, record in enumerate(
+    filtered_records,
+    start=1,
+):
+
+    metadata = get_metadata(
+        record
     )
 
-    evidence_scores = appraisal.get(
-        "scores",
-        {},
+    title = get_title(
+        record
     )
 
-    statistics_scores = statistics.get(
-        "scores",
-        {},
+    year = get_year(
+        record
     )
 
-    if not isinstance(
-        evidence_scores,
-        dict,
-    ):
-        evidence_scores = {}
-
-    if not isinstance(
-        statistics_scores,
-        dict,
-    ):
-        statistics_scores = {}
-
-    evidence_score = evidence_scores.get(
-        "overall_evidence",
-        0,
+    journal = get_journal(
+        record
     )
 
-    relevance_score = evidence_scores.get(
-        "practitioner_relevance",
-        0,
+    design = get_study_design(
+        record
     )
 
-    statistics_score = statistics_scores.get(
-        "overall_statistics",
-        0,
+    area = get_clinical_area(
+        record
     )
 
-    readiness = translation.get(
-        "practice_readiness",
-        "Unknown",
+    intervention = get_intervention(
+        record
     )
 
-    clinical_area = translation.get(
-        "clinical_area",
-        "",
+    evidence_score = (
+        get_evidence_score(
+            record
+        )
+    )
+
+    statistics_score = (
+        get_statistics_score(
+            record
+        )
+    )
+
+    readiness = (
+        get_practice_readiness(
+            record
+        )
+    )
+
+    specialty_names = (
+        get_specialty_names(
+            record
+        )
     )
 
     with st.container(
-        border=True
+        border=True,
     ):
 
-        top_left, top_right = st.columns(
-            [5, 1]
+        st.caption(
+            f"RESULT {index}"
         )
 
-        with top_left:
+        st.markdown(
+            f"### {title}"
+        )
 
-            if clinical_area:
-                st.caption(
-                    clinical_area
-                )
+        source_parts = []
 
-            st.markdown(
-                f"### {title}"
+        if journal:
+            source_parts.append(
+                str(journal)
             )
 
-            citation_bits = [
-                journal,
-                study_design,
-                publication_date,
-            ]
+        if year:
+            source_parts.append(
+                str(year)
+            )
+
+        if design:
+            source_parts.append(
+                str(design)
+            )
+
+        if source_parts:
 
             st.caption(
-                " · ".join(
-                    bit
-                    for bit in citation_bits
-                    if bit
+                " • ".join(
+                    source_parts
                 )
             )
 
-        with top_right:
+        st.write("")
+
+        c1, c2, c3, c4 = st.columns(
+            4,
+            gap="small",
+        )
+
+        with c1:
 
             st.metric(
                 "Evidence",
                 evidence_score,
             )
 
-        c1, c2, c3 = st.columns(
-            3
-        )
 
-        c1.metric(
-            "Statistics",
-            statistics_score,
-        )
+        with c2:
 
-        c2.metric(
-            "Relevance",
-            relevance_score,
-        )
-
-        c3.metric(
-            "Readiness",
-            readiness,
-        )
-
-        takeaway = translation.get(
-            "practitioner_takeaway",
-            "",
-        )
-
-        if takeaway:
-
-            st.markdown(
-                "**Clinical takeaway**"
+            st.metric(
+                "Statistics",
+                statistics_score,
             )
+
+
+        with c3:
+
+            st.metric(
+                "Clinical Area",
+                area,
+            )
+
+
+        with c4:
+
+            st.metric(
+                "Practice Readiness",
+                readiness,
+            )
+
+
+        st.markdown(
+            "**Intervention / exposure**"
+        )
+
+        st.write(
+            intervention
+        )
+
+
+        if specialty_names:
+
+            st.caption(
+                "Specialists: "
+                + " • ".join(
+                    specialty_names
+                )
+            )
+
+
+        takeaway = get_takeaway(
+            record
+        )
+
+        with st.expander(
+            "Practitioner takeaway"
+        ):
 
             st.write(
                 takeaway
             )
 
-        with st.expander(
-            "View evidence details"
+
+        abstract = metadata.get(
+            "abstract",
+            "",
+        )
+
+        if (
+            isinstance(
+                abstract,
+                str,
+            )
+            and abstract.strip()
         ):
 
-            st.markdown(
-                "**Population**"
-            )
-
-            st.write(
-                translation.get(
-                    "population",
-                    "Not clearly reported.",
-                )
-            )
-
-            st.markdown(
-                "**Intervention / Exposure**"
-            )
-
-            st.write(
-                translation.get(
-                    "intervention_or_exposure",
-                    "Not clearly reported.",
-                )
-            )
-
-            st.markdown(
-                "**Outcomes**"
-            )
-
-            outcomes = translation.get(
-                "clinically_relevant_outcomes",
-                [],
-            )
-
-            if outcomes:
-
-                for outcome in outcomes:
-                    st.write(
-                        f"• {outcome}"
-                    )
-
-            else:
-                st.write(
-                    "No standardized outcomes identified."
-                )
-
-            st.markdown(
-                "**Major cautions**"
-            )
-
-            cautions = translation.get(
-                "major_cautions",
-                [],
-            )
-
-            if cautions:
-
-                for caution in cautions:
-                    st.write(
-                        f"• {caution}"
-                    )
-
-            else:
-                st.write(
-                    "No major abstract-level cautions flagged."
-                )
-
-            abstract = metadata.get(
-                "abstract",
-                "",
-            )
-
-            if abstract:
-
-                st.markdown(
-                    "**Abstract**"
-                )
+            with st.expander(
+                "Abstract"
+            ):
 
                 st.write(
                     abstract
                 )
 
-        pubmed_url = metadata.get(
-            "pubmed_url",
-            "",
+
+        pubmed_url = get_pubmed_url(
+            record
         )
 
         if pubmed_url:
 
             st.link_button(
-                "Open in PubMed ↗",
+                "Open PubMed",
                 pubmed_url,
             )
