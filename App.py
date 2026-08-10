@@ -37,6 +37,14 @@ if STYLE_PATH.exists():
 # DEFINE PAGES
 # =========================================================
 
+
+home = st.Page(
+    "pages/home.py",
+    title="Home",
+    icon=":material/home:",
+    default=True,
+)
+
 clinical_problems = st.Page(
     "pages/clinical_problems.py",
     title="Clinical Problems",
