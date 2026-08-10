@@ -1,34 +1,12 @@
 import json
-from collections import Counter
 from pathlib import Path
 
 import streamlit as st
 
 
-st.set_page_config(
-    page_title="Evidence Gaps",
-    page_icon="⚠️",
-    layout="wide",
-)
-
-
-# ---------------------------------------------------------
-# Load CSS
-# ---------------------------------------------------------
-
-STYLE_PATH = Path("assets/style.css")
-
-if STYLE_PATH.exists():
-    with STYLE_PATH.open("r", encoding="utf-8") as file:
-        st.markdown(
-            f"<style>{file.read()}</style>",
-            unsafe_allow_html=True,
-        )
-
-
-# ---------------------------------------------------------
-# Load data
-# ---------------------------------------------------------
+# =========================================================
+# LOAD DATA
+# =========================================================
 
 def load_json(path, default):
     path = Path(path)
@@ -36,12 +14,15 @@ def load_json(path, default):
     if not path.exists():
         return default
 
-    with path.open("r", encoding="utf-8") as file:
-        return json.load(file)
+    try:
+        with path.open("r", encoding="utf-8") as file:
+            return json.load(file)
+    except (json.JSONDecodeError, OSError):
+        return default
 
 
-knowledge_graph = load_json(
-    "data/knowledge_graph.json",
+dashboard = load_json(
+    "data/dashboard.json",
     {},
 )
 
@@ -50,652 +31,770 @@ evidence_db = load_json(
     [],
 )
 
-
-# ---------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------
-
-def safe_dict(value):
-    return value if isinstance(value, dict) else {}
+journal_club = load_json(
+    "data/journal_club.json",
+    {},
+)
 
 
-def safe_list(value):
-    return value if isinstance(value, list) else []
+# =========================================================
+# HELPERS
+# =========================================================
 
-
-gaps = safe_list(
-    knowledge_graph.get(
-        "evidence_gaps"
+def get_translation(record):
+    value = record.get(
+        "clinical_translation",
+        {},
     )
-)
 
-syntheses = safe_list(
-    knowledge_graph.get(
-        "evidence_synthesis"
+    return (
+        value
+        if isinstance(value, dict)
+        else {}
     )
-)
 
 
-# ---------------------------------------------------------
-# Header
-# ---------------------------------------------------------
+def get_appraisal(record):
+    value = record.get(
+        "appraisal",
+        {},
+    )
 
-st.markdown(
-    """
-    <div class="hero-eyebrow">
-        RESEARCH OPPORTUNITIES
-    </div>
-
-    <h1 class="hero-title">
-        Where is the <span>evidence missing?</span>
-    </h1>
-
-    <p class="hero-subtitle">
-        Identify problems that remain poorly studied, clinically uncertain,
-        methodologically inconsistent, or underrepresented in current research.
-    </p>
-    """,
-    unsafe_allow_html=True,
-)
+    return (
+        value
+        if isinstance(value, dict)
+        else {}
+    )
 
 
-# ---------------------------------------------------------
-# Summary metrics
-# ---------------------------------------------------------
+def get_statistics(record):
+    value = record.get(
+        "statistics",
+        {},
+    )
 
-low_evidence = 0
-conflicting = 0
-limited_literature = 0
-no_practice_informing = 0
+    return (
+        value
+        if isinstance(value, dict)
+        else {}
+    )
 
 
-for gap in gaps:
+def get_metadata(record):
+    value = record.get(
+        "metadata",
+        {},
+    )
+
+    return (
+        value
+        if isinstance(value, dict)
+        else {}
+    )
+
+
+def get_title(record):
+    return (
+        get_metadata(record).get("title")
+        or "Untitled paper"
+    )
+
+
+def get_clinical_area(record):
+    value = get_translation(
+        record
+    ).get(
+        "clinical_area",
+        "",
+    )
+
+    if isinstance(
+        value,
+        str,
+    ) and value.strip():
+        return value.strip()
+
+    return "Other"
+
+
+def get_evidence_score(record):
+    scores = get_appraisal(
+        record
+    ).get(
+        "scores",
+        {},
+    )
 
     if not isinstance(
-        gap,
+        scores,
         dict,
     ):
-        continue
+        return 0
 
-    reasons = safe_list(
-        gap.get(
-            "reasons"
-        )
-    )
-
-    reason_text = " ".join(
-        str(reason).lower()
-        for reason in reasons
-    )
-
-    if "low" in reason_text:
-        low_evidence += 1
-
-    if "conflict" in reason_text:
-        conflicting += 1
-
-    if (
-        "few papers" in reason_text
-        or "very few" in reason_text
-    ):
-        limited_literature += 1
-
-    if "practice-informing" in reason_text:
-        no_practice_informing += 1
-
-
-m1, m2, m3, m4 = st.columns(4)
-
-m1.metric(
-    "Evidence Gaps",
-    len(gaps),
-)
-
-m2.metric(
-    "Limited Literature",
-    limited_literature,
-)
-
-m3.metric(
-    "Low Evidence",
-    low_evidence,
-)
-
-m4.metric(
-    "Conflicting Findings",
-    conflicting,
-)
-
-
-# ---------------------------------------------------------
-# Priority gaps
-# ---------------------------------------------------------
-
-st.markdown(
-    "## Highest-Priority Gaps"
-)
-
-
-def gap_priority(gap):
-
-    paper_count = gap.get(
-        "paper_count",
+    value = scores.get(
+        "overall_evidence",
         0,
     )
 
-    reasons = safe_list(
-        gap.get(
-            "reasons"
-        )
+    if isinstance(
+        value,
+        (int, float),
+    ):
+        return value
+
+    return 0
+
+
+def get_statistics_score(record):
+    scores = get_statistics(
+        record
+    ).get(
+        "scores",
+        {},
     )
 
-    score = 0
+    if not isinstance(
+        scores,
+        dict,
+    ):
+        return 0
 
-    if paper_count <= 2:
-        score += 4
-
-    elif paper_count <= 5:
-        score += 2
-
-    reason_text = " ".join(
-        str(reason).lower()
-        for reason in reasons
-    )
-
-    if "low" in reason_text:
-        score += 3
-
-    if "conflict" in reason_text:
-        score += 3
-
-    if "practice-informing" in reason_text:
-        score += 2
-
-    return score
-
-
-ranked_gaps = sorted(
-    [
-        gap
-        for gap in gaps
-        if isinstance(
-            gap,
-            dict,
-        )
-    ],
-    key=gap_priority,
-    reverse=True,
-)
-
-
-if ranked_gaps:
-
-    for i in range(
+    value = scores.get(
+        "overall_statistics",
         0,
-        min(
-            len(ranked_gaps),
-            6,
-        ),
-        3,
+    )
+
+    if isinstance(
+        value,
+        (int, float),
     ):
+        return value
 
-        cols = st.columns(3)
-
-        for col, gap in zip(
-            cols,
-            ranked_gaps[
-                i : i + 3
-            ],
-        ):
-
-            concept = gap.get(
-                "concept",
-                "Unknown",
-            )
-
-            concept_type = str(
-                gap.get(
-                    "concept_type",
-                    "",
-                )
-            ).replace(
-                "_",
-                " ",
-            ).title()
-
-            paper_count = gap.get(
-                "paper_count",
-                0,
-            )
-
-            priority = gap_priority(
-                gap
-            )
-
-            with col:
-
-                st.markdown(
-                    f"""
-                    <div class="gap-card">
-
-                        <div class="gap-priority">
-                            PRIORITY {priority}
-                        </div>
-
-                        <div class="gap-title">
-                            {concept}
-                        </div>
-
-                        <div class="gap-type">
-                            {concept_type}
-                        </div>
-
-                        <div class="gap-study-count">
-                            {paper_count} indexed studies
-                        </div>
-
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
-
-                reasons = safe_list(
-                    gap.get(
-                        "reasons"
-                    )
-                )
-
-                with st.expander(
-                    "Why this is a gap"
-                ):
-
-                    for reason in reasons:
-                        st.write(
-                            f"• {reason}"
-                        )
-
-else:
-
-    st.info(
-        "No evidence gaps are currently flagged."
-    )
+    return 0
 
 
-# ---------------------------------------------------------
-# Gap explorer
-# ---------------------------------------------------------
+def get_gap_candidates():
+    candidates = []
 
-st.markdown(
-    "## Explore All Evidence Gaps"
-)
-
-gap_types = sorted(
-    {
-        str(
-            gap.get(
-                "concept_type",
-                "",
-            )
-        )
-        for gap in gaps
-        if isinstance(
-            gap,
-            dict,
-        )
-        and gap.get(
-            "concept_type"
-        )
-    }
-)
-
-
-type_filter = st.selectbox(
-    "Concept type",
-    [
-        "All",
-        *[
-            gap_type.replace(
-                "_",
-                " ",
-            ).title()
-            for gap_type
-            in gap_types
-        ],
-    ],
-)
-
-
-search = st.text_input(
-    "Search gaps",
-    placeholder=(
-        "Female athletes, PRP formulation, "
-        "return to sport, bone health..."
-    ),
-)
-
-
-filtered_gaps = []
-
-for gap in ranked_gaps:
-
-    concept = str(
-        gap.get(
-            "concept",
-            "",
-        )
-    )
-
-    concept_type = str(
-        gap.get(
-            "concept_type",
-            "",
-        )
-    )
-
-    if (
-        type_filter != "All"
-        and concept_type.replace(
-            "_",
-            " ",
-        ).title()
-        != type_filter
+    if not isinstance(
+        evidence_db,
+        list,
     ):
-        continue
+        return candidates
 
-    if (
-        search
-        and search.lower()
-        not in json.dumps(
-            gap
-        ).lower()
-    ):
-        continue
-
-    filtered_gaps.append(
-        gap
-    )
-
-
-st.caption(
-    f"{len(filtered_gaps)} gaps shown"
-)
-
-
-for gap in filtered_gaps:
-
-    concept = gap.get(
-        "concept",
-        "Unknown",
-    )
-
-    reasons = safe_list(
-        gap.get(
-            "reasons"
-        )
-    )
-
-    with st.expander(
-        concept
-    ):
-
-        c1, c2 = st.columns(
-            2
-        )
-
-        c1.metric(
-            "Indexed Studies",
-            gap.get(
-                "paper_count",
-                0,
-            ),
-        )
-
-        c2.metric(
-            "Gap Priority",
-            gap_priority(
-                gap
-            ),
-        )
-
-        st.markdown(
-            "**Why the evidence is incomplete**"
-        )
-
-        for reason in reasons:
-            st.write(
-                f"• {reason}"
-            )
-
-
-# ---------------------------------------------------------
-# Common recurring problems in research
-# ---------------------------------------------------------
-
-st.markdown(
-    "## Common Problems Across the Literature"
-)
-
-problem_counter = Counter()
-
-
-for record in evidence_db:
-
-    translation = safe_dict(
-        record.get(
-            "clinical_translation"
-        )
-    )
-
-    statistics = safe_dict(
-        record.get(
-            "statistics"
-        )
-    )
-
-    specialties = safe_dict(
-        record.get(
-            "specialties"
-        )
-    )
-
-    cautions = safe_list(
-        translation.get(
-            "major_cautions"
-        )
-    )
-
-    reporting_flags = safe_list(
-        statistics.get(
-            "reporting_flags"
-        )
-    )
-
-    for issue in (
-        cautions
-        + reporting_flags
-    ):
-
-        issue = str(
-            issue
-        ).strip()
-
-        if issue:
-            problem_counter[
-                issue
-            ] += 1
-
-    for specialty_data in specialties.values():
+    for record in evidence_db:
 
         if not isinstance(
-            specialty_data,
+            record,
             dict,
         ):
             continue
 
-        flags = safe_list(
-            specialty_data.get(
-                "domain_flags"
+        translation = get_translation(
+            record
+        )
+
+        appraisal = get_appraisal(
+            record
+        )
+
+        statistics = get_statistics(
+            record
+        )
+
+        flags = []
+
+        # ---------------------------------------------
+        # Full-text review
+        # ---------------------------------------------
+
+        if translation.get(
+            "requires_full_text_review",
+            False,
+        ):
+            flags.append(
+                "Requires full-text review"
+            )
+
+        # ---------------------------------------------
+        # Weak evidence
+        # ---------------------------------------------
+
+        evidence_score = (
+            get_evidence_score(
+                record
             )
         )
 
-        for issue in flags:
+        if (
+            evidence_score > 0
+            and evidence_score <= 4
+        ):
+            flags.append(
+                "Low evidence strength"
+            )
 
-            issue = str(
-                issue
-            ).strip()
+        # ---------------------------------------------
+        # Weak statistics
+        # ---------------------------------------------
 
-            if issue:
-                problem_counter[
-                    issue
-                ] += 1
-
-
-if problem_counter:
-
-    for issue, count in (
-        problem_counter.most_common(
-            12
-        )
-    ):
-
-        st.markdown(
-            f"""
-            <div class="recurring-problem-row">
-
-                <div class="recurring-problem-main">
-                    {issue}
-                </div>
-
-                <div class="recurring-problem-count">
-                    Seen in {count} analyses
-                </div>
-
-            </div>
-            """,
-            unsafe_allow_html=True,
+        statistics_score = (
+            get_statistics_score(
+                record
+            )
         )
 
-else:
+        if (
+            statistics_score > 0
+            and statistics_score <= 4
+        ):
+            flags.append(
+                "Weak statistical support"
+            )
 
-    st.info(
-        "Recurring methodological problems will appear after more papers are reviewed."
+        # ---------------------------------------------
+        # Statistical flags
+        # ---------------------------------------------
+
+        reporting_flags = (
+            statistics.get(
+                "reporting_flags",
+                [],
+            )
+        )
+
+        if (
+            isinstance(
+                reporting_flags,
+                list,
+            )
+            and reporting_flags
+        ):
+            flags.append(
+                "Statistical reporting concerns"
+            )
+
+        # ---------------------------------------------
+        # Appraisal flags
+        # ---------------------------------------------
+
+        appraisal_flags = appraisal.get(
+            "flags",
+            [],
+        )
+
+        if (
+            isinstance(
+                appraisal_flags,
+                list,
+            )
+            and appraisal_flags
+        ):
+            flags.append(
+                "Evidence appraisal concerns"
+            )
+
+        # ---------------------------------------------
+        # Practice readiness
+        # ---------------------------------------------
+
+        readiness = translation.get(
+            "practice_readiness",
+            "",
+        )
+
+        if readiness not in {
+            "Practice-informing",
+            "",
+            None,
+        }:
+            flags.append(
+                "Not yet practice-informing"
+            )
+
+        if flags:
+
+            candidates.append(
+                {
+                    "record": record,
+                    "flags": flags,
+                    "area": get_clinical_area(
+                        record
+                    ),
+                    "evidence_score": evidence_score,
+                    "statistics_score": statistics_score,
+                }
+            )
+
+    return candidates
+
+
+# =========================================================
+# HEADER
+# =========================================================
+
+st.caption(
+    "RESEARCH UNCERTAINTY"
+)
+
+st.title(
+    "Evidence Gaps"
+)
+
+st.write(
+    "Identify where the current evidence base is weak, incomplete, "
+    "conflicting, or not yet ready to support confident clinical decisions."
+)
+
+st.write("")
+
+
+# =========================================================
+# BUILD GAP DATA
+# =========================================================
+
+gap_candidates = (
+    get_gap_candidates()
+)
+
+
+# =========================================================
+# SUMMARY METRICS
+# =========================================================
+
+full_text_count = sum(
+    1
+    for item in gap_candidates
+    if "Requires full-text review"
+    in item["flags"]
+)
+
+low_evidence_count = sum(
+    1
+    for item in gap_candidates
+    if "Low evidence strength"
+    in item["flags"]
+)
+
+statistical_issue_count = sum(
+    1
+    for item in gap_candidates
+    if (
+        "Weak statistical support"
+        in item["flags"]
+        or
+        "Statistical reporting concerns"
+        in item["flags"]
+    )
+)
+
+affected_areas = len(
+    {
+        item["area"]
+        for item in gap_candidates
+    }
+)
+
+
+m1, m2, m3, m4 = st.columns(
+    4,
+    gap="medium",
+)
+
+with m1:
+
+    st.metric(
+        "Flagged Papers",
+        len(
+            gap_candidates
+        ),
+        border=True,
+    )
+
+with m2:
+
+    st.metric(
+        "Needs Full Text",
+        full_text_count,
+        border=True,
+    )
+
+with m3:
+
+    st.metric(
+        "Statistical Concerns",
+        statistical_issue_count,
+        border=True,
+    )
+
+with m4:
+
+    st.metric(
+        "Clinical Areas",
+        affected_areas,
+        border=True,
     )
 
 
-# ---------------------------------------------------------
-# Understudied topics
-# ---------------------------------------------------------
+st.write("")
 
-st.markdown(
-    "## Understudied Topics"
+
+# =========================================================
+# FILTERS
+# =========================================================
+
+clinical_areas = sorted(
+    {
+        item["area"]
+        for item in gap_candidates
+    }
 )
 
-understudied = []
 
-for synthesis in syntheses:
+filter_col, sort_col = st.columns(
+    [2, 1],
+    gap="medium",
+)
 
-    if not isinstance(
-        synthesis,
-        dict,
+with filter_col:
+
+    selected_area = st.selectbox(
+        "Clinical Area",
+        [
+            "All Clinical Areas",
+            *clinical_areas,
+        ],
+    )
+
+
+with sort_col:
+
+    sort_option = st.selectbox(
+        "Sort",
+        [
+            "Most Concerns",
+            "Lowest Evidence",
+            "Lowest Statistics",
+            "Alphabetical",
+        ],
+    )
+
+
+filtered_gaps = []
+
+for item in gap_candidates:
+
+    if (
+        selected_area
+        != "All Clinical Areas"
+        and item["area"]
+        != selected_area
     ):
         continue
 
-    count = synthesis.get(
-        "paper_count",
-        0,
+    filtered_gaps.append(
+        item
     )
 
-    if (
-        isinstance(
-            count,
-            int,
-        )
-        and count <= 3
-    ):
-        understudied.append(
-            synthesis
-        )
 
+# =========================================================
+# SORT
+# =========================================================
 
-understudied.sort(
-    key=lambda item: (
-        item.get(
-            "paper_count",
-            0,
+if sort_option == "Most Concerns":
+
+    filtered_gaps.sort(
+        key=lambda item: len(
+            item["flags"]
         ),
-        item.get(
-            "average_evidence_score",
+        reverse=True,
+    )
+
+
+elif sort_option == "Lowest Evidence":
+
+    filtered_gaps.sort(
+        key=lambda item: (
+            item[
+                "evidence_score"
+            ]
+            if item[
+                "evidence_score"
+            ] > 0
+            else 999
+        )
+    )
+
+
+elif sort_option == "Lowest Statistics":
+
+    filtered_gaps.sort(
+        key=lambda item: (
+            item[
+                "statistics_score"
+            ]
+            if item[
+                "statistics_score"
+            ] > 0
+            else 999
+        )
+    )
+
+
+else:
+
+    filtered_gaps.sort(
+        key=lambda item: (
+            get_title(
+                item["record"]
+            ).lower()
+        )
+    )
+
+
+# =========================================================
+# AREA-LEVEL GAP OVERVIEW
+# =========================================================
+
+st.subheader(
+    "Where uncertainty is concentrated"
+)
+
+area_counts = {}
+
+for item in gap_candidates:
+
+    area = item["area"]
+
+    area_counts[
+        area
+    ] = (
+        area_counts.get(
+            area,
             0,
         )
-        or 0,
+        + 1
     )
+
+
+sorted_areas = sorted(
+    area_counts.items(),
+    key=lambda item: item[1],
+    reverse=True,
 )
 
 
-if understudied:
+if sorted_areas:
 
-    cols = st.columns(4)
+    area_cols = st.columns(
+        min(
+            4,
+            len(
+                sorted_areas
+            ),
+        ),
+        gap="medium",
+    )
 
-    for col, item in zip(
-        cols,
-        understudied[:4],
+    for col, (
+        area,
+        count,
+    ) in zip(
+        area_cols,
+        sorted_areas[:4],
     ):
 
         with col:
 
-            st.markdown(
-                f"""
-                <div class="understudied-card">
+            with st.container(
+                border=True,
+            ):
 
-                    <div class="understudied-label">
-                        UNDERSTUDIED
-                    </div>
+                st.markdown(
+                    f"**{area}**"
+                )
 
-                    <div class="understudied-title">
-                        {item.get("concept", "Unknown")}
-                    </div>
+                st.metric(
+                    "Flagged Papers",
+                    count,
+                )
 
-                    <div class="understudied-count">
-                        {item.get("paper_count", 0)} papers
-                    </div>
-
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
 
 else:
 
-    st.info(
-        "No clearly understudied graph concepts are currently identified."
+    st.success(
+        "No evidence gaps are currently flagged."
     )
 
 
-# ---------------------------------------------------------
-# Research opportunity framing
-# ---------------------------------------------------------
+st.write("")
 
-st.markdown(
-    "## Research Opportunities"
+
+# =========================================================
+# PAPER-LEVEL GAPS
+# =========================================================
+
+st.subheader(
+    "Flagged Evidence"
 )
 
-st.markdown(
-    """
-    The strongest opportunities are not necessarily the topics with
-    the fewest publications.
-
-    High-value research questions often sit at the intersection of:
-
-    **High clinical importance**
-    ×
-    **High uncertainty**
-    ×
-    **Weak methodology**
-    ×
-    **Underrepresented populations**
-    ×
-    **Poorly standardized interventions**
-
-    This page is designed to surface those intersections.
-    """
+st.caption(
+    f"{len(filtered_gaps)} papers shown"
 )
+
+
+if not filtered_gaps:
+
+    st.info(
+        "No papers match the current filters."
+    )
+
+    st.stop()
+
+
+for index, item in enumerate(
+    filtered_gaps,
+    start=1,
+):
+
+    record = item[
+        "record"
+    ]
+
+    metadata = get_metadata(
+        record
+    )
+
+    title = get_title(
+        record
+    )
+
+    journal = metadata.get(
+        "journal",
+        "",
+    )
+
+    year = (
+        metadata.get(
+            "publication_year"
+        )
+        or metadata.get(
+            "year"
+        )
+        or ""
+    )
+
+    with st.container(
+        border=True,
+    ):
+
+        st.caption(
+            f"GAP SIGNAL {index}"
+        )
+
+        st.markdown(
+            f"### {title}"
+        )
+
+        source_parts = []
+
+        if journal:
+            source_parts.append(
+                str(journal)
+            )
+
+        if year:
+            source_parts.append(
+                str(year)
+            )
+
+        if item["area"]:
+            source_parts.append(
+                item["area"]
+            )
+
+        if source_parts:
+
+            st.caption(
+                " • ".join(
+                    source_parts
+                )
+            )
+
+
+        c1, c2, c3 = st.columns(
+            3
+        )
+
+        with c1:
+
+            st.metric(
+                "Evidence Score",
+                item[
+                    "evidence_score"
+                ],
+            )
+
+        with c2:
+
+            st.metric(
+                "Statistics Score",
+                item[
+                    "statistics_score"
+                ],
+            )
+
+        with c3:
+
+            st.metric(
+                "Gap Signals",
+                len(
+                    item["flags"]
+                ),
+            )
+
+
+        st.markdown(
+            "**Why this paper is flagged**"
+        )
+
+        for flag in item[
+            "flags"
+        ]:
+
+            st.write(
+                f"• {flag}"
+            )
+
+
+        translation = get_translation(
+            record
+        )
+
+        takeaway = translation.get(
+            "practitioner_takeaway",
+            "",
+        )
+
+        if takeaway:
+
+            with st.expander(
+                "Practitioner takeaway"
+            ):
+
+                st.write(
+                    takeaway
+                )
+
+
+        pubmed_url = metadata.get(
+            "pubmed_url",
+            "",
+        )
+
+        if pubmed_url:
+
+            st.link_button(
+                "Open PubMed",
+                pubmed_url,
+            )
