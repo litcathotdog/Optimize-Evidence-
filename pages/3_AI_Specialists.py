@@ -5,31 +5,6 @@ import streamlit as st
 
 
 # =========================================================
-# PAGE CONFIG
-# =========================================================
-
-st.set_page_config(
-    page_title="AI Specialists",
-    page_icon="🤖",
-    layout="wide",
-)
-
-
-# =========================================================
-# LOAD CSS
-# =========================================================
-
-STYLE_PATH = Path("assets/style.css")
-
-if STYLE_PATH.exists():
-    with STYLE_PATH.open("r", encoding="utf-8") as file:
-        st.markdown(
-            f"<style>{file.read()}</style>",
-            unsafe_allow_html=True,
-        )
-
-
-# =========================================================
 # LOAD DATA
 # =========================================================
 
@@ -39,8 +14,11 @@ def load_json(path, default):
     if not path.exists():
         return default
 
-    with path.open("r", encoding="utf-8") as file:
-        return json.load(file)
+    try:
+        with path.open("r", encoding="utf-8") as file:
+            return json.load(file)
+    except (json.JSONDecodeError, OSError):
+        return default
 
 
 evidence_db = load_json(
@@ -55,7 +33,7 @@ journal_club = load_json(
 
 
 # =========================================================
-# SPECIALIST CONFIG
+# SPECIALISTS
 # =========================================================
 
 SPECIALISTS = {
@@ -67,7 +45,6 @@ SPECIALISTS = {
             "Reviews PRP, BMAC, mesenchymal-cell therapies, "
             "exosomes, shockwave, and regenerative interventions."
         ),
-        "css_class": "atlas",
     },
 
     "Vector": {
@@ -78,7 +55,6 @@ SPECIALISTS = {
             "Reviews sprinting, strength, power, training adaptation, "
             "fatigue, recovery, and performance outcomes."
         ),
-        "css_class": "vector",
     },
 
     "Newton": {
@@ -86,10 +62,9 @@ SPECIALISTS = {
         "specialty_key": "biomechanics",
         "icon": "⚙️",
         "description": (
-            "Reviews kinetics, kinematics, force production, movement "
-            "mechanics, stiffness, and measurement systems."
+            "Reviews kinetics, kinematics, force production, "
+            "movement mechanics, stiffness, and measurement systems."
         ),
-        "css_class": "newton",
     },
 
     "Athena": {
@@ -100,7 +75,6 @@ SPECIALISTS = {
             "Reviews RED-S, menstrual health, bone health, hormones, "
             "female injury risk, and sex-specific evidence."
         ),
-        "css_class": "athena",
     },
 
     "Euler": {
@@ -111,7 +85,6 @@ SPECIALISTS = {
             "Reviews statistical reporting, precision, effect estimates, "
             "confidence intervals, and methodological rigor."
         ),
-        "css_class": "euler",
     },
 
     "Artemis": {
@@ -122,7 +95,6 @@ SPECIALISTS = {
             "Ranks the most important new papers, surfaces controversies, "
             "and builds discussion questions."
         ),
-        "css_class": "artemis",
     },
 }
 
@@ -131,7 +103,10 @@ SPECIALISTS = {
 # HELPERS
 # =========================================================
 
-def get_specialty_review(record, specialty_key):
+def get_specialty_review(
+    record,
+    specialty_key,
+):
     specialties = record.get(
         "specialties",
         {},
@@ -148,22 +123,46 @@ def get_specialty_review(record, specialty_key):
         {},
     )
 
-    if not isinstance(
+    if isinstance(
         review,
         dict,
     ):
-        return {}
+        return review
 
-    return review
+    return {}
 
 
-def count_specialty_papers(specialty_key):
+def get_metadata(record):
+    metadata = record.get(
+        "metadata",
+        {},
+    )
+
+    if isinstance(
+        metadata,
+        dict,
+    ):
+        return metadata
+
+    return {}
+
+
+def count_specialty_papers(
+    specialty_key,
+):
     if not specialty_key:
         return 0
 
     count = 0
 
     for record in evidence_db:
+
+        if not isinstance(
+            record,
+            dict,
+        ):
+            continue
+
         review = get_specialty_review(
             record,
             specialty_key,
@@ -178,7 +177,7 @@ def count_specialty_papers(specialty_key):
     return count
 
 
-def count_moderate_plus_confidence(
+def count_high_confidence(
     specialty_key,
 ):
     if not specialty_key:
@@ -187,6 +186,13 @@ def count_moderate_plus_confidence(
     count = 0
 
     for record in evidence_db:
+
+        if not isinstance(
+            record,
+            dict,
+        ):
+            continue
+
         review = get_specialty_review(
             record,
             specialty_key,
@@ -194,89 +200,128 @@ def count_moderate_plus_confidence(
 
         if review.get(
             "specialist_confidence"
-        ) in {
-            "High",
-            "Moderate",
-        }:
-            count += 1
-
-    return count
-
-
-def count_euler_papers():
-    count = 0
-
-    for record in evidence_db:
-        statistics = record.get(
-            "statistics",
-            {},
-        )
-
-        if (
-            isinstance(
-                statistics,
-                dict,
-            )
-            and statistics
-        ):
-            count += 1
-
-    return count
-
-
-def count_euler_high_confidence():
-    count = 0
-
-    for record in evidence_db:
-        statistics = record.get(
-            "statistics",
-            {},
-        )
-
-        if not isinstance(
-            statistics,
-            dict,
-        ):
-            continue
-
-        if statistics.get(
-            "statistical_confidence"
         ) == "High":
             count += 1
 
     return count
 
 
-def get_artemis_metrics():
+def count_moderate_confidence(
+    specialty_key,
+):
+    if not specialty_key:
+        return 0
+
+    count = 0
+
+    for record in evidence_db:
+
+        if not isinstance(
+            record,
+            dict,
+        ):
+            continue
+
+        review = get_specialty_review(
+            record,
+            specialty_key,
+        )
+
+        if review.get(
+            "specialist_confidence"
+        ) == "Moderate":
+            count += 1
+
+    return count
+
+
+def count_flagged(
+    specialty_key,
+):
+    if not specialty_key:
+        return 0
+
+    count = 0
+
+    for record in evidence_db:
+
+        if not isinstance(
+            record,
+            dict,
+        ):
+            continue
+
+        review = get_specialty_review(
+            record,
+            specialty_key,
+        )
+
+        flags = review.get(
+            "domain_flags",
+            [],
+        )
+
+        if (
+            isinstance(flags, list)
+            and flags
+        ):
+            count += 1
+
+    return count
+
+
+def get_euler_records():
+    reviewed = []
+
+    for record in evidence_db:
+
+        if not isinstance(
+            record,
+            dict,
+        ):
+            continue
+
+        statistics = record.get(
+            "statistics",
+            {},
+        )
+
+        if (
+            isinstance(statistics, dict)
+            and statistics
+        ):
+            reviewed.append(
+                (
+                    record,
+                    statistics,
+                )
+            )
+
+    return reviewed
+
+
+def get_artemis_summary():
     summary = journal_club.get(
         "executive_summary",
         {},
     )
 
-    if not isinstance(
+    if isinstance(
         summary,
         dict,
     ):
-        summary = {}
+        return summary
 
-    relevant = summary.get(
-        "high_priority_papers",
-        0,
-    )
-
-    higher_confidence = summary.get(
-        "practice_informing_papers",
-        0,
-    )
-
-    return (
-        relevant,
-        higher_confidence,
-    )
+    return {}
 
 
-def get_specialist_metrics(name):
-    config = SPECIALISTS[name]
+def get_specialist_card_metrics(
+    name,
+):
+    config = SPECIALISTS[
+        name
+    ]
+
     specialty_key = config[
         "specialty_key"
     ]
@@ -286,19 +331,45 @@ def get_specialist_metrics(name):
             count_specialty_papers(
                 specialty_key
             ),
-            count_moderate_plus_confidence(
+            count_high_confidence(
                 specialty_key
             ),
         )
 
     if name == "Euler":
+
+        reviewed = get_euler_records()
+
+        high_confidence = sum(
+            1
+            for _, statistics
+            in reviewed
+            if statistics.get(
+                "statistical_confidence"
+            ) == "High"
+        )
+
         return (
-            count_euler_papers(),
-            count_euler_high_confidence(),
+            len(reviewed),
+            high_confidence,
         )
 
     if name == "Artemis":
-        return get_artemis_metrics()
+
+        summary = (
+            get_artemis_summary()
+        )
+
+        return (
+            summary.get(
+                "high_priority_papers",
+                0,
+            ),
+            summary.get(
+                "practice_informing_papers",
+                0,
+            ),
+        )
 
     return 0, 0
 
@@ -307,33 +378,39 @@ def get_specialist_metrics(name):
 # HEADER
 # =========================================================
 
-st.markdown(
-    """
-    <div class="team-eyebrow">
-        YOUR RESEARCH TEAM
-    </div>
-
-    <div class="team-title">
-        Meet your <span style="color:#16b7a4;">AI specialists</span>
-    </div>
-
-    <div class="team-subtitle">
-        Each specialist reviews the evidence through a different lens.
-        Together, they help turn research into clinical intelligence.
-    </div>
-    """,
-    unsafe_allow_html=True,
+st.caption(
+    "YOUR RESEARCH TEAM"
 )
+
+st.title(
+    "Meet your AI specialists"
+)
+
+st.write(
+    "Each specialist reviews the evidence through a different lens. "
+    "Together, they help turn research into clinical intelligence."
+)
+
+st.write("")
 
 
 # =========================================================
-# SPECIALIST OVERVIEW CARDS
+# SPECIALIST CARDS
 # =========================================================
 
 rows = [
-    ("Atlas", "Vector", "Newton"),
-    ("Athena", "Euler", "Artemis"),
+    (
+        "Atlas",
+        "Vector",
+        "Newton",
+    ),
+    (
+        "Athena",
+        "Euler",
+        "Artemis",
+    ),
 ]
+
 
 for row in rows:
 
@@ -351,94 +428,100 @@ for row in rows:
             name
         ]
 
-        paper_count, confidence_count = (
-            get_specialist_metrics(
-                name
-            )
+        (
+            relevant_papers,
+            high_confidence,
+        ) = get_specialist_card_metrics(
+            name
         )
 
         with col:
 
-            card_html = f"""
-            <div class="ai-agent-card {config['css_class']}">
-
-                <div class="ai-agent-top">
-
-                    <div class="ai-agent-avatar">
-                        {config["icon"]}
-                    </div>
-
-                    <div class="ai-agent-heading">
-
-                        <div class="ai-agent-name">
-                            {name}
-                            <span class="status-dot"></span>
-                        </div>
-
-                        <div class="ai-agent-role">
-                            {config["role"]}
-                        </div>
-
-                    </div>
-
-                </div>
-
-                <div class="ai-agent-description">
-                    {config["description"]}
-                </div>
-
-                <div class="ai-agent-divider"></div>
-
-                <div class="ai-agent-stats">
-
-                    <div class="ai-agent-stat">
-
-                        <div class="ai-agent-number">
-                            {paper_count}
-                        </div>
-
-                        <div class="ai-agent-small">
-                            Relevant papers
-                        </div>
-
-                    </div>
-
-                    <div class="ai-agent-stat">
-
-                        <div class="ai-agent-number">
-                            {confidence_count}
-                        </div>
-
-                        <div class="ai-agent-small">
-                            Moderate+ confidence
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-            """
-
-            st.markdown(
-                card_html,
-                unsafe_allow_html=True,
-            )
-
-            if st.button(
-                f"Open {name}'s workspace →",
-                key=f"open_{name}",
-                use_container_width=True,
+            with st.container(
+                border=True,
             ):
-                st.session_state[
-                    "selected_specialist"
-                ] = name
 
-                st.rerun()
+                # -----------------------------------------
+                # Agent header
+                # -----------------------------------------
+
+                icon_col, name_col = (
+                    st.columns(
+                        [1, 3]
+                    )
+                )
+
+                with icon_col:
+
+                    st.markdown(
+                        f"# {config['icon']}"
+                    )
+
+                with name_col:
+
+                    st.markdown(
+                        f"### {name}"
+                    )
+
+                    st.caption(
+                        config[
+                            "role"
+                        ]
+                    )
+
+                # -----------------------------------------
+                # Description
+                # -----------------------------------------
+
+                st.write(
+                    config[
+                        "description"
+                    ]
+                )
+
+                st.divider()
+
+                # -----------------------------------------
+                # Metrics
+                # -----------------------------------------
+
+                metric_1, metric_2 = (
+                    st.columns(2)
+                )
+
+                with metric_1:
+
+                    st.metric(
+                        "Relevant Papers",
+                        relevant_papers,
+                    )
+
+                with metric_2:
+
+                    st.metric(
+                        "High Confidence",
+                        high_confidence,
+                    )
+
+                # -----------------------------------------
+                # Open workspace
+                # -----------------------------------------
+
+                if st.button(
+                    f"Open {name}'s workspace →",
+                    key=f"open_{name}",
+                    width="stretch",
+                ):
+
+                    st.session_state[
+                        "selected_specialist"
+                    ] = name
+
+                    st.rerun()
 
 
 # =========================================================
-# SELECTED SPECIALIST WORKSPACE
+# WORKSPACE
 # =========================================================
 
 selected_specialist = (
@@ -447,18 +530,18 @@ selected_specialist = (
     )
 )
 
+
+if (
+    selected_specialist
+    and selected_specialist
+    not in SPECIALISTS
+):
+    selected_specialist = None
+
+
 if selected_specialist:
 
-    if selected_specialist not in SPECIALISTS:
-        selected_specialist = None
-
-
-if selected_specialist:
-
-    st.markdown(
-        "<div class='vertical-gap'></div>",
-        unsafe_allow_html=True,
-    )
+    st.write("")
 
     st.divider()
 
@@ -466,47 +549,54 @@ if selected_specialist:
         selected_specialist
     ]
 
-    st.markdown(
-        f"""
-        <div class="specialist-workspace-header">
+    # =====================================================
+    # WORKSPACE HEADER
+    # =====================================================
 
-            <div class="specialist-workspace-avatar">
-                {config["icon"]}
-            </div>
-
-            <div>
-
-                <div class="specialist-workspace-name">
-                    {selected_specialist}
-                </div>
-
-                <div class="specialist-workspace-role">
-                    {config["role"]}
-                </div>
-
-            </div>
-
-        </div>
-        """,
-        unsafe_allow_html=True,
+    header_icon, header_text, close_col = (
+        st.columns(
+            [1, 6, 1]
+        )
     )
 
-    st.caption(
-        config[
-            "description"
-        ]
-    )
+    with header_icon:
 
-    if st.button(
-        "Close workspace",
-        key="close_specialist_workspace",
-    ):
-        st.session_state.pop(
-            "selected_specialist",
-            None,
+        st.markdown(
+            f"# {config['icon']}"
         )
 
-        st.rerun()
+    with header_text:
+
+        st.subheader(
+            selected_specialist
+        )
+
+        st.caption(
+            config[
+                "role"
+            ]
+        )
+
+        st.write(
+            config[
+                "description"
+            ]
+        )
+
+    with close_col:
+
+        if st.button(
+            "Close",
+            width="stretch",
+        ):
+
+            st.session_state.pop(
+                "selected_specialist",
+                None,
+            )
+
+            st.rerun()
+
 
     specialty_key = config[
         "specialty_key"
@@ -523,6 +613,12 @@ if selected_specialist:
 
         for record in evidence_db:
 
+            if not isinstance(
+                record,
+                dict,
+            ):
+                continue
+
             review = get_specialty_review(
                 record,
                 specialty_key,
@@ -532,6 +628,7 @@ if selected_specialist:
                 "relevant",
                 False,
             ):
+
                 reviewed_records.append(
                     (
                         record,
@@ -539,7 +636,24 @@ if selected_specialist:
                     )
                 )
 
-        reviewed_count = len(
+
+        reviewed_records.sort(
+            key=lambda item: (
+                item[1].get(
+                    "domain_score",
+                    0,
+                )
+                or 0
+            ),
+            reverse=True,
+        )
+
+
+        # -------------------------------------------------
+        # Metrics
+        # -------------------------------------------------
+
+        relevant_count = len(
             reviewed_records
         )
 
@@ -570,151 +684,147 @@ if selected_specialist:
             )
         )
 
-        st.markdown(
-            "<div class='vertical-gap-small'></div>",
-            unsafe_allow_html=True,
-        )
 
         m1, m2, m3, m4 = (
-            st.columns(4)
+            st.columns(
+                4,
+                gap="medium",
+            )
         )
 
-        m1.metric(
-            "Relevant Papers",
-            reviewed_count,
-        )
+        with m1:
+            st.metric(
+                "Relevant Papers",
+                relevant_count,
+                border=True,
+            )
 
-        m2.metric(
-            "High Confidence",
-            high_confidence,
-        )
+        with m2:
+            st.metric(
+                "High Confidence",
+                high_confidence,
+                border=True,
+            )
 
-        m3.metric(
-            "Moderate Confidence",
-            moderate_confidence,
-        )
+        with m3:
+            st.metric(
+                "Moderate Confidence",
+                moderate_confidence,
+                border=True,
+            )
 
-        m4.metric(
-            "Flagged Papers",
-            flagged,
-        )
+        with m4:
+            st.metric(
+                "Flagged Papers",
+                flagged,
+                border=True,
+            )
 
-        st.markdown(
-            "### What I'm seeing"
+
+        st.write("")
+
+
+        # -------------------------------------------------
+        # What I'm seeing
+        # -------------------------------------------------
+
+        st.subheader(
+            f"What {selected_specialist} is seeing"
         )
 
         if reviewed_records:
 
-            sorted_reviews = sorted(
-                reviewed_records,
-                key=lambda item: item[
-                    1
-                ].get(
-                    "domain_score",
-                    0,
-                ),
-                reverse=True,
-            )
-
             top_record, top_review = (
-                sorted_reviews[0]
+                reviewed_records[0]
             )
 
-            takeaway = top_review.get(
-                "specialist_takeaway",
-                "",
+            takeaway = (
+                top_review.get(
+                    "specialist_takeaway",
+                    "",
+                )
             )
 
             if takeaway:
+
                 st.info(
                     takeaway
                 )
 
             else:
+
                 st.info(
-                    "This specialist has reviewed relevant papers, "
-                    "but no synthesized takeaway is currently available."
+                    "Relevant evidence has been identified, "
+                    "but a specialist synthesis is not yet available."
                 )
 
         else:
+
             st.info(
                 "No papers are currently routed to this specialty."
             )
 
-        st.markdown(
-            "### Recent specialist reviews"
+
+        # -------------------------------------------------
+        # Recent reviews
+        # -------------------------------------------------
+
+        st.subheader(
+            "Recent specialist reviews"
         )
 
         if not reviewed_records:
 
             st.caption(
-                "No reviews to display yet."
+                "No reviews to display."
             )
 
         else:
 
-            sorted_reviews = sorted(
-                reviewed_records,
-                key=lambda item: item[
-                    1
-                ].get(
-                    "domain_score",
-                    0,
-                ),
-                reverse=True,
-            )
-
             for record, review in (
-                sorted_reviews[:10]
+                reviewed_records[:10]
             ):
 
-                metadata = record.get(
-                    "metadata",
-                    {},
+                metadata = get_metadata(
+                    record
                 )
-
-                if not isinstance(
-                    metadata,
-                    dict,
-                ):
-                    metadata = {}
 
                 title = metadata.get(
                     "title",
                     "Untitled paper",
                 )
 
+                confidence = review.get(
+                    "specialist_confidence",
+                    "Unknown",
+                )
+
+                score = review.get(
+                    "domain_score",
+                    0,
+                )
+
                 with st.expander(
                     title
                 ):
-
-                    confidence = (
-                        review.get(
-                            "specialist_confidence",
-                            "Unknown",
-                        )
-                    )
-
-                    score = (
-                        review.get(
-                            "domain_score",
-                            0,
-                        )
-                    )
 
                     c1, c2 = (
                         st.columns(2)
                     )
 
-                    c1.metric(
-                        "Domain Score",
-                        score,
-                    )
+                    with c1:
 
-                    c2.metric(
-                        "Confidence",
-                        confidence,
-                    )
+                        st.metric(
+                            "Domain Score",
+                            score,
+                        )
+
+                    with c2:
+
+                        st.metric(
+                            "Confidence",
+                            confidence,
+                        )
 
                     takeaway = (
                         review.get(
@@ -733,60 +843,68 @@ if selected_specialist:
                             takeaway
                         )
 
-                    flags = (
-                        review.get(
-                            "domain_flags",
-                            [],
-                        )
+                    flags = review.get(
+                        "domain_flags",
+                        [],
                     )
 
-                    if isinstance(
-                        flags,
-                        list,
-                    ) and flags:
+                    if (
+                        isinstance(flags, list)
+                        and flags
+                    ):
 
                         st.markdown(
                             "**What I'm cautious about**"
                         )
 
                         for flag in flags:
+
                             st.write(
                                 f"• {flag}"
                             )
 
-                    metadata_left, metadata_right = (
-                        st.columns(2)
-                    )
-
-                    year = metadata.get(
-                        "publication_year",
+                    year = (
                         metadata.get(
-                            "year",
-                            "",
-                        ),
+                            "publication_year"
+                        )
+                        or metadata.get(
+                            "year"
+                        )
                     )
 
                     journal = metadata.get(
-                        "journal",
-                        "",
+                        "journal"
                     )
 
-                    if year:
-                        metadata_left.caption(
-                            f"Year: {year}"
-                        )
+                    source_parts = []
 
                     if journal:
-                        metadata_right.caption(
-                            f"Journal: {journal}"
+                        source_parts.append(
+                            str(journal)
                         )
 
-                    pubmed_url = metadata.get(
-                        "pubmed_url",
-                        "",
+                    if year:
+                        source_parts.append(
+                            str(year)
+                        )
+
+                    if source_parts:
+
+                        st.caption(
+                            " • ".join(
+                                source_parts
+                            )
+                        )
+
+                    pubmed_url = (
+                        metadata.get(
+                            "pubmed_url",
+                            "",
+                        )
                     )
 
                     if pubmed_url:
+
                         st.link_button(
                             "Open PubMed",
                             pubmed_url,
@@ -797,156 +915,146 @@ if selected_specialist:
     # EULER
     # =====================================================
 
-    elif (
-        selected_specialist
-        == "Euler"
-    ):
+    elif selected_specialist == "Euler":
 
-        reviewed = []
-
-        for record in evidence_db:
-
-            statistics = record.get(
-                "statistics",
-                {},
-            )
-
-            if (
-                isinstance(
-                    statistics,
-                    dict,
-                )
-                and statistics
-            ):
-                reviewed.append(
-                    (
-                        record,
-                        statistics,
-                    )
-                )
+        reviewed = (
+            get_euler_records()
+        )
 
         high_confidence = sum(
             1
-            for _, stats
+            for _, statistics
             in reviewed
-            if stats.get(
+            if statistics.get(
                 "statistical_confidence"
             ) == "High"
         )
 
+        moderate_confidence = sum(
+            1
+            for _, statistics
+            in reviewed
+            if statistics.get(
+                "statistical_confidence"
+            ) == "Moderate"
+        )
+
         flagged = sum(
             1
-            for _, stats
+            for _, statistics
             in reviewed
-            if stats.get(
+            if statistics.get(
                 "reporting_flags"
             )
         )
 
-        st.markdown(
-            "<div class='vertical-gap-small'></div>",
-            unsafe_allow_html=True,
+
+        m1, m2, m3, m4 = (
+            st.columns(
+                4,
+                gap="medium",
+            )
         )
 
-        m1, m2, m3 = (
-            st.columns(3)
-        )
+        with m1:
 
-        m1.metric(
-            "Papers Reviewed",
-            len(reviewed),
-        )
-
-        m2.metric(
-            "High Confidence",
-            high_confidence,
-        )
-
-        m3.metric(
-            "With Statistical Flags",
-            flagged,
-        )
-
-        st.markdown(
-            "### Euler's concerns"
-        )
-
-        if not reviewed:
-
-            st.info(
-                "Euler has not reviewed any papers yet."
+            st.metric(
+                "Papers Reviewed",
+                len(reviewed),
+                border=True,
             )
 
-        else:
+        with m2:
 
-            shown = 0
+            st.metric(
+                "High Confidence",
+                high_confidence,
+                border=True,
+            )
 
-            for record, stats in (
-                reviewed
+        with m3:
+
+            st.metric(
+                "Moderate Confidence",
+                moderate_confidence,
+                border=True,
+            )
+
+        with m4:
+
+            st.metric(
+                "With Flags",
+                flagged,
+                border=True,
+            )
+
+
+        st.write("")
+
+        st.subheader(
+            "Euler's statistical concerns"
+        )
+
+        shown = 0
+
+        for record, statistics in (
+            reviewed
+        ):
+
+            flags = statistics.get(
+                "reporting_flags",
+                [],
+            )
+
+            if not (
+                isinstance(flags, list)
+                and flags
+            ):
+                continue
+
+            metadata = get_metadata(
+                record
+            )
+
+            title = metadata.get(
+                "title",
+                "Untitled paper",
+            )
+
+            with st.expander(
+                title
             ):
 
-                flags = stats.get(
-                    "reporting_flags",
-                    [],
+                summary = statistics.get(
+                    "review_summary",
+                    "",
                 )
 
-                if not flags:
-                    continue
-
-                title = (
-                    record.get(
-                        "metadata",
-                        {},
-                    ).get(
-                        "title",
-                        "Untitled paper",
+                confidence = (
+                    statistics.get(
+                        "statistical_confidence",
+                        "Unknown",
                     )
                 )
 
-                with st.expander(
-                    title
+                scores = statistics.get(
+                    "scores",
+                    {},
+                )
+
+                if not isinstance(
+                    scores,
+                    dict,
                 ):
+                    scores = {}
 
-                    review_summary = (
-                        stats.get(
-                            "review_summary",
-                            "",
-                        )
-                    )
+                c1, c2 = (
+                    st.columns(2)
+                )
 
-                    if review_summary:
-                        st.write(
-                            review_summary
-                        )
+                with c1:
 
-                    statistical_confidence = (
-                        stats.get(
-                            "statistical_confidence",
-                            "Unknown",
-                        )
-                    )
-
-                    scores = stats.get(
-                        "scores",
-                        {},
-                    )
-
-                    if not isinstance(
-                        scores,
-                        dict,
-                    ):
-                        scores = {}
-
-                    c1, c2 = (
-                        st.columns(2)
-                    )
-
-                    c1.metric(
-                        "Confidence",
-                        statistical_confidence,
-                    )
-
-                    c2.metric(
+                    st.metric(
                         "Statistics Score",
                         scores.get(
                             "overall_statistics",
@@ -954,35 +1062,66 @@ if selected_specialist:
                         ),
                     )
 
-                    st.markdown(
-                        "**Reporting flags**"
+                with c2:
+
+                    st.metric(
+                        "Confidence",
+                        confidence,
                     )
 
-                    for flag in flags:
-                        st.write(
-                            f"• {flag}"
-                        )
+                if summary:
 
-                shown += 1
+                    st.write(
+                        summary
+                    )
 
-                if shown >= 10:
-                    break
-
-            if shown == 0:
-                st.success(
-                    "Euler has not identified reporting flags "
-                    "in the currently reviewed papers."
+                st.markdown(
+                    "**Reporting flags**"
                 )
+
+                for flag in flags:
+
+                    st.write(
+                        f"• {flag}"
+                    )
+
+                pubmed_url = (
+                    metadata.get(
+                        "pubmed_url",
+                        "",
+                    )
+                )
+
+                if pubmed_url:
+
+                    st.link_button(
+                        "Open PubMed",
+                        pubmed_url,
+                    )
+
+            shown += 1
+
+            if shown >= 10:
+                break
+
+
+        if shown == 0:
+
+            st.success(
+                "Euler has not identified statistical reporting "
+                "flags in the currently reviewed papers."
+            )
 
 
     # =====================================================
     # ARTEMIS
     # =====================================================
 
-    elif (
-        selected_specialist
-        == "Artemis"
-    ):
+    elif selected_specialist == "Artemis":
+
+        summary = (
+            get_artemis_summary()
+        )
 
         paper_of_week = (
             journal_club.get(
@@ -991,113 +1130,129 @@ if selected_specialist:
             )
         )
 
-        summary = (
-            journal_club.get(
-                "executive_summary",
-                {},
-            )
-        )
-
         if not isinstance(
-            summary,
+            paper_of_week,
             dict,
         ):
-            summary = {}
+            paper_of_week = {}
 
-        st.markdown(
-            "<div class='vertical-gap-small'></div>",
-            unsafe_allow_html=True,
-        )
 
         m1, m2, m3 = (
-            st.columns(3)
+            st.columns(
+                3,
+                gap="medium",
+            )
         )
 
-        m1.metric(
-            "High Priority",
-            summary.get(
-                "high_priority_papers",
-                0,
-            ),
+        with m1:
+
+            st.metric(
+                "High Priority",
+                summary.get(
+                    "high_priority_papers",
+                    0,
+                ),
+                border=True,
+            )
+
+        with m2:
+
+            st.metric(
+                "Practice Informing",
+                summary.get(
+                    "practice_informing_papers",
+                    0,
+                ),
+                border=True,
+            )
+
+        with m3:
+
+            st.metric(
+                "Evidence Gaps",
+                summary.get(
+                    "evidence_gaps_highlighted",
+                    0,
+                ),
+                border=True,
+            )
+
+
+        st.write("")
+
+        st.subheader(
+            "Artemis' Paper of the Week"
         )
 
-        m2.metric(
-            "Practice Informing",
-            summary.get(
-                "practice_informing_papers",
-                0,
-            ),
-        )
+        if paper_of_week:
 
-        m3.metric(
-            "Evidence Gaps",
-            summary.get(
-                "evidence_gaps_highlighted",
-                0,
-            ),
-        )
+            with st.container(
+                border=True,
+            ):
 
-        st.markdown(
-            "### Artemis' Paper of the Week"
-        )
-
-        if (
-            isinstance(
-                paper_of_week,
-                dict,
-            )
-            and paper_of_week
-        ):
-
-            st.markdown(
-                f"## {paper_of_week.get('title', 'Paper of the Week')}"
-            )
-
-            study_design = (
-                paper_of_week.get(
-                    "study_design",
-                    "",
-                )
-            )
-
-            if study_design:
-                st.caption(
-                    study_design
+                title = (
+                    paper_of_week.get(
+                        "title",
+                        "Paper of the Week",
+                    )
                 )
 
-            takeaway = (
-                paper_of_week.get(
-                    "practitioner_takeaway",
-                    "",
-                )
-            )
-
-            if takeaway:
-                st.write(
-                    takeaway
+                st.markdown(
+                    f"### {title}"
                 )
 
-            paper_url = (
-                paper_of_week.get(
-                    "pubmed_url",
-                    "",
+                study_design = (
+                    paper_of_week.get(
+                        "study_design",
+                        "",
+                    )
                 )
-            )
 
-            if paper_url:
-                st.link_button(
-                    "Open Paper",
-                    paper_url,
+                if study_design:
+
+                    st.caption(
+                        study_design
+                    )
+
+                takeaway = (
+                    paper_of_week.get(
+                        "practitioner_takeaway",
+                        "",
+                    )
                 )
+
+                if takeaway:
+
+                    st.write(
+                        takeaway
+                    )
+
+                pubmed_url = (
+                    paper_of_week.get(
+                        "pubmed_url",
+                        "",
+                    )
+                )
+
+                if pubmed_url:
+
+                    st.link_button(
+                        "Open Paper",
+                        pubmed_url,
+                    )
 
         else:
 
             st.info(
-                "Paper of the Week will appear after the pipeline runs."
+                "Paper of the Week will appear after "
+                "the research pipeline runs."
             )
 
-        st.markdown(
-            "### Discussion prompts"
+
+        st.write("")
+
+        st.subheader(
+            "Discussion prompts"
         )
 
         questions = (
@@ -1108,23 +1263,19 @@ if selected_specialist:
         )
 
         if (
-            isinstance(
-                questions,
-                list,
-            )
+            isinstance(questions, list)
             and questions
         ):
 
             for question in questions:
 
-                st.markdown(
-                    f"""
-                    <div class="journal-question-card">
-                        {question}
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
+                with st.container(
+                    border=True,
+                ):
+
+                    st.write(
+                        question
+                    )
 
         else:
 
