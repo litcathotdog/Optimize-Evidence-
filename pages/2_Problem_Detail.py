@@ -1,43 +1,27 @@
 import json
-from collections import Counter
 from pathlib import Path
 
 import streamlit as st
 
 
-st.set_page_config(
-    page_title="Problem Detail",
-    page_icon="🧩",
-    layout="wide",
-)
+# =========================================================
+# LOAD DATA
+# =========================================================
 
+def load_json(path, default=None):
+    if default is None:
+        default = []
 
-# ---------------------------------------------------------
-# Load CSS
-# ---------------------------------------------------------
-
-STYLE_PATH = Path("assets/style.css")
-
-if STYLE_PATH.exists():
-    with STYLE_PATH.open("r", encoding="utf-8") as file:
-        st.markdown(
-            f"<style>{file.read()}</style>",
-            unsafe_allow_html=True,
-        )
-
-
-# ---------------------------------------------------------
-# Load data
-# ---------------------------------------------------------
-
-def load_json(path, default):
     path = Path(path)
 
     if not path.exists():
         return default
 
-    with path.open("r", encoding="utf-8") as file:
-        return json.load(file)
+    try:
+        with path.open("r", encoding="utf-8") as file:
+            return json.load(file)
+    except (json.JSONDecodeError, OSError):
+        return default
 
 
 evidence_db = load_json(
@@ -45,39 +29,12 @@ evidence_db = load_json(
     [],
 )
 
-knowledge_graph = load_json(
-    "data/knowledge_graph.json",
-    {},
-)
 
+# =========================================================
+# HELPERS
+# =========================================================
 
-# ---------------------------------------------------------
-# Selected problem
-# ---------------------------------------------------------
-
-selected_problem = st.session_state.get(
-    "selected_problem",
-    None,
-)
-
-if not selected_problem:
-    st.warning(
-        "No clinical problem selected yet."
-    )
-
-    if st.button("← Back to Clinical Problems"):
-        st.switch_page(
-            "pages/1_Clinical_Problems.py"
-        )
-
-    st.stop()
-
-
-# ---------------------------------------------------------
-# Filter records
-# ---------------------------------------------------------
-
-def get_clinical_area(record):
+def extract_problem(record):
     translation = record.get(
         "clinical_translation",
         {},
@@ -87,152 +44,449 @@ def get_clinical_area(record):
         translation,
         dict,
     ):
-        return ""
+        return "Other"
 
-    return translation.get(
-        "clinical_area",
-        "",
+    problem = translation.get(
+        "clinical_area"
     )
 
+    if (
+        not isinstance(problem, str)
+        or not problem.strip()
+    ):
+        return "Other"
 
-papers = [
-    paper
-    for paper in evidence_db
-    if get_clinical_area(paper)
-    == selected_problem
-]
+    return problem.strip()
 
 
-# ---------------------------------------------------------
-# Header
-# ---------------------------------------------------------
-
-if st.button("← Clinical Problems"):
-    st.switch_page(
-        "pages/1_Clinical_Problems.py"
+def get_metadata(record):
+    metadata = record.get(
+        "metadata",
+        {},
     )
 
+    if isinstance(metadata, dict):
+        return metadata
 
-st.markdown(
-    f"""
-    <div class="hero-eyebrow">
-        CLINICAL PROBLEM
-    </div>
-
-    <h1 class="hero-title">
-        {selected_problem}
-    </h1>
-
-    <p class="hero-subtitle">
-        What researchers are trying to solve, what interventions
-        are being tested, and where uncertainty remains.
-    </p>
-    """,
-    unsafe_allow_html=True,
-)
+    return {}
 
 
-# ---------------------------------------------------------
-# Metrics
-# ---------------------------------------------------------
-
-paper_count = len(
-    papers
-)
-
-evidence_scores = []
-statistics_scores = []
-practice_informing = 0
-full_text_needed = 0
-
-
-for paper in papers:
-
-    appraisal = paper.get(
+def get_appraisal(record):
+    appraisal = record.get(
         "appraisal",
         {},
     )
 
-    statistics = paper.get(
+    if isinstance(appraisal, dict):
+        return appraisal
+
+    return {}
+
+
+def get_statistics(record):
+    statistics = record.get(
         "statistics",
         {},
     )
 
-    translation = paper.get(
+    if isinstance(statistics, dict):
+        return statistics
+
+    return {}
+
+
+def get_translation(record):
+    translation = record.get(
         "clinical_translation",
         {},
     )
 
-    if isinstance(
-        appraisal,
+    if isinstance(translation, dict):
+        return translation
+
+    return {}
+
+
+def get_overall_evidence(record):
+    appraisal = get_appraisal(
+        record
+    )
+
+    scores = appraisal.get(
+        "scores",
+        {},
+    )
+
+    if not isinstance(
+        scores,
         dict,
     ):
-        scores = appraisal.get(
-            "scores",
-            {},
+        return 0
+
+    score = scores.get(
+        "overall_evidence",
+        0,
+    )
+
+    if isinstance(
+        score,
+        (int, float),
+    ):
+        return score
+
+    return 0
+
+
+def get_statistics_score(record):
+    statistics = get_statistics(
+        record
+    )
+
+    scores = statistics.get(
+        "scores",
+        {},
+    )
+
+    if not isinstance(
+        scores,
+        dict,
+    ):
+        return 0
+
+    score = scores.get(
+        "overall_statistics",
+        0,
+    )
+
+    if isinstance(
+        score,
+        (int, float),
+    ):
+        return score
+
+    return 0
+
+
+def get_confidence(record):
+    translation = get_translation(
+        record
+    )
+
+    for key in [
+        "clinical_confidence",
+        "confidence",
+        "evidence_confidence",
+    ]:
+        value = translation.get(
+            key
         )
 
         if isinstance(
-            scores,
-            dict,
-        ):
-            value = scores.get(
-                "overall_evidence"
-            )
+            value,
+            str,
+        ) and value.strip():
+            return value.strip()
 
-            if isinstance(
-                value,
-                (int, float),
-            ):
-                evidence_scores.append(
-                    value
-                )
+    return "Unclear"
+
+
+def get_practice_readiness(record):
+    translation = get_translation(
+        record
+    )
+
+    value = translation.get(
+        "practice_readiness",
+        "",
+    )
 
     if isinstance(
-        statistics,
-        dict,
+        value,
+        str,
+    ) and value.strip():
+        return value.strip()
+
+    return "Not classified"
+
+
+def get_intervention(record):
+    translation = get_translation(
+        record
+    )
+
+    value = translation.get(
+        "intervention_or_exposure",
+        "",
+    )
+
+    if (
+        isinstance(value, str)
+        and value.strip()
     ):
-        scores = statistics.get(
-            "scores",
-            {},
+        return value.strip()
+
+    appraisal = get_appraisal(
+        record
+    )
+
+    value = appraisal.get(
+        "intervention_or_exposure",
+        "",
+    )
+
+    if (
+        isinstance(value, str)
+        and value.strip()
+    ):
+        return value.strip()
+
+    return "Not clearly identified"
+
+
+def get_takeaway(record):
+    translation = get_translation(
+        record
+    )
+
+    value = translation.get(
+        "practitioner_takeaway",
+        "",
+    )
+
+    if (
+        isinstance(value, str)
+        and value.strip()
+    ):
+        return value.strip()
+
+    value = translation.get(
+        "clinical_summary",
+        "",
+    )
+
+    if (
+        isinstance(value, str)
+        and value.strip()
+    ):
+        return value.strip()
+
+    return "No practitioner takeaway available."
+
+
+def get_flags(record):
+    flags = []
+
+    appraisal = get_appraisal(
+        record
+    )
+
+    statistics = get_statistics(
+        record
+    )
+
+    translation = get_translation(
+        record
+    )
+
+    appraisal_flags = appraisal.get(
+        "flags",
+        [],
+    )
+
+    if isinstance(
+        appraisal_flags,
+        list,
+    ):
+        flags.extend(
+            str(flag)
+            for flag in appraisal_flags
+            if flag
         )
 
-        if isinstance(
-            scores,
-            dict,
-        ):
-            value = scores.get(
-                "overall_statistics"
-            )
-
-            if isinstance(
-                value,
-                (int, float),
-            ):
-                statistics_scores.append(
-                    value
-                )
+    stats_flags = statistics.get(
+        "reporting_flags",
+        [],
+    )
 
     if isinstance(
-        translation,
-        dict,
+        stats_flags,
+        list,
     ):
-        if (
-            translation.get(
-                "practice_readiness"
+        flags.extend(
+            str(flag)
+            for flag in stats_flags
+            if flag
+        )
+
+    if translation.get(
+        "requires_full_text_review",
+        False,
+    ):
+        flags.append(
+            "Full-text review recommended before applying findings."
+        )
+
+    deduplicated = []
+
+    for flag in flags:
+        if flag not in deduplicated:
+            deduplicated.append(
+                flag
             )
-            == "Practice-informing"
+
+    return deduplicated
+
+
+def sort_papers(records):
+    return sorted(
+        records,
+        key=lambda record: (
+            get_overall_evidence(
+                record
+            ),
+            get_statistics_score(
+                record
+            ),
+        ),
+        reverse=True,
+    )
+
+
+# =========================================================
+# SELECTED PROBLEM
+# =========================================================
+
+selected_problem = (
+    st.session_state.get(
+        "selected_problem"
+    )
+)
+
+
+if not selected_problem:
+
+    st.warning(
+        "No clinical problem has been selected yet."
+    )
+
+    st.page_link(
+        "pages/clinical_problems.py",
+        label="← Back to Clinical Problems",
+    )
+
+    st.stop()
+
+
+# =========================================================
+# MATCH PAPERS
+# =========================================================
+
+problem_papers = []
+
+if isinstance(
+    evidence_db,
+    list,
+):
+
+    for record in evidence_db:
+
+        if not isinstance(
+            record,
+            dict,
         ):
-            practice_informing += 1
+            continue
 
-        if translation.get(
-            "requires_full_text_review",
-            False,
-        ):
-            full_text_needed += 1
+        if extract_problem(
+            record
+        ) == selected_problem:
+
+            problem_papers.append(
+                record
+            )
 
 
-avg_evidence = (
+problem_papers = sort_papers(
+    problem_papers
+)
+
+
+# =========================================================
+# HEADER
+# =========================================================
+
+st.page_link(
+    "pages/clinical_problems.py",
+    label="← Back to Clinical Problems",
+)
+
+st.caption(
+    "CLINICAL PROBLEM"
+)
+
+st.title(
+    selected_problem
+)
+
+st.write(
+    "Evidence synthesis, interventions, methodological quality, "
+    "practice relevance, and remaining uncertainty."
+)
+
+st.write("")
+
+
+# =========================================================
+# SUMMARY METRICS
+# =========================================================
+
+paper_count = len(
+    problem_papers
+)
+
+evidence_scores = [
+    get_overall_evidence(
+        record
+    )
+    for record in problem_papers
+    if get_overall_evidence(
+        record
+    ) > 0
+]
+
+statistics_scores = [
+    get_statistics_score(
+        record
+    )
+    for record in problem_papers
+    if get_statistics_score(
+        record
+    ) > 0
+]
+
+practice_informing = sum(
+    1
+    for record
+    in problem_papers
+    if get_practice_readiness(
+        record
+    )
+    == "Practice-informing"
+)
+
+needs_full_text = sum(
+    1
+    for record
+    in problem_papers
+    if get_translation(
+        record
+    ).get(
+        "requires_full_text_review",
+        False,
+    )
+)
+
+
+average_evidence = (
     round(
         sum(
             evidence_scores
@@ -246,8 +500,7 @@ avg_evidence = (
     else 0
 )
 
-
-avg_statistics = (
+average_statistics = (
     round(
         sum(
             statistics_scores
@@ -262,513 +515,167 @@ avg_statistics = (
 )
 
 
-m1, m2, m3, m4 = st.columns(4)
-
-m1.metric(
-    "Studies",
-    paper_count,
+m1, m2, m3, m4, m5 = st.columns(
+    5,
+    gap="medium",
 )
 
-m2.metric(
-    "Evidence Score",
-    avg_evidence,
-)
-
-m3.metric(
-    "Statistics Score",
-    avg_statistics,
-)
-
-m4.metric(
-    "Practice-Informing",
-    practice_informing,
-)
-
-
-# ---------------------------------------------------------
-# What researchers are trying to solve
-# ---------------------------------------------------------
-
-st.markdown(
-    "## What researchers are trying to solve"
-)
-
-outcome_counter = Counter()
-
-
-for paper in papers:
-
-    translation = paper.get(
-        "clinical_translation",
-        {},
+with m1:
+    st.metric(
+        "Studies",
+        paper_count,
+        border=True,
     )
 
-    if not isinstance(
-        translation,
-        dict,
-    ):
-        continue
-
-    outcomes = translation.get(
-        "clinically_relevant_outcomes",
-        [],
+with m2:
+    st.metric(
+        "Avg Evidence",
+        average_evidence,
+        border=True,
     )
 
-    if not isinstance(
-        outcomes,
-        list,
-    ):
-        continue
-
-    for outcome in outcomes:
-        if isinstance(
-            outcome,
-            str,
-        ):
-            outcome_counter[
-                outcome
-            ] += 1
-
-
-if outcome_counter:
-
-    cols = st.columns(
-        min(
-            4,
-            len(
-                outcome_counter
-            ),
-        )
+with m3:
+    st.metric(
+        "Avg Statistics",
+        average_statistics,
+        border=True,
     )
 
-    for col, (
-        outcome,
-        count,
-    ) in zip(
-        cols,
-        outcome_counter.most_common(
-            4
-        ),
-    ):
+with m4:
+    st.metric(
+        "Practice-Informing",
+        practice_informing,
+        border=True,
+    )
 
-        with col:
-            st.markdown(
-                f"""
-                <div class="solution-card">
-                    <div class="solution-title">
-                        {outcome}
-                    </div>
+with m5:
+    st.metric(
+        "Needs Full Text",
+        needs_full_text,
+        border=True,
+    )
 
-                    <div class="solution-count">
-                        {count} studies
-                    </div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
 
-else:
+st.write("")
+
+
+# =========================================================
+# EMPTY STATE
+# =========================================================
+
+if not problem_papers:
+
     st.info(
-        "Outcome patterns will appear after the evidence pipeline runs."
+        "No papers are currently indexed for this clinical problem."
     )
 
+    st.stop()
 
-# ---------------------------------------------------------
-# Interventions
-# ---------------------------------------------------------
 
-st.markdown(
-    "## Interventions being tested"
+# =========================================================
+# INTERVENTION SUMMARY
+# =========================================================
+
+st.subheader(
+    "Interventions being studied"
 )
 
-intervention_counter = Counter()
+intervention_counts = {}
 
+for record in problem_papers:
 
-for paper in papers:
-
-    translation = paper.get(
-        "clinical_translation",
-        {},
-    )
-
-    if not isinstance(
-        translation,
-        dict,
-    ):
-        continue
-
-    intervention = translation.get(
-        "intervention_or_exposure",
-        "",
+    intervention = get_intervention(
+        record
     )
 
     if (
-        isinstance(
+        intervention
+        == "Not clearly identified"
+    ):
+        continue
+
+    intervention_counts[
+        intervention
+    ] = (
+        intervention_counts.get(
             intervention,
-            str,
-        )
-        and intervention
-        and "not clearly" not in intervention.lower()
-        and "not reliably" not in intervention.lower()
-    ):
-        intervention_counter[
-            intervention
-        ] += 1
-
-
-if intervention_counter:
-
-    for intervention, count in (
-        intervention_counter.most_common(
-            10
-        )
-    ):
-
-        st.markdown(
-            f"""
-            <div class="intervention-row">
-
-                <div>
-                    <div class="intervention-name">
-                        {intervention}
-                    </div>
-
-                    <div class="intervention-sub">
-                        {count} studies
-                    </div>
-                </div>
-
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-else:
-    st.info(
-        "No standardized interventions identified yet."
-    )
-
-
-# ---------------------------------------------------------
-# Evidence disagreement
-# ---------------------------------------------------------
-
-st.markdown(
-    "## Where the evidence disagrees"
-)
-
-matching_synthesis = None
-
-
-for synthesis in knowledge_graph.get(
-    "evidence_synthesis",
-    [],
-):
-
-    if not isinstance(
-        synthesis,
-        dict,
-    ):
-        continue
-
-    if (
-        synthesis.get(
-            "concept"
-        )
-        == selected_problem
-    ):
-        matching_synthesis = synthesis
-        break
-
-
-if matching_synthesis:
-
-    directions = matching_synthesis.get(
-        "result_direction",
-        {},
-    )
-
-    c1, c2, c3, c4 = st.columns(4)
-
-    c1.metric(
-        "Favorable",
-        directions.get(
-            "favorable",
-            0,
-        ),
-    )
-
-    c2.metric(
-        "Neutral",
-        directions.get(
-            "neutral",
-            0,
-        ),
-    )
-
-    c3.metric(
-        "Unfavorable",
-        directions.get(
-            "unfavorable",
-            0,
-        ),
-    )
-
-    c4.metric(
-        "Unclear",
-        directions.get(
-            "unclear",
-            0,
-        ),
-    )
-
-else:
-    st.info(
-        "No disagreement summary is available yet."
-    )
-
-
-# ---------------------------------------------------------
-# Evidence gaps
-# ---------------------------------------------------------
-
-st.markdown(
-    "## What we still don't know"
-)
-
-gaps = []
-
-
-for gap in knowledge_graph.get(
-    "evidence_gaps",
-    [],
-):
-
-    if not isinstance(
-        gap,
-        dict,
-    ):
-        continue
-
-    if (
-        gap.get(
-            "concept"
-        )
-        == selected_problem
-    ):
-        gaps.append(
-            gap
-        )
-
-
-if gaps:
-
-    for gap in gaps:
-
-        reasons = gap.get(
-            "reasons",
-            [],
-        )
-
-        for reason in reasons:
-            st.warning(
-                reason
-            )
-
-else:
-    st.info(
-        "No problem-specific evidence gaps are currently flagged."
-    )
-
-
-# ---------------------------------------------------------
-# Specialist perspectives
-# ---------------------------------------------------------
-
-st.markdown(
-    "## Specialist perspectives"
-)
-
-specialist_reviews = {
-    "regenerative_medicine": [],
-    "sports_performance": [],
-    "biomechanics": [],
-    "womens_athlete_health": [],
-}
-
-
-for paper in papers:
-
-    specialties = paper.get(
-        "specialties",
-        {},
-    )
-
-    if not isinstance(
-        specialties,
-        dict,
-    ):
-        continue
-
-    for specialty in specialist_reviews:
-
-        review = specialties.get(
-            specialty,
-            {},
-        )
-
-        if not isinstance(
-            review,
-            dict,
-        ):
-            continue
-
-        takeaway = review.get(
-            "specialist_takeaway",
-            "",
-        )
-
-        if (
-            review.get(
-                "reviewed",
-                False,
-            )
-            and takeaway
-        ):
-            specialist_reviews[
-                specialty
-            ].append(
-                takeaway
-            )
-
-
-specialist_labels = {
-    "regenerative_medicine": (
-        "Atlas",
-        "Regenerative Medicine",
-    ),
-    "sports_performance": (
-        "Vector",
-        "Sports Performance",
-    ),
-    "biomechanics": (
-        "Newton",
-        "Biomechanics",
-    ),
-    "womens_athlete_health": (
-        "Athena",
-        "Women's Athlete Health",
-    ),
-}
-
-
-cols = st.columns(4)
-
-
-for col, specialty in zip(
-    cols,
-    specialist_reviews,
-):
-
-    name, role = specialist_labels[
-        specialty
-    ]
-
-    takeaways = specialist_reviews[
-        specialty
-    ]
-
-    with col:
-
-        st.markdown(
-            f"### {name}"
-        )
-
-        st.caption(
-            role
-        )
-
-        if takeaways:
-
-            st.write(
-                takeaways[0]
-            )
-
-        else:
-            st.write(
-                "No major specialty-specific insight yet."
-            )
-
-
-# ---------------------------------------------------------
-# Highest-priority papers
-# ---------------------------------------------------------
-
-st.markdown(
-    "## Highest-priority papers"
-)
-
-
-def priority_score(paper):
-
-    appraisal = paper.get(
-        "appraisal",
-        {},
-    )
-
-    translation = paper.get(
-        "clinical_translation",
-        {},
-    )
-
-    scores = (
-        appraisal.get(
-            "scores",
-            {},
-        )
-        if isinstance(
-            appraisal,
-            dict,
-        )
-        else {}
-    )
-
-    return (
-        scores.get(
-            "overall_evidence",
             0,
         )
-        * 0.6
-        + translation.get(
-            "translation_priority",
-            0,
-        )
-        * 0.4
+        + 1
     )
 
 
-ranked_papers = sorted(
-    papers,
-    key=priority_score,
+sorted_interventions = sorted(
+    intervention_counts.items(),
+    key=lambda item: item[1],
     reverse=True,
 )
 
 
-for paper in ranked_papers[:10]:
+if sorted_interventions:
 
-    metadata = paper.get(
-        "metadata",
-        {},
+    intervention_cols = st.columns(
+        min(
+            4,
+            len(
+                sorted_interventions
+            ),
+        ),
+        gap="medium",
     )
 
-    appraisal = paper.get(
-        "appraisal",
-        {},
+    for col, (
+        intervention,
+        count,
+    ) in zip(
+        intervention_cols,
+        sorted_interventions[:4],
+    ):
+
+        with col:
+
+            with st.container(
+                border=True,
+            ):
+
+                st.markdown(
+                    f"**{intervention}**"
+                )
+
+                st.metric(
+                    "Papers",
+                    count,
+                )
+
+else:
+
+    st.info(
+        "No clearly identified interventions are available yet."
     )
 
-    translation = paper.get(
-        "clinical_translation",
-        {},
+
+st.write("")
+
+
+# =========================================================
+# BEST AVAILABLE EVIDENCE
+# =========================================================
+
+st.subheader(
+    "Best available evidence"
+)
+
+top_papers = (
+    problem_papers[:3]
+)
+
+for index, record in enumerate(
+    top_papers,
+    start=1,
+):
+
+    metadata = get_metadata(
+        record
     )
 
     title = metadata.get(
@@ -776,84 +683,102 @@ for paper in ranked_papers[:10]:
         "Untitled paper",
     )
 
-    with st.expander(
-        title
+    journal = metadata.get(
+        "journal",
+        "",
+    )
+
+    year = (
+        metadata.get(
+            "publication_year"
+        )
+        or metadata.get(
+            "year"
+        )
+        or ""
+    )
+
+    evidence_score = (
+        get_overall_evidence(
+            record
+        )
+    )
+
+    statistics_score = (
+        get_statistics_score(
+            record
+        )
+    )
+
+    readiness = (
+        get_practice_readiness(
+            record
+        )
+    )
+
+    takeaway = get_takeaway(
+        record
+    )
+
+    with st.container(
+        border=True,
     ):
 
         st.caption(
-            " · ".join(
-                value
-                for value in [
-                    metadata.get(
-                        "journal",
-                        "",
-                    ),
-                    appraisal.get(
-                        "study_design",
-                        "",
-                    ),
-                    metadata.get(
-                        "publication_date",
-                        "",
-                    ),
-                ]
-                if value
+            f"TOP EVIDENCE #{index}"
+        )
+
+        st.markdown(
+            f"### {title}"
+        )
+
+        source_parts = []
+
+        if journal:
+            source_parts.append(
+                journal
             )
+
+        if year:
+            source_parts.append(
+                str(year)
+            )
+
+        if source_parts:
+            st.caption(
+                " • ".join(
+                    source_parts
+                )
+            )
+
+        c1, c2, c3 = st.columns(
+            3
+        )
+
+        with c1:
+            st.metric(
+                "Evidence",
+                evidence_score,
+            )
+
+        with c2:
+            st.metric(
+                "Statistics",
+                statistics_score,
+            )
+
+        with c3:
+            st.metric(
+                "Practice Readiness",
+                readiness,
+            )
+
+        st.markdown(
+            "**Practitioner takeaway**"
         )
 
         st.write(
-            translation.get(
-                "practitioner_takeaway",
-                "",
-            )
-        )
-
-        c1, c2, c3 = st.columns(3)
-
-        scores = appraisal.get(
-            "scores",
-            {},
-        )
-
-        c1.metric(
-            "Evidence",
-            scores.get(
-                "overall_evidence",
-                0,
-            ),
-        )
-
-        statistics = paper.get(
-            "statistics",
-            {},
-        )
-
-        statistics_scores = (
-            statistics.get(
-                "scores",
-                {},
-            )
-            if isinstance(
-                statistics,
-                dict,
-            )
-            else {}
-        )
-
-        c2.metric(
-            "Statistics",
-            statistics_scores.get(
-                "overall_statistics",
-                0,
-            ),
-        )
-
-        c3.metric(
-            "Relevance",
-            scores.get(
-                "practitioner_relevance",
-                0,
-            ),
+            takeaway
         )
 
         pubmed_url = metadata.get(
@@ -862,6 +787,175 @@ for paper in ranked_papers[:10]:
         )
 
         if pubmed_url:
+            st.link_button(
+                "Open PubMed",
+                pubmed_url,
+            )
+
+
+st.write("")
+
+
+# =========================================================
+# ALL PAPERS
+# =========================================================
+
+st.subheader(
+    "All indexed papers"
+)
+
+for index, record in enumerate(
+    problem_papers,
+    start=1,
+):
+
+    metadata = get_metadata(
+        record
+    )
+
+    title = metadata.get(
+        "title",
+        "Untitled paper",
+    )
+
+    with st.expander(
+        f"{index}. {title}"
+    ):
+
+        journal = metadata.get(
+            "journal",
+            "",
+        )
+
+        year = (
+            metadata.get(
+                "publication_year"
+            )
+            or metadata.get(
+                "year"
+            )
+            or ""
+        )
+
+        study_design = metadata.get(
+            "study_design",
+            "",
+        )
+
+        if not study_design:
+
+            appraisal = get_appraisal(
+                record
+            )
+
+            study_design = appraisal.get(
+                "study_design",
+                "",
+            )
+
+        source_parts = []
+
+        if journal:
+            source_parts.append(
+                journal
+            )
+
+        if year:
+            source_parts.append(
+                str(year)
+            )
+
+        if study_design:
+            source_parts.append(
+                str(
+                    study_design
+                )
+            )
+
+        if source_parts:
+
+            st.caption(
+                " • ".join(
+                    source_parts
+                )
+            )
+
+        metric_1, metric_2, metric_3 = (
+            st.columns(3)
+        )
+
+        with metric_1:
+
+            st.metric(
+                "Evidence Score",
+                get_overall_evidence(
+                    record
+                ),
+            )
+
+        with metric_2:
+
+            st.metric(
+                "Statistics Score",
+                get_statistics_score(
+                    record
+                ),
+            )
+
+        with metric_3:
+
+            st.metric(
+                "Confidence",
+                get_confidence(
+                    record
+                ),
+            )
+
+        intervention = get_intervention(
+            record
+        )
+
+        st.markdown(
+            "**Intervention / exposure**"
+        )
+
+        st.write(
+            intervention
+        )
+
+        st.markdown(
+            "**Practitioner takeaway**"
+        )
+
+        st.write(
+            get_takeaway(
+                record
+            )
+        )
+
+        flags = get_flags(
+            record
+        )
+
+        if flags:
+
+            st.markdown(
+                "**Cautions / review flags**"
+            )
+
+            for flag in flags:
+
+                st.write(
+                    f"• {flag}"
+                )
+
+        pubmed_url = metadata.get(
+            "pubmed_url",
+            "",
+        )
+
+        if pubmed_url:
+
             st.link_button(
                 "Open PubMed",
                 pubmed_url,
