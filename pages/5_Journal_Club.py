@@ -4,30 +4,9 @@ from pathlib import Path
 import streamlit as st
 
 
-st.set_page_config(
-    page_title="Journal Club",
-    page_icon="📚",
-    layout="wide",
-)
-
-
-# ---------------------------------------------------------
-# Load CSS
-# ---------------------------------------------------------
-
-STYLE_PATH = Path("assets/style.css")
-
-if STYLE_PATH.exists():
-    with STYLE_PATH.open("r", encoding="utf-8") as file:
-        st.markdown(
-            f"<style>{file.read()}</style>",
-            unsafe_allow_html=True,
-        )
-
-
-# ---------------------------------------------------------
-# Load data
-# ---------------------------------------------------------
+# =========================================================
+# LOAD DATA
+# =========================================================
 
 def load_json(path, default):
     path = Path(path)
@@ -35,8 +14,11 @@ def load_json(path, default):
     if not path.exists():
         return default
 
-    with path.open("r", encoding="utf-8") as file:
-        return json.load(file)
+    try:
+        with path.open("r", encoding="utf-8") as file:
+            return json.load(file)
+    except (json.JSONDecodeError, OSError):
+        return default
 
 
 journal_club = load_json(
@@ -49,897 +31,928 @@ evidence_db = load_json(
     [],
 )
 
-knowledge_graph = load_json(
-    "data/knowledge_graph.json",
-    {},
-)
 
+# =========================================================
+# HELPERS
+# =========================================================
 
-# ---------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------
+def get_metadata(record):
+    value = record.get(
+        "metadata",
+        {},
+    )
 
-def safe_dict(value):
-    return value if isinstance(value, dict) else {}
-
-
-def safe_list(value):
-    return value if isinstance(value, list) else []
-
-
-def display_name(specialty):
-    names = {
-        "regenerative_medicine": "Atlas",
-        "sports_performance": "Vector",
-        "biomechanics": "Newton",
-        "womens_athlete_health": "Athena",
-    }
-
-    return names.get(
-        specialty,
-        specialty.replace("_", " ").title(),
+    return (
+        value
+        if isinstance(value, dict)
+        else {}
     )
 
 
-def specialist_icon(name):
-    icons = {
-        "Atlas": "🌱",
-        "Vector": "⚡",
-        "Newton": "⚙️",
-        "Athena": "♡",
-        "Euler": "Σ",
-        "Artemis": "📚",
-    }
-
-    return icons.get(name, "✦")
-
-
-# ---------------------------------------------------------
-# Header
-# ---------------------------------------------------------
-
-st.markdown(
-    """
-    <div class="hero-eyebrow">
-        WEEKLY RESEARCH MEETING
-    </div>
-
-    <h1 class="hero-title">
-        Journal <span>Club</span>
-    </h1>
-
-    <p class="hero-subtitle">
-        The papers, clinical problems, controversies, and evidence gaps
-        your research team thinks are worth discussing.
-    </p>
-    """,
-    unsafe_allow_html=True,
-)
-
-
-# ---------------------------------------------------------
-# Executive summary
-# ---------------------------------------------------------
-
-summary = safe_dict(
-    journal_club.get(
-        "executive_summary"
+def get_translation(record):
+    value = record.get(
+        "clinical_translation",
+        {},
     )
-)
 
-m1, m2, m3, m4, m5 = st.columns(5)
+    return (
+        value
+        if isinstance(value, dict)
+        else {}
+    )
 
-m1.metric(
-    "Papers Reviewed",
-    summary.get(
-        "papers_reviewed",
-        len(evidence_db),
-    ),
-)
 
-m2.metric(
-    "High Priority",
-    summary.get(
-        "high_priority_papers",
+def get_appraisal(record):
+    value = record.get(
+        "appraisal",
+        {},
+    )
+
+    return (
+        value
+        if isinstance(value, dict)
+        else {}
+    )
+
+
+def get_statistics(record):
+    value = record.get(
+        "statistics",
+        {},
+    )
+
+    return (
+        value
+        if isinstance(value, dict)
+        else {}
+    )
+
+
+def get_title(record):
+    metadata = get_metadata(
+        record
+    )
+
+    return (
+        metadata.get(
+            "title"
+        )
+        or "Untitled paper"
+    )
+
+
+def get_year(record):
+    metadata = get_metadata(
+        record
+    )
+
+    return (
+        metadata.get(
+            "publication_year"
+        )
+        or metadata.get(
+            "year"
+        )
+        or ""
+    )
+
+
+def get_journal(record):
+    metadata = get_metadata(
+        record
+    )
+
+    return (
+        metadata.get(
+            "journal"
+        )
+        or ""
+    )
+
+
+def get_pubmed_url(record):
+    metadata = get_metadata(
+        record
+    )
+
+    return (
+        metadata.get(
+            "pubmed_url"
+        )
+        or ""
+    )
+
+
+def get_evidence_score(record):
+    appraisal = get_appraisal(
+        record
+    )
+
+    scores = appraisal.get(
+        "scores",
+        {},
+    )
+
+    if not isinstance(
+        scores,
+        dict,
+    ):
+        return 0
+
+    value = scores.get(
+        "overall_evidence",
         0,
-    ),
-)
+    )
 
-m3.metric(
-    "Practice-Informing",
-    summary.get(
-        "practice_informing_papers",
+    if isinstance(
+        value,
+        (int, float),
+    ):
+        return value
+
+    return 0
+
+
+def get_statistics_score(record):
+    statistics = get_statistics(
+        record
+    )
+
+    scores = statistics.get(
+        "scores",
+        {},
+    )
+
+    if not isinstance(
+        scores,
+        dict,
+    ):
+        return 0
+
+    value = scores.get(
+        "overall_statistics",
         0,
-    ),
-)
-
-m4.metric(
-    "Controversies",
-    summary.get(
-        "conflicting_evidence_topics",
-        0,
-    ),
-)
-
-m5.metric(
-    "Evidence Gaps",
-    summary.get(
-        "evidence_gaps_highlighted",
-        0,
-    ),
-)
-
-
-# ---------------------------------------------------------
-# Paper of the Week
-# ---------------------------------------------------------
-
-st.markdown("## 🏆 Paper of the Week")
-
-paper_of_week = safe_dict(
-    journal_club.get(
-        "paper_of_the_week"
-    )
-)
-
-if paper_of_week:
-
-    with st.container(border=True):
-
-        st.caption(
-            " · ".join(
-                value
-                for value in [
-                    paper_of_week.get(
-                        "clinical_area",
-                        "",
-                    ),
-                    paper_of_week.get(
-                        "study_design",
-                        "",
-                    ),
-                    paper_of_week.get(
-                        "journal",
-                        "",
-                    ),
-                ]
-                if value
-            )
-        )
-
-        st.markdown(
-            f"## {paper_of_week.get('title', 'Untitled paper')}"
-        )
-
-        score_cols = st.columns(4)
-
-        score_cols[0].metric(
-            "Evidence",
-            paper_of_week.get(
-                "evidence_score",
-                0,
-            ),
-        )
-
-        score_cols[1].metric(
-            "Statistics",
-            paper_of_week.get(
-                "statistics_score",
-                0,
-            ),
-        )
-
-        score_cols[2].metric(
-            "Relevance",
-            paper_of_week.get(
-                "practitioner_relevance",
-                0,
-            ),
-        )
-
-        score_cols[3].metric(
-            "Priority",
-            paper_of_week.get(
-                "journal_club_priority",
-                0,
-            ),
-        )
-
-        takeaway = paper_of_week.get(
-            "practitioner_takeaway",
-            "",
-        )
-
-        if takeaway:
-            st.markdown(
-                "### Why it matters"
-            )
-
-            st.write(
-                takeaway
-            )
-
-        why_selected = safe_list(
-            paper_of_week.get(
-                "why_selected"
-            )
-        )
-
-        if why_selected:
-
-            st.markdown(
-                "### Why Artemis selected it"
-            )
-
-            for reason in why_selected:
-                st.write(
-                    f"• {reason}"
-                )
-
-        cautions = safe_list(
-            paper_of_week.get(
-                "major_cautions"
-            )
-        )
-
-        if cautions:
-
-            with st.expander(
-                "What to be cautious about"
-            ):
-                for caution in cautions:
-                    st.write(
-                        f"• {caution}"
-                    )
-
-        pubmed_url = paper_of_week.get(
-            "pubmed_url",
-            "",
-        )
-
-        if pubmed_url:
-            st.link_button(
-                "Open in PubMed ↗",
-                pubmed_url,
-            )
-
-else:
-
-    st.info(
-        "Paper of the Week will appear after your pipeline generates the Journal Club."
     )
 
+    if isinstance(
+        value,
+        (int, float),
+    ):
+        return value
 
-# ---------------------------------------------------------
-# Weekly story
-# ---------------------------------------------------------
+    return 0
 
-st.markdown(
-    "## This Week's Research Story"
-)
 
-top_papers = safe_list(
-    journal_club.get(
-        "top_papers"
-    )
-)
-
-practice_papers = safe_list(
-    journal_club.get(
-        "practice_informing_papers"
-    )
-)
-
-conflicts = safe_list(
-    journal_club.get(
-        "conflicting_evidence"
-    )
-)
-
-gaps = safe_list(
-    journal_club.get(
-        "evidence_gaps"
-    )
-)
-
-story_parts = []
-
-if top_papers:
-    story_parts.append(
-        f"{len(top_papers)} papers rose to the top of this week's evidence review."
+def get_practice_readiness(record):
+    translation = get_translation(
+        record
     )
 
-if practice_papers:
-    story_parts.append(
-        f"{len(practice_papers)} were classified as potentially practice-informing."
-    )
-
-if conflicts:
-    story_parts.append(
-        f"The team identified {len(conflicts)} areas where published findings point in different directions."
-    )
-
-if gaps:
-    story_parts.append(
-        f"{len(gaps)} important evidence gaps remain unresolved."
-    )
-
-if story_parts:
-
-    st.markdown(
-        f"""
-        <div class="journal-story-card">
-            {" ".join(story_parts)}
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-else:
-
-    st.info(
-        "The weekly research story will populate after the pipeline has enough evidence to summarize."
-    )
-
-
-# ---------------------------------------------------------
-# AI Team Discussion
-# ---------------------------------------------------------
-
-st.markdown(
-    "## AI Team Discussion"
-)
-
-specialty_highlights = safe_dict(
-    journal_club.get(
-        "specialty_highlights"
-    )
-)
-
-discussion_cards = []
-
-for specialty, papers in specialty_highlights.items():
-
-    papers = safe_list(papers)
-
-    if not papers:
-        continue
-
-    top = safe_dict(
-        papers[0]
-    )
-
-    name = display_name(
-        specialty
-    )
-
-    takeaway = top.get(
-        "specialist_takeaway",
+    value = translation.get(
+        "practice_readiness",
         "",
     )
 
-    if takeaway:
+    if (
+        isinstance(value, str)
+        and value.strip()
+    ):
+        return value.strip()
 
-        discussion_cards.append(
-            (
-                name,
-                takeaway,
+    return "Not classified"
+
+
+def get_takeaway(record):
+    translation = get_translation(
+        record
+    )
+
+    value = translation.get(
+        "practitioner_takeaway",
+        "",
+    )
+
+    if (
+        isinstance(value, str)
+        and value.strip()
+    ):
+        return value.strip()
+
+    value = translation.get(
+        "clinical_summary",
+        "",
+    )
+
+    if (
+        isinstance(value, str)
+        and value.strip()
+    ):
+        return value.strip()
+
+    return "No practitioner takeaway available."
+
+
+def get_clinical_area(record):
+    translation = get_translation(
+        record
+    )
+
+    value = translation.get(
+        "clinical_area",
+        "",
+    )
+
+    if (
+        isinstance(value, str)
+        and value.strip()
+    ):
+        return value.strip()
+
+    return "Other"
+
+
+def find_record_by_title(title):
+    if not title:
+        return None
+
+    title_lower = str(
+        title
+    ).strip().lower()
+
+    for record in evidence_db:
+
+        if not isinstance(
+            record,
+            dict,
+        ):
+            continue
+
+        if (
+            get_title(
+                record
+            ).strip().lower()
+            == title_lower
+        ):
+            return record
+
+    return None
+
+
+# =========================================================
+# HEADER
+# =========================================================
+
+st.caption(
+    "ARTEMIS • JOURNAL CLUB"
+)
+
+st.title(
+    "Journal Club"
+)
+
+st.write(
+    "A curated view of the most clinically relevant new research, "
+    "with structured discussion prompts and evidence critique."
+)
+
+st.write("")
+
+
+# =========================================================
+# EXECUTIVE SUMMARY
+# =========================================================
+
+summary = journal_club.get(
+    "executive_summary",
+    {},
+)
+
+if not isinstance(
+    summary,
+    dict,
+):
+    summary = {}
+
+
+m1, m2, m3, m4 = st.columns(
+    4,
+    gap="medium",
+)
+
+with m1:
+
+    st.metric(
+        "High Priority Papers",
+        summary.get(
+            "high_priority_papers",
+            0,
+        ),
+        border=True,
+    )
+
+
+with m2:
+
+    st.metric(
+        "Practice-Informing",
+        summary.get(
+            "practice_informing_papers",
+            0,
+        ),
+        border=True,
+    )
+
+
+with m3:
+
+    st.metric(
+        "Evidence Gaps",
+        summary.get(
+            "evidence_gaps_highlighted",
+            0,
+        ),
+        border=True,
+    )
+
+
+with m4:
+
+    st.metric(
+        "Indexed Papers",
+        len(
+            evidence_db
+        )
+        if isinstance(
+            evidence_db,
+            list,
+        )
+        else 0,
+        border=True,
+    )
+
+
+st.write("")
+
+
+# =========================================================
+# PAPER OF THE WEEK
+# =========================================================
+
+st.subheader(
+    "⭐ Paper of the Week"
+)
+
+paper_of_week = journal_club.get(
+    "paper_of_the_week",
+    {},
+)
+
+if not isinstance(
+    paper_of_week,
+    dict,
+):
+    paper_of_week = {}
+
+
+if paper_of_week:
+
+    title = paper_of_week.get(
+        "title",
+        "Paper of the Week",
+    )
+
+    matching_record = (
+        find_record_by_title(
+            title
+        )
+    )
+
+    with st.container(
+        border=True,
+    ):
+
+        st.caption(
+            "ARTEMIS' TOP PICK"
+        )
+
+        st.markdown(
+            f"## {title}"
+        )
+
+        study_design = paper_of_week.get(
+            "study_design",
+            "",
+        )
+
+        if study_design:
+            st.caption(
+                study_design
+            )
+
+        if matching_record:
+
+            metadata = get_metadata(
+                matching_record
+            )
+
+            source_parts = []
+
+            journal = get_journal(
+                matching_record
+            )
+
+            year = get_year(
+                matching_record
+            )
+
+            if journal:
+                source_parts.append(
+                    str(journal)
+                )
+
+            if year:
+                source_parts.append(
+                    str(year)
+                )
+
+            if source_parts:
+                st.caption(
+                    " • ".join(
+                        source_parts
+                    )
+                )
+
+            c1, c2, c3 = st.columns(
+                3
+            )
+
+            with c1:
+
+                st.metric(
+                    "Evidence Score",
+                    get_evidence_score(
+                        matching_record
+                    ),
+                )
+
+            with c2:
+
+                st.metric(
+                    "Statistics Score",
+                    get_statistics_score(
+                        matching_record
+                    ),
+                )
+
+            with c3:
+
+                st.metric(
+                    "Practice Readiness",
+                    get_practice_readiness(
+                        matching_record
+                    ),
+                )
+
+        practitioner_takeaway = (
+            paper_of_week.get(
+                "practitioner_takeaway",
+                "",
             )
         )
 
+        if not practitioner_takeaway and matching_record:
 
-# Add Euler
-statistics_flags = []
-
-for record in evidence_db:
-
-    stats = safe_dict(
-        record.get(
-            "statistics"
-        )
-    )
-
-    flags = safe_list(
-        stats.get(
-            "reporting_flags"
-        )
-    )
-
-    statistics_flags.extend(
-        flags
-    )
-
-
-if statistics_flags:
-
-    discussion_cards.append(
-        (
-            "Euler",
-            (
-                f"I flagged statistical-reporting concerns across "
-                f"{len(statistics_flags)} instances. "
-                f"One recurring concern is: {statistics_flags[0]}"
-            ),
-        )
-    )
-
-
-# Add Artemis
-if paper_of_week:
-
-    discussion_cards.append(
-        (
-            "Artemis",
-            (
-                "I prioritized this week's papers based on evidence quality, "
-                "statistical rigor, practitioner relevance, and potential "
-                "clinical importance."
-            ),
-        )
-    )
-
-
-if discussion_cards:
-
-    for i in range(
-        0,
-        len(discussion_cards),
-        3,
-    ):
-
-        cols = st.columns(3)
-
-        for col, item in zip(
-            cols,
-            discussion_cards[
-                i : i + 3
-            ],
-        ):
-
-            name, message = item
-
-            with col:
-
-                st.markdown(
-                    f"""
-                    <div class="journal-agent-card">
-
-                        <div class="journal-agent-header">
-
-                            <div class="journal-agent-avatar">
-                                {specialist_icon(name)}
-                            </div>
-
-                            <div>
-                                <div class="journal-agent-name">
-                                    {name}
-                                </div>
-
-                                <div class="journal-agent-label">
-                                    RESEARCH TEAM
-                                </div>
-                            </div>
-
-                        </div>
-
-                        <div class="journal-agent-message">
-                            “{message}”
-                        </div>
-
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
+            practitioner_takeaway = (
+                get_takeaway(
+                    matching_record
                 )
+            )
+
+        if practitioner_takeaway:
+
+            st.markdown(
+                "**Why this matters**"
+            )
+
+            st.write(
+                practitioner_takeaway
+            )
+
+        controversy = paper_of_week.get(
+            "controversy",
+            "",
+        )
+
+        if controversy:
+
+            st.markdown(
+                "**What deserves debate**"
+            )
+
+            st.warning(
+                controversy
+            )
+
+        if matching_record:
+
+            pubmed_url = get_pubmed_url(
+                matching_record
+            )
+
+            if pubmed_url:
+
+                st.link_button(
+                    "Open PubMed",
+                    pubmed_url,
+                )
+
+        else:
+
+            paper_url = paper_of_week.get(
+                "pubmed_url",
+                "",
+            )
+
+            if paper_url:
+
+                st.link_button(
+                    "Open Paper",
+                    paper_url,
+                )
+
 
 else:
 
     st.info(
-        "Specialist discussion will appear once specialty reviews are available."
+        "Artemis has not selected a Paper of the Week yet. "
+        "This will populate after the journal-club pipeline runs."
     )
 
 
-# ---------------------------------------------------------
-# Emerging clinical problems
-# ---------------------------------------------------------
+st.write("")
 
-st.markdown(
-    "## Problems Gaining Research Attention"
+
+# =========================================================
+# DISCUSSION QUESTIONS
+# =========================================================
+
+st.subheader(
+    "Discussion Prompts"
 )
 
-problem_counts = {}
+questions = journal_club.get(
+    "discussion_questions",
+    [],
+)
+
+if (
+    isinstance(
+        questions,
+        list,
+    )
+    and questions
+):
+
+    question_cols = st.columns(
+        2,
+        gap="medium",
+    )
+
+    for index, question in enumerate(
+        questions
+    ):
+
+        col = question_cols[
+            index % 2
+        ]
+
+        with col:
+
+            with st.container(
+                border=True,
+            ):
+
+                st.caption(
+                    f"QUESTION {index + 1}"
+                )
+
+                st.write(
+                    question
+                )
+
+else:
+
+    st.caption(
+        "No discussion prompts are currently available."
+    )
+
+
+st.write("")
+
+
+# =========================================================
+# HIGH-PRIORITY PAPERS
+# =========================================================
+
+st.subheader(
+    "High-Priority Papers"
+)
+
+priority_papers = journal_club.get(
+    "high_priority_papers",
+    [],
+)
+
+if not isinstance(
+    priority_papers,
+    list,
+):
+    priority_papers = []
+
+
+# If journal_club.json doesn't contain a list, build one
+# from the strongest indexed evidence instead.
+
+if not priority_papers:
+
+    candidate_records = [
+        record
+        for record in evidence_db
+        if isinstance(
+            record,
+            dict,
+        )
+    ]
+
+    candidate_records.sort(
+        key=lambda record: (
+            get_evidence_score(
+                record
+            ),
+            get_statistics_score(
+                record
+            ),
+        ),
+        reverse=True,
+    )
+
+    priority_papers = (
+        candidate_records[:10]
+    )
+
+
+for index, item in enumerate(
+    priority_papers[:10],
+    start=1,
+):
+
+    if isinstance(
+        item,
+        dict,
+    ) and "metadata" in item:
+
+        record = item
+        title = get_title(
+            record
+        )
+
+    elif isinstance(
+        item,
+        dict,
+    ):
+
+        title = item.get(
+            "title",
+            "Untitled paper",
+        )
+
+        record = (
+            find_record_by_title(
+                title
+            )
+        )
+
+    else:
+
+        title = str(
+            item
+        )
+
+        record = (
+            find_record_by_title(
+                title
+            )
+        )
+
+
+    with st.expander(
+        f"{index}. {title}"
+    ):
+
+        if record:
+
+            source_parts = []
+
+            journal = get_journal(
+                record
+            )
+
+            year = get_year(
+                record
+            )
+
+            area = get_clinical_area(
+                record
+            )
+
+            if journal:
+                source_parts.append(
+                    str(journal)
+                )
+
+            if year:
+                source_parts.append(
+                    str(year)
+                )
+
+            if area:
+                source_parts.append(
+                    area
+                )
+
+            if source_parts:
+
+                st.caption(
+                    " • ".join(
+                        source_parts
+                    )
+                )
+
+            c1, c2, c3 = st.columns(
+                3
+            )
+
+            with c1:
+
+                st.metric(
+                    "Evidence",
+                    get_evidence_score(
+                        record
+                    ),
+                )
+
+            with c2:
+
+                st.metric(
+                    "Statistics",
+                    get_statistics_score(
+                        record
+                    ),
+                )
+
+            with c3:
+
+                st.metric(
+                    "Practice Readiness",
+                    get_practice_readiness(
+                        record
+                    ),
+                )
+
+            st.markdown(
+                "**Practitioner takeaway**"
+            )
+
+            st.write(
+                get_takeaway(
+                    record
+                )
+            )
+
+            pubmed_url = get_pubmed_url(
+                record
+            )
+
+            if pubmed_url:
+
+                st.link_button(
+                    "Open PubMed",
+                    pubmed_url,
+                )
+
+        elif isinstance(
+            item,
+            dict,
+        ):
+
+            takeaway = item.get(
+                "practitioner_takeaway",
+                "",
+            )
+
+            if takeaway:
+                st.write(
+                    takeaway
+                )
+
+            st.caption(
+                "This paper is listed by Artemis but was not matched "
+                "to a full evidence-database record."
+            )
+
+
+st.write("")
+
+
+# =========================================================
+# JOURNAL CLUB BY CLINICAL AREA
+# =========================================================
+
+st.subheader(
+    "Explore by Clinical Area"
+)
+
+area_counts = {}
 
 for record in evidence_db:
 
-    translation = safe_dict(
-        record.get(
-            "clinical_translation"
-        )
-    )
-
-    problem = translation.get(
-        "clinical_area"
-    )
-
-    if not problem:
+    if not isinstance(
+        record,
+        dict,
+    ):
         continue
 
-    problem_counts[
-        problem
+    area = get_clinical_area(
+        record
+    )
+
+    area_counts[
+        area
     ] = (
-        problem_counts.get(
-            problem,
+        area_counts.get(
+            area,
             0,
         )
         + 1
     )
 
 
-ranked_problems = sorted(
-    problem_counts.items(),
+sorted_areas = sorted(
+    area_counts.items(),
     key=lambda item: item[1],
     reverse=True,
 )
 
 
-if ranked_problems:
+if sorted_areas:
 
-    cols = st.columns(
-        min(
-            5,
-            len(ranked_problems),
-        )
+    area_cols = st.columns(
+        3,
+        gap="medium",
     )
 
-    for col, (
-        problem,
+    for index, (
+        area,
         count,
-    ) in zip(
-        cols,
-        ranked_problems[:5],
+    ) in enumerate(
+        sorted_areas[:9]
     ):
+
+        col = area_cols[
+            index % 3
+        ]
 
         with col:
 
-            st.markdown(
-                f"""
-                <div class="journal-topic-card">
+            with st.container(
+                border=True,
+            ):
 
-                    <div class="journal-topic-arrow">
-                        ↑
-                    </div>
-
-                    <div class="journal-topic-title">
-                        {problem}
-                    </div>
-
-                    <div class="journal-topic-count">
-                        {count} indexed studies
-                    </div>
-
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-
-else:
-
-    st.info(
-        "Clinical problem trends will populate after your database contains translated studies."
-    )
-
-
-# ---------------------------------------------------------
-# Clinical pearls
-# ---------------------------------------------------------
-
-st.markdown(
-    "## Clinical Pearls"
-)
-
-clinical_pearls = []
-
-for paper in practice_papers:
-
-    if not isinstance(
-        paper,
-        dict,
-    ):
-        continue
-
-    takeaway = paper.get(
-        "practitioner_takeaway",
-        "",
-    )
-
-    if (
-        takeaway
-        and takeaway
-        not in clinical_pearls
-    ):
-        clinical_pearls.append(
-            takeaway
-        )
-
-
-if clinical_pearls:
-
-    for pearl in clinical_pearls[:5]:
-
-        st.success(
-            pearl,
-            icon="✓",
-        )
-
-else:
-
-    st.info(
-        "Clinical pearls will appear when papers reach practice-informing status."
-    )
-
-
-# ---------------------------------------------------------
-# Current controversies
-# ---------------------------------------------------------
-
-st.markdown(
-    "## Current Debates"
-)
-
-if conflicts:
-
-    for conflict in conflicts[:8]:
-
-        if not isinstance(
-            conflict,
-            dict,
-        ):
-            continue
-
-        concept = conflict.get(
-            "concept",
-            "Unknown topic",
-        )
-
-        with st.expander(
-            concept
-        ):
-
-            c1, c2, c3 = st.columns(
-                3
-            )
-
-            c1.metric(
-                "Favorable",
-                conflict.get(
-                    "favorable",
-                    0,
-                ),
-            )
-
-            c2.metric(
-                "Neutral",
-                conflict.get(
-                    "neutral",
-                    0,
-                ),
-            )
-
-            c3.metric(
-                "Unfavorable",
-                conflict.get(
-                    "unfavorable",
-                    0,
-                ),
-            )
-
-            st.write(
-                conflict.get(
-                    "discussion_point",
-                    "",
-                )
-            )
-
-else:
-
-    st.info(
-        "No multi-study evidence conflicts are currently flagged."
-    )
-
-
-# ---------------------------------------------------------
-# Evidence gaps
-# ---------------------------------------------------------
-
-st.markdown(
-    "## What We Still Don't Know"
-)
-
-if gaps:
-
-    for gap in gaps[:8]:
-
-        if not isinstance(
-            gap,
-            dict,
-        ):
-            continue
-
-        concept = gap.get(
-            "concept",
-            "Unknown problem",
-        )
-
-        reasons = safe_list(
-            gap.get(
-                "reasons"
-            )
-        )
-
-        with st.container(
-            border=True
-        ):
-
-            st.markdown(
-                f"### {concept}"
-            )
-
-            st.caption(
-                f"{gap.get('paper_count', 0)} indexed studies"
-            )
-
-            for reason in reasons:
-                st.write(
-                    f"• {reason}"
+                st.markdown(
+                    f"**{area}**"
                 )
 
-else:
+                st.metric(
+                    "Papers",
+                    count,
+                )
 
-    st.info(
-        "No major evidence gaps are currently flagged."
-    )
+                if st.button(
+                    "Explore evidence →",
+                    key=f"journal_area_{index}",
+                    width="stretch",
+                ):
 
+                    st.session_state[
+                        "evidence_library_area"
+                    ] = area
 
-# ---------------------------------------------------------
-# Papers worth reading
-# ---------------------------------------------------------
-
-st.markdown(
-    "## Papers Worth Reading"
-)
-
-for index, paper in enumerate(
-    top_papers[:10],
-    start=1,
-):
-
-    if not isinstance(
-        paper,
-        dict,
-    ):
-        continue
-
-    with st.expander(
-        f"{index}. {paper.get('title', 'Untitled paper')}"
-    ):
-
-        st.caption(
-            " · ".join(
-                value
-                for value in [
-                    paper.get(
-                        "clinical_area",
-                        "",
-                    ),
-                    paper.get(
-                        "study_design",
-                        "",
-                    ),
-                    paper.get(
-                        "journal",
-                        "",
-                    ),
-                ]
-                if value
-            )
-        )
-
-        c1, c2, c3, c4 = st.columns(
-            4
-        )
-
-        c1.metric(
-            "Evidence",
-            paper.get(
-                "evidence_score",
-                0,
-            ),
-        )
-
-        c2.metric(
-            "Statistics",
-            paper.get(
-                "statistics_score",
-                0,
-            ),
-        )
-
-        c3.metric(
-            "Relevance",
-            paper.get(
-                "practitioner_relevance",
-                0,
-            ),
-        )
-
-        c4.metric(
-            "Priority",
-            paper.get(
-                "journal_club_priority",
-                0,
-            ),
-        )
-
-        takeaway = paper.get(
-            "practitioner_takeaway",
-            "",
-        )
-
-        if takeaway:
-
-            st.markdown(
-                "**Why it matters**"
-            )
-
-            st.write(
-                takeaway
-            )
-
-        pubmed_url = paper.get(
-            "pubmed_url",
-            "",
-        )
-
-        if pubmed_url:
-
-            st.link_button(
-                "Open PubMed ↗",
-                pubmed_url,
-            )
-
-
-# ---------------------------------------------------------
-# Discussion questions
-# ---------------------------------------------------------
-
-st.markdown(
-    "## Questions for the Room"
-)
-
-questions = safe_list(
-    journal_club.get(
-        "discussion_questions"
-    )
-)
-
-if questions:
-
-    for number, question in enumerate(
-        questions,
-        start=1,
-    ):
-
-        st.markdown(
-            f"""
-            <div class="journal-question">
-                <span>{number:02d}</span>
-                {question}
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+                    st.switch_page(
+                        "pages/evidence_library.py"
+                    )
 
 else:
 
     st.info(
-        "Discussion questions will appear after the Journal Club Editor runs."
+        "Clinical-area data will appear after the evidence pipeline runs."
     )
