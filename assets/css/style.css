@@ -1,412 +1,731 @@
-/* ========================================================
-   AI SPECIALISTS PAGE
-======================================================== */
-
-.team-eyebrow {
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 0.12em;
-    color: #667085;
-    margin-top: 4px;
-    margin-bottom: 10px;
-}
-
-.team-title {
-    font-size: 38px;
-    line-height: 1.06;
-    letter-spacing: -1.3px;
-    font-weight: 800;
-    color: #161a2b;
-}
-
-.team-subtitle {
-    font-size: 14px;
-    line-height: 1.55;
-    color: #667085;
-    max-width: 760px;
-    margin-top: 11px;
-    margin-bottom: 30px;
-}
+/* =========================================================
+   OPTIMIZE EVIDENCE
+   STAGE 1 GLOBAL DESIGN SYSTEM
+========================================================= */
 
 
-/* --------------------------------------------------------
-   Agent cards
--------------------------------------------------------- */
+/* =========================================================
+   ROOT / GLOBAL
+========================================================= */
 
-.ai-agent-card {
-    min-height: 310px;
-    padding: 24px;
+:root {
+    --oe-bg: #f8fafc;
+    --oe-surface: #ffffff;
+    --oe-surface-soft: #f9fbfc;
 
-    border-radius: 23px;
+    --oe-border: #e7ebef;
+    --oe-border-strong: #dfe4ea;
 
-    background:
-        linear-gradient(
-            145deg,
-            rgba(255,255,255,.98),
-            rgba(250,251,255,.97)
-        );
+    --oe-text: #18212f;
+    --oe-text-soft: #667085;
+    --oe-text-muted: #98a2b3;
 
-    border: 1px solid #e6e9ef;
+    --oe-primary: #17a995;
+    --oe-primary-soft: #eaf8f5;
 
-    box-shadow:
-        0 2px 4px rgba(16,24,40,.018),
-        0 10px 32px rgba(16,24,40,.035);
+    --oe-blue: #4b8fce;
+    --oe-blue-soft: #eef6fd;
 
-    margin-bottom: 10px;
+    --oe-purple: #7c62c8;
+    --oe-purple-soft: #f3f0fc;
 
-    transition:
-        transform .18s ease,
-        box-shadow .18s ease,
-        border-color .18s ease;
-}
+    --oe-pink: #dc668a;
+    --oe-pink-soft: #fdf1f5;
 
-.ai-agent-card:hover {
-    transform: translateY(-3px);
+    --oe-gold: #c79235;
+    --oe-gold-soft: #fcf6e9;
 
-    box-shadow:
-        0 4px 7px rgba(16,24,40,.025),
-        0 16px 38px rgba(16,24,40,.06);
+    --oe-success: #11946f;
+    --oe-warning: #c68b26;
+    --oe-danger: #c64f67;
+
+    --oe-radius-sm: 10px;
+    --oe-radius-md: 14px;
+    --oe-radius-lg: 18px;
+    --oe-radius-xl: 22px;
+
+    --oe-shadow:
+        0 1px 2px rgba(16, 24, 40, 0.02),
+        0 8px 24px rgba(16, 24, 40, 0.035);
 }
 
 
-/* --------------------------------------------------------
-   Top area
--------------------------------------------------------- */
+/* =========================================================
+   APP BACKGROUND
+========================================================= */
 
-.ai-agent-top {
-    display: flex;
-    align-items: center;
-    gap: 18px;
+html,
+body,
+[class*="css"] {
+    font-family:
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
 }
 
-.ai-agent-avatar {
-    width: 102px;
-    height: 102px;
-    min-width: 102px;
-
-    border-radius: 50%;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    font-size: 46px;
-
+.stApp {
     background:
         radial-gradient(
-            circle at 50% 40%,
-            #ffffff 0%,
-            #f1f8f7 65%,
-            #e7f1ef 100%
+            circle at 77% -5%,
+            rgba(236, 230, 255, 0.44),
+            transparent 29%
+        ),
+        radial-gradient(
+            circle at 10% 8%,
+            rgba(224, 249, 244, 0.34),
+            transparent 22%
+        ),
+        linear-gradient(
+            180deg,
+            #fcfdff 0%,
+            var(--oe-bg) 100%
         );
 
-    border: 1px solid #e1eae8;
-
-    box-shadow:
-        inset 0 1px 3px rgba(255,255,255,.8);
+    color: var(--oe-text);
 }
 
-.ai-agent-heading {
-    min-width: 0;
+
+/* =========================================================
+   MAIN CONTENT WIDTH
+========================================================= */
+
+.block-container {
+    max-width: 1540px;
+
+    padding-top: 2rem;
+    padding-left: 2.1rem;
+    padding-right: 2.1rem;
+    padding-bottom: 4rem;
 }
 
-.ai-agent-name {
+
+/* =========================================================
+   STREAMLIT CHROME
+========================================================= */
+
+#MainMenu {
+    visibility: hidden;
+}
+
+footer {
+    visibility: hidden;
+}
+
+header[data-testid="stHeader"] {
+    background: transparent;
+}
+
+
+/* =========================================================
+   TYPOGRAPHY
+========================================================= */
+
+h1,
+h2,
+h3,
+h4 {
+    color: var(--oe-text);
+    letter-spacing: -0.025em;
+}
+
+h1 {
+    font-weight: 780 !important;
+    line-height: 1.08 !important;
+}
+
+h2 {
+    font-weight: 740 !important;
+}
+
+h3 {
+    font-weight: 700 !important;
+}
+
+p {
+    color: var(--oe-text-soft);
+    line-height: 1.6;
+}
+
+
+/* caption */
+
+div[data-testid="stCaptionContainer"] {
+    color: var(--oe-text-muted);
+    font-size: 0.78rem;
+    letter-spacing: 0.015em;
+}
+
+
+/* =========================================================
+   SIDEBAR
+========================================================= */
+
+section[data-testid="stSidebar"] {
+    background:
+        rgba(255, 255, 255, 0.97);
+
+    border-right:
+        1px solid var(--oe-border);
+}
+
+section[data-testid="stSidebar"] > div {
+    padding-top: 1.25rem;
+    padding-left: 0.85rem;
+    padding-right: 0.85rem;
+}
+
+
+/* ---------------------------------------------------------
+   Optional brand from app.py
+--------------------------------------------------------- */
+
+.sidebar-brand {
     display: flex;
-    align-items: center;
-    gap: 7px;
+    align-items: flex-start;
+    gap: 12px;
 
-    font-size: 19px;
-    line-height: 1.1;
-    font-weight: 800;
+    margin-bottom: 22px;
+    padding: 7px 5px;
 }
 
-.ai-agent-role {
-    margin-top: 7px;
+.brand-mark {
+    width: 43px;
+    height: 43px;
 
-    font-size: 12px;
-    line-height: 1.35;
-
-    font-weight: 600;
-
-    color: #667085;
-}
-
-.status-dot {
-    display: inline-block;
-
-    width: 8px;
-    height: 8px;
-
-    border-radius: 50%;
-}
-
-
-/* --------------------------------------------------------
-   Description
--------------------------------------------------------- */
-
-.ai-agent-description {
-    min-height: 76px;
-
-    margin-top: 23px;
-
-    font-size: 11px;
-    line-height: 1.7;
-
-    color: #475467;
-}
-
-
-/* --------------------------------------------------------
-   Divider + stats
--------------------------------------------------------- */
-
-.ai-agent-divider {
-    width: 100%;
-    height: 1px;
-
-    margin-top: 19px;
-    margin-bottom: 16px;
-
-    background: #eaecf0;
-}
-
-.ai-agent-stats {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-}
-
-.ai-agent-stat {
-    text-align: center;
-    padding: 0 10px;
-}
-
-.ai-agent-stat + .ai-agent-stat {
-    border-left: 1px solid #eaecf0;
-}
-
-.ai-agent-number {
-    font-size: 23px;
-    line-height: 1;
-    font-weight: 800;
-}
-
-.ai-agent-small {
-    margin-top: 8px;
-
-    font-size: 10px;
-    line-height: 1.25;
-
-    color: #667085;
-}
-
-
-/* --------------------------------------------------------
-   Atlas
--------------------------------------------------------- */
-
-.ai-agent-card.atlas .ai-agent-name,
-.ai-agent-card.atlas .ai-agent-number {
-    color: #168b75;
-}
-
-.ai-agent-card.atlas .status-dot {
-    background: #4fcdb5;
-}
-
-.ai-agent-card.atlas .ai-agent-avatar {
-    background: #effaf6;
-}
-
-
-/* --------------------------------------------------------
-   Vector
--------------------------------------------------------- */
-
-.ai-agent-card.vector .ai-agent-name,
-.ai-agent-card.vector .ai-agent-number {
-    color: #337bc8;
-}
-
-.ai-agent-card.vector .status-dot {
-    background: #69b5ed;
-}
-
-.ai-agent-card.vector .ai-agent-avatar {
-    background: #eef7ff;
-}
-
-
-/* --------------------------------------------------------
-   Newton
--------------------------------------------------------- */
-
-.ai-agent-card.newton .ai-agent-name,
-.ai-agent-card.newton .ai-agent-number {
-    color: #7653c6;
-}
-
-.ai-agent-card.newton .status-dot {
-    background: #9e7de4;
-}
-
-.ai-agent-card.newton .ai-agent-avatar {
-    background: #f5f1ff;
-}
-
-
-/* --------------------------------------------------------
-   Athena
--------------------------------------------------------- */
-
-.ai-agent-card.athena .ai-agent-name,
-.ai-agent-card.athena .ai-agent-number {
-    color: #e24a7d;
-}
-
-.ai-agent-card.athena .status-dot {
-    background: #ef7b9f;
-}
-
-.ai-agent-card.athena .ai-agent-avatar {
-    background: #fff2f7;
-}
-
-
-/* --------------------------------------------------------
-   Euler
--------------------------------------------------------- */
-
-.ai-agent-card.euler .ai-agent-name,
-.ai-agent-card.euler .ai-agent-number {
-    color: #7544ca;
-}
-
-.ai-agent-card.euler .status-dot {
-    background: #a07ae1;
-}
-
-.ai-agent-card.euler .ai-agent-avatar {
-    background: #f5f2ff;
-}
-
-
-/* --------------------------------------------------------
-   Artemis
--------------------------------------------------------- */
-
-.ai-agent-card.artemis .ai-agent-name,
-.ai-agent-card.artemis .ai-agent-number {
-    color: #cc861e;
-}
-
-.ai-agent-card.artemis .status-dot {
-    background: #ecba4f;
-}
-
-.ai-agent-card.artemis .ai-agent-avatar {
-    background: #fff8eb;
-}
-
-
-/* --------------------------------------------------------
-   Workspace
--------------------------------------------------------- */
-
-.specialist-workspace-header {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-
-    margin-top: 12px;
-    margin-bottom: 8px;
-}
-
-.specialist-workspace-avatar {
-    width: 62px;
-    height: 62px;
-
-    border-radius: 20px;
+    border-radius: 14px;
 
     display: flex;
     align-items: center;
     justify-content: center;
 
+    font-size: 23px;
+
     background:
         linear-gradient(
             145deg,
-            #effbf8,
-            #f4f1ff
+            #e9faf7,
+            #f0effc
         );
 
-    border: 1px solid #e1e8eb;
-
-    font-size: 31px;
+    border: 1px solid #dfe9e7;
 }
 
-.specialist-workspace-name {
-    font-size: 24px;
-    line-height: 1.1;
-    font-weight: 800;
+.brand-title {
+    font-size: 15px;
+    line-height: 1.05;
 
-    color: #101828;
+    font-weight: 850;
+    letter-spacing: 0.12em;
+
+    color: #182230;
 }
 
-.specialist-workspace-role {
-    margin-top: 5px;
+.brand-subtitle {
+    margin-top: 9px;
 
-    font-size: 12px;
-    font-weight: 600;
+    font-size: 10px;
+    line-height: 1.45;
 
-    color: #667085;
+    color: var(--oe-text-soft);
 }
 
 
-/* --------------------------------------------------------
-   Artemis questions
--------------------------------------------------------- */
+/* =========================================================
+   SIDEBAR NAVIGATION
+========================================================= */
 
-.journal-question-card {
-    padding: 14px 16px;
+section[data-testid="stSidebar"]
+[data-testid="stSidebarNav"] {
+    padding-top: 0;
+}
 
-    margin-bottom: 10px;
+section[data-testid="stSidebar"]
+[data-testid="stSidebarNav"] ul {
+    gap: 4px;
+}
 
-    border-radius: 15px;
+section[data-testid="stSidebar"]
+[data-testid="stSidebarNav"] a {
+    border-radius: 12px;
 
-    background: rgba(255,255,255,.88);
-
-    border: 1px solid #e7e9ef;
-
-    font-size: 12px;
-    line-height: 1.55;
+    min-height: 42px;
 
     color: #344054;
+
+    font-size: 0.9rem;
+    font-weight: 530;
+
+    transition:
+        background 0.15s ease,
+        color 0.15s ease;
+}
+
+section[data-testid="stSidebar"]
+[data-testid="stSidebarNav"] a:hover {
+    background: #f1f8f7;
+    color: #147f72;
 }
 
 
-/* --------------------------------------------------------
-   Responsive
--------------------------------------------------------- */
+/* =========================================================
+   NATIVE CONTAINERS / CARDS
+========================================================= */
+
+div[data-testid="stVerticalBlockBorderWrapper"] {
+    border-radius: var(--oe-radius-lg) !important;
+
+    border:
+        1px solid var(--oe-border) !important;
+
+    background:
+        rgba(255, 255, 255, 0.9);
+
+    box-shadow:
+        var(--oe-shadow);
+
+    transition:
+        transform 0.16s ease,
+        box-shadow 0.16s ease,
+        border-color 0.16s ease;
+}
+
+div[data-testid="stVerticalBlockBorderWrapper"]:hover {
+    border-color:
+        var(--oe-border-strong) !important;
+
+    box-shadow:
+        0 2px 4px rgba(16, 24, 40, 0.025),
+        0 12px 30px rgba(16, 24, 40, 0.055);
+}
+
+
+/* =========================================================
+   METRICS
+========================================================= */
+
+div[data-testid="stMetric"] {
+    background:
+        rgba(255, 255, 255, 0.82);
+
+    border:
+        1px solid var(--oe-border);
+
+    border-radius:
+        var(--oe-radius-md);
+
+    padding:
+        13px 14px;
+
+    min-height:
+        86px;
+
+    box-shadow:
+        0 3px 12px rgba(16, 24, 40, 0.025);
+}
+
+
+/* metrics already inside bordered cards */
+
+div[data-testid="stVerticalBlockBorderWrapper"]
+div[data-testid="stMetric"] {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+
+    padding-left: 0;
+    padding-right: 0;
+}
+
+
+div[data-testid="stMetricLabel"] {
+    color: var(--oe-text-soft);
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+
+div[data-testid="stMetricValue"] {
+    color: var(--oe-text);
+    font-size: 1.55rem;
+    font-weight: 770;
+}
+
+div[data-testid="stMetricDelta"] {
+    font-size: 0.7rem;
+}
+
+
+/* =========================================================
+   BUTTONS
+========================================================= */
+
+div[data-testid="stButton"] button {
+    min-height: 40px;
+
+    border-radius:
+        11px;
+
+    border:
+        1px solid var(--oe-border);
+
+    background:
+        rgba(255, 255, 255, 0.9);
+
+    color:
+        #344054;
+
+    font-weight:
+        580;
+
+    box-shadow:
+        none;
+
+    transition:
+        all 0.15s ease;
+}
+
+div[data-testid="stButton"] button:hover {
+    border-color:
+        #b9ddd7;
+
+    background:
+        #f0faf8;
+
+    color:
+        #147d71;
+
+    transform:
+        translateY(-1px);
+}
+
+
+/* primary buttons */
+
+div[data-testid="stButton"] button[kind="primary"] {
+    background:
+        var(--oe-primary);
+
+    color:
+        white;
+
+    border-color:
+        var(--oe-primary);
+}
+
+div[data-testid="stButton"] button[kind="primary"]:hover {
+    background:
+        #149986;
+
+    color:
+        white;
+}
+
+
+/* =========================================================
+   PAGE LINKS
+========================================================= */
+
+div[data-testid="stPageLink"] a {
+    border-radius: 10px;
+
+    color:
+        #168b7c;
+
+    font-size:
+        0.86rem;
+
+    font-weight:
+        620;
+}
+
+div[data-testid="stPageLink"] a:hover {
+    color:
+        #0c7267;
+}
+
+
+/* =========================================================
+   LINK BUTTONS
+========================================================= */
+
+div[data-testid="stLinkButton"] a {
+    border-radius:
+        10px;
+
+    border:
+        1px solid #cfe7e3;
+
+    background:
+        #f1faf8;
+
+    color:
+        #157c70;
+
+    font-weight:
+        600;
+}
+
+
+/* =========================================================
+   INPUTS
+========================================================= */
+
+div[data-testid="stTextInput"] input,
+div[data-testid="stTextArea"] textarea {
+
+    border-radius:
+        12px;
+
+    border:
+        1px solid var(--oe-border-strong);
+
+    background:
+        rgba(255, 255, 255, 0.95);
+
+    color:
+        var(--oe-text);
+
+    box-shadow:
+        0 3px 12px rgba(16, 24, 40, 0.02);
+}
+
+
+div[data-testid="stTextInput"] input:focus,
+div[data-testid="stTextArea"] textarea:focus {
+
+    border-color:
+        #8fcfc5;
+
+    box-shadow:
+        0 0 0 3px rgba(23, 169, 149, 0.08);
+}
+
+
+/* =========================================================
+   SELECTBOXES
+========================================================= */
+
+div[data-baseweb="select"] > div {
+
+    border-radius:
+        12px !important;
+
+    border-color:
+        var(--oe-border-strong) !important;
+
+    background:
+        rgba(255, 255, 255, 0.95);
+}
+
+
+/* =========================================================
+   EXPANDERS
+========================================================= */
+
+div[data-testid="stExpander"] {
+
+    border:
+        1px solid var(--oe-border);
+
+    border-radius:
+        var(--oe-radius-md);
+
+    background:
+        rgba(255, 255, 255, 0.88);
+
+    overflow:
+        hidden;
+
+    margin-bottom:
+        8px;
+}
+
+div[data-testid="stExpander"] summary {
+
+    font-weight:
+        600;
+
+    color:
+        #344054;
+}
+
+
+/* =========================================================
+   DIVIDERS
+========================================================= */
+
+hr {
+    border: none !important;
+
+    border-top:
+        1px solid #eceff2 !important;
+
+    margin-top:
+        1.3rem !important;
+
+    margin-bottom:
+        1.3rem !important;
+}
+
+
+/* =========================================================
+   INFO / WARNING / SUCCESS
+========================================================= */
+
+div[data-testid="stAlert"] {
+    border-radius:
+        var(--oe-radius-md);
+
+    border-width:
+        1px;
+
+    box-shadow:
+        none;
+}
+
+
+/* =========================================================
+   CHAT
+========================================================= */
+
+div[data-testid="stChatMessage"] {
+
+    border:
+        1px solid var(--oe-border);
+
+    border-radius:
+        16px;
+
+    padding:
+        12px 14px;
+
+    background:
+        rgba(255, 255, 255, 0.88);
+
+    margin-bottom:
+        10px;
+}
+
+
+/* assistant */
+
+div[data-testid="stChatMessage"]:has(
+    div[data-testid="chatAvatarIcon-assistant"]
+) {
+    background:
+        linear-gradient(
+            135deg,
+            #f0fbf8,
+            #f6f5fc
+        );
+}
+
+
+/* chat input */
+
+div[data-testid="stChatInput"] {
+    border-radius:
+        16px;
+}
+
+
+/* =========================================================
+   DATAFRAMES / TABLES
+========================================================= */
+
+div[data-testid="stDataFrame"] {
+    border:
+        1px solid var(--oe-border);
+
+    border-radius:
+        var(--oe-radius-md);
+
+    overflow:
+        hidden;
+
+    background:
+        white;
+}
+
+
+/* =========================================================
+   CHARTS
+========================================================= */
+
+div[data-testid="stVegaLiteChart"],
+div[data-testid="stArrowVegaLiteChart"],
+div[data-testid="stPlotlyChart"] {
+
+    border-radius:
+        14px;
+
+    overflow:
+        hidden;
+
+    background:
+        rgba(255,255,255,.72);
+}
+
+
+/* =========================================================
+   TABS
+========================================================= */
+
+button[data-baseweb="tab"] {
+
+    font-weight:
+        600;
+
+    color:
+        var(--oe-text-soft);
+}
+
+button[data-baseweb="tab"][aria-selected="true"] {
+
+    color:
+        var(--oe-primary);
+}
+
+
+/* =========================================================
+   PROGRESS
+========================================================= */
+
+div[data-testid="stProgress"] > div > div > div {
+
+    background:
+        var(--oe-primary);
+}
+
+
+/* =========================================================
+   MOBILE / IPAD
+========================================================= */
 
 @media (max-width: 1200px) {
 
-    .team-title {
-        font-size: 32px;
+    .block-container {
+        padding-left: 1.3rem;
+        padding-right: 1.3rem;
     }
 
-    .ai-agent-card {
-        padding: 18px;
-        min-height: 290px;
+    h1 {
+        font-size: 2rem !important;
     }
 
-    .ai-agent-avatar {
-        width: 78px;
-        height: 78px;
-        min-width: 78px;
-        font-size: 37px;
+}
+
+
+@media (max-width: 850px) {
+
+    .block-container {
+        padding-left: 1rem;
+        padding-right: 1rem;
     }
 
-    .ai-agent-name {
-        font-size: 16px;
+    div[data-testid="stMetricValue"] {
+        font-size: 1.25rem;
     }
+
 }
