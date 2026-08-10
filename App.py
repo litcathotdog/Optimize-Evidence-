@@ -26,6 +26,7 @@ if STYLE_PATH.exists():
         "r",
         encoding="utf-8",
     ) as file:
+
         st.markdown(
             f"<style>{file.read()}</style>",
             unsafe_allow_html=True,
@@ -36,64 +37,58 @@ if STYLE_PATH.exists():
 # DEFINE PAGES
 # =========================================================
 
-home = st.Page(
-    "pages/1_Home.py",
-    title="Home",
-    icon=":material/home:",
+clinical_problems = st.Page(
+    "pages/clinical_problems.py",
+    title="Clinical Problems",
+    icon=":material/clinical_notes:",
     default=True,
 )
 
-clinical_problems = st.Page(
-    "pages/2_Clinical_Problems.py",
-    title="Clinical Problems",
-    icon=":material/clinical_notes:",
-)
-
 problem_detail = st.Page(
-    "pages/3_Problem_Detail.py",
+    "pages/problem_detail.py",
     title="Problem Detail",
     icon=":material/article:",
     visibility="hidden",
 )
 
 ai_specialists = st.Page(
-    "pages/4_AI_Specialists.py",
+    "pages/ai_specialists.py",
     title="AI Specialists",
     icon=":material/groups:",
 )
 
 evidence_library = st.Page(
-    "pages/5_Evidence_Library.py",
+    "pages/evidence_library.py",
     title="Evidence Library",
     icon=":material/library_books:",
 )
 
 journal_club = st.Page(
-    "pages/6_Journal_Club.py",
+    "pages/journal_club.py",
     title="Journal Club",
     icon=":material/menu_book:",
 )
 
 knowledge_graph = st.Page(
-    "pages/7_Knowledge_Graph.py",
+    "pages/knowledge_graph.py",
     title="Knowledge Graph",
     icon=":material/hub:",
 )
 
 evidence_gaps = st.Page(
-    "pages/8_Evidence_Gaps.py",
+    "pages/evidence_gaps.py",
     title="Evidence Gaps",
     icon=":material/warning:",
 )
 
 statistics_review = st.Page(
-    "pages/9_Statistics_Review.py",
+    "pages/statistics_review.py",
     title="Statistics Review",
     icon=":material/analytics:",
 )
 
 ask_athena = st.Page(
-    "pages/10_Ask_Athena.py",
+    "pages/ask_athena.py",
     title="Ask Athena",
     icon=":material/auto_awesome:",
 )
@@ -108,9 +103,13 @@ with st.sidebar:
     st.markdown(
         """
         <div class="sidebar-brand">
-            <div class="brand-mark">🧠</div>
+
+            <div class="brand-mark">
+                🧠
+            </div>
 
             <div>
+
                 <div class="brand-title">
                     OPTIMIZE
                 </div>
@@ -123,7 +122,9 @@ with st.sidebar:
                     Better evidence.<br>
                     Better outcomes.
                 </div>
+
             </div>
+
         </div>
         """,
         unsafe_allow_html=True,
@@ -134,10 +135,9 @@ with st.sidebar:
 # NAVIGATION
 # =========================================================
 
-navigation = st.navigation(
+page = st.navigation(
     {
-        "": [
-            home,
+        "Evidence Intelligence": [
             clinical_problems,
             ai_specialists,
             evidence_library,
@@ -147,15 +147,21 @@ navigation = st.navigation(
             statistics_review,
         ],
 
-        "AI": [
+        "Research Assistant": [
             ask_athena,
         ],
-    }
+
+        # Hidden but still routable
+        "_hidden": [
+            problem_detail,
+        ],
+    },
+    position="sidebar",
 )
 
 
 # =========================================================
-# RUN CURRENT PAGE
+# RUN SELECTED PAGE
 # =========================================================
 
-navigation.run()
+page.run()
