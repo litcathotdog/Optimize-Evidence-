@@ -25,7 +25,7 @@ home = st.Page(
 )
 
 clinical_problems = st.Page(
-    "pages/clinical_problems.py",
+    "pages/1_Clinical_Problems.py",
     title="Clinical Problems",
 )
 
