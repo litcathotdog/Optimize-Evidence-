@@ -25,9 +25,8 @@ home = st.Page(
 )
 
 clinical_problems = st.Page(
-    "pages/1_Clinical_Problems.py",
+    "pages/clinical_problems.py",
     title="Clinical Problems",
-    icon=":material/clinical_notes:",
 )
 
 problem_detail = st.Page(
