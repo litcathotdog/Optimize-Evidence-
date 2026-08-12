@@ -370,7 +370,7 @@ if not selected_problem:
     )
 
     st.page_link(
-        "pages/clinical_problems.py",
+        "pages/1_Clinical_Problems.py",
         label="← Back to Clinical Problems",
     )
 
@@ -415,7 +415,7 @@ problem_papers = sort_papers(
 # =========================================================
 
 st.page_link(
-    "pages/clinical_problems.py",
+    "pages/1_Clinical_Problems.py",
     label="← Back to Clinical Problems",
 )
 
