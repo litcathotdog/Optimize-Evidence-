@@ -500,9 +500,8 @@ with main_col:
         )
 
     with link_col:
-
         st.page_link(
-            "pages/clinical_problems.py",
+            "pages/1_Clinical_Problems.py",
             label="View all →",
         )
 
