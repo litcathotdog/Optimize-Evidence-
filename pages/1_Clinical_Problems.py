@@ -606,5 +606,5 @@ for row_start in range(
                     ]
 
                     st.switch_page(
-                        "pages/problem_detail.py"
+                        "pages/2_Problem_Detail.py"
                     )
