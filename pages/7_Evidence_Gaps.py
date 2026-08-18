@@ -36,12 +36,35 @@ journal_club = load_json(
     {},
 )
 
+# Protect against malformed top-level JSON
+if not isinstance(dashboard, dict):
+    dashboard = {}
+
+if not isinstance(evidence_db, list):
+    evidence_db = []
+
+if not isinstance(journal_club, dict):
+    journal_club = {}
+
 
 # =========================================================
 # HELPERS
 # =========================================================
 
+def clean_text(value):
+    if value is None:
+        return ""
+
+    if isinstance(value, str):
+        return value.strip()
+
+    return str(value).strip()
+
+
 def get_translation(record):
+    if not isinstance(record, dict):
+        return {}
+
     value = record.get(
         "clinical_translation",
         {},
@@ -55,6 +78,9 @@ def get_translation(record):
 
 
 def get_appraisal(record):
+    if not isinstance(record, dict):
+        return {}
+
     value = record.get(
         "appraisal",
         {},
@@ -68,6 +94,9 @@ def get_appraisal(record):
 
 
 def get_statistics(record):
+    if not isinstance(record, dict):
+        return {}
+
     value = record.get(
         "statistics",
         {},
@@ -81,6 +110,9 @@ def get_statistics(record):
 
 
 def get_metadata(record):
+    if not isinstance(record, dict):
+        return {}
+
     value = record.get(
         "metadata",
         {},
@@ -94,25 +126,34 @@ def get_metadata(record):
 
 
 def get_title(record):
+    title = clean_text(
+        get_metadata(
+            record
+        ).get(
+            "title",
+            "",
+        )
+    )
+
     return (
-        get_metadata(record).get("title")
-        or "Untitled paper"
+        title
+        if title
+        else "Untitled paper"
     )
 
 
 def get_clinical_area(record):
-    value = get_translation(
-        record
-    ).get(
-        "clinical_area",
-        "",
+    value = clean_text(
+        get_translation(
+            record
+        ).get(
+            "clinical_area",
+            "",
+        )
     )
 
-    if isinstance(
-        value,
-        str,
-    ) and value.strip():
-        return value.strip()
+    if value:
+        return value
 
     return "Other"
 
@@ -142,7 +183,13 @@ def get_evidence_score(record):
     ):
         return value
 
-    return 0
+    try:
+        return float(value)
+    except (
+        TypeError,
+        ValueError,
+    ):
+        return 0
 
 
 def get_statistics_score(record):
@@ -170,17 +217,72 @@ def get_statistics_score(record):
     ):
         return value
 
-    return 0
+    try:
+        return float(value)
+    except (
+        TypeError,
+        ValueError,
+    ):
+        return 0
+
+
+def get_pubmed_url(record):
+    metadata = get_metadata(
+        record
+    )
+
+    url = clean_text(
+        metadata.get(
+            "pubmed_url",
+            "",
+        )
+    )
+
+    if url.startswith(
+        ("http://", "https://")
+    ):
+        return url
+
+    return ""
+
+
+def get_practitioner_takeaway(record):
+    translation = get_translation(
+        record
+    )
+
+    value = clean_text(
+        translation.get(
+            "practitioner_takeaway",
+            "",
+        )
+    )
+
+    if value:
+        return value
+
+    value = clean_text(
+        translation.get(
+            "clinical_summary",
+            "",
+        )
+    )
+
+    if value:
+        return value
+
+    return ""
+
+
+def has_nonempty_list(value):
+    return (
+        isinstance(value, list)
+        and len(value) > 0
+    )
 
 
 def get_gap_candidates():
     candidates = []
-
-    if not isinstance(
-        evidence_db,
-        list,
-    ):
-        return candidates
 
     for record in evidence_db:
 
@@ -204,17 +306,21 @@ def get_gap_candidates():
 
         flags = []
 
+
         # ---------------------------------------------
         # Full-text review
         # ---------------------------------------------
 
-        if translation.get(
+        requires_full_text = translation.get(
             "requires_full_text_review",
             False,
-        ):
+        )
+
+        if requires_full_text is True:
             flags.append(
                 "Requires full-text review"
             )
+
 
         # ---------------------------------------------
         # Weak evidence
@@ -234,6 +340,7 @@ def get_gap_candidates():
                 "Low evidence strength"
             )
 
+
         # ---------------------------------------------
         # Weak statistics
         # ---------------------------------------------
@@ -252,6 +359,7 @@ def get_gap_candidates():
                 "Weak statistical support"
             )
 
+
         # ---------------------------------------------
         # Statistical flags
         # ---------------------------------------------
@@ -263,16 +371,13 @@ def get_gap_candidates():
             )
         )
 
-        if (
-            isinstance(
-                reporting_flags,
-                list,
-            )
-            and reporting_flags
+        if has_nonempty_list(
+            reporting_flags
         ):
             flags.append(
                 "Statistical reporting concerns"
             )
+
 
         # ---------------------------------------------
         # Appraisal flags
@@ -283,34 +388,38 @@ def get_gap_candidates():
             [],
         )
 
-        if (
-            isinstance(
-                appraisal_flags,
-                list,
-            )
-            and appraisal_flags
+        if has_nonempty_list(
+            appraisal_flags
         ):
             flags.append(
                 "Evidence appraisal concerns"
             )
 
+
         # ---------------------------------------------
         # Practice readiness
         # ---------------------------------------------
 
-        readiness = translation.get(
-            "practice_readiness",
-            "",
+        readiness = clean_text(
+            translation.get(
+                "practice_readiness",
+                "",
+            )
         )
 
-        if readiness not in {
-            "Practice-informing",
-            "",
-            None,
-        }:
+        if (
+            readiness
+            and readiness.lower()
+            != "practice-informing"
+        ):
             flags.append(
                 "Not yet practice-informing"
             )
+
+
+        # ---------------------------------------------
+        # Add record if any concern exists
+        # ---------------------------------------------
 
         if flags:
 
@@ -401,6 +510,7 @@ m1, m2, m3, m4 = st.columns(
     gap="medium",
 )
 
+
 with m1:
 
     st.metric(
@@ -411,6 +521,7 @@ with m1:
         border=True,
     )
 
+
 with m2:
 
     st.metric(
@@ -419,6 +530,7 @@ with m2:
         border=True,
     )
 
+
 with m3:
 
     st.metric(
@@ -426,6 +538,7 @@ with m3:
         statistical_issue_count,
         border=True,
     )
+
 
 with m4:
 
@@ -447,6 +560,9 @@ clinical_areas = sorted(
     {
         item["area"]
         for item in gap_candidates
+        if item.get(
+            "area"
+        )
     }
 )
 
@@ -455,6 +571,7 @@ filter_col, sort_col = st.columns(
     [2, 1],
     gap="medium",
 )
+
 
 with filter_col:
 
@@ -480,7 +597,12 @@ with sort_col:
     )
 
 
+# =========================================================
+# FILTER GAP RECORDS
+# =========================================================
+
 filtered_gaps = []
+
 
 for item in gap_candidates:
 
@@ -521,7 +643,7 @@ elif sort_option == "Lowest Evidence":
             if item[
                 "evidence_score"
             ] > 0
-            else 999
+            else float("inf")
         )
     )
 
@@ -536,7 +658,7 @@ elif sort_option == "Lowest Statistics":
             if item[
                 "statistics_score"
             ] > 0
-            else 999
+            else float("inf")
         )
     )
 
@@ -562,6 +684,7 @@ st.subheader(
 
 area_counts = {}
 
+
 for item in gap_candidates:
 
     area = item["area"]
@@ -586,22 +709,24 @@ sorted_areas = sorted(
 
 if sorted_areas:
 
+    visible_areas = (
+        sorted_areas[:4]
+    )
+
     area_cols = st.columns(
-        min(
-            4,
-            len(
-                sorted_areas
-            ),
+        len(
+            visible_areas
         ),
         gap="medium",
     )
+
 
     for col, (
         area,
         count,
     ) in zip(
         area_cols,
-        sorted_areas[:4],
+        visible_areas,
     ):
 
         with col:
@@ -649,152 +774,159 @@ if not filtered_gaps:
         "No papers match the current filters."
     )
 
-    st.stop()
 
+else:
 
-for index, item in enumerate(
-    filtered_gaps,
-    start=1,
-):
-
-    record = item[
-        "record"
-    ]
-
-    metadata = get_metadata(
-        record
-    )
-
-    title = get_title(
-        record
-    )
-
-    journal = metadata.get(
-        "journal",
-        "",
-    )
-
-    year = (
-        metadata.get(
-            "publication_year"
-        )
-        or metadata.get(
-            "year"
-        )
-        or ""
-    )
-
-    with st.container(
-        border=True,
+    for index, item in enumerate(
+        filtered_gaps,
+        start=1,
     ):
 
-        st.caption(
-            f"GAP SIGNAL {index}"
-        )
+        record = item[
+            "record"
+        ]
 
-        st.markdown(
-            f"### {title}"
-        )
-
-        source_parts = []
-
-        if journal:
-            source_parts.append(
-                str(journal)
-            )
-
-        if year:
-            source_parts.append(
-                str(year)
-            )
-
-        if item["area"]:
-            source_parts.append(
-                item["area"]
-            )
-
-        if source_parts:
-
-            st.caption(
-                " • ".join(
-                    source_parts
-                )
-            )
-
-
-        c1, c2, c3 = st.columns(
-            3
-        )
-
-        with c1:
-
-            st.metric(
-                "Evidence Score",
-                item[
-                    "evidence_score"
-                ],
-            )
-
-        with c2:
-
-            st.metric(
-                "Statistics Score",
-                item[
-                    "statistics_score"
-                ],
-            )
-
-        with c3:
-
-            st.metric(
-                "Gap Signals",
-                len(
-                    item["flags"]
-                ),
-            )
-
-
-        st.markdown(
-            "**Why this paper is flagged**"
-        )
-
-        for flag in item[
-            "flags"
-        ]:
-
-            st.write(
-                f"• {flag}"
-            )
-
-
-        translation = get_translation(
+        metadata = get_metadata(
             record
         )
 
-        takeaway = translation.get(
-            "practitioner_takeaway",
-            "",
+        title = get_title(
+            record
         )
 
-        if takeaway:
+        journal = clean_text(
+            metadata.get(
+                "journal",
+                "",
+            )
+        )
 
-            with st.expander(
-                "Practitioner takeaway"
-            ):
+        year = clean_text(
+            metadata.get(
+                "publication_year"
+            )
+            or metadata.get(
+                "year"
+            )
+            or ""
+        )
 
-                st.write(
-                    takeaway
+
+        with st.container(
+            border=True,
+        ):
+
+            st.caption(
+                f"GAP SIGNAL {index}"
+            )
+
+            st.markdown(
+                f"### {title}"
+            )
+
+
+            source_parts = []
+
+            if journal:
+                source_parts.append(
+                    journal
+                )
+
+            if year:
+                source_parts.append(
+                    year
+                )
+
+            if item["area"]:
+                source_parts.append(
+                    item["area"]
                 )
 
 
-        pubmed_url = metadata.get(
-            "pubmed_url",
-            "",
-        )
+            if source_parts:
 
-        if pubmed_url:
+                st.caption(
+                    " • ".join(
+                        source_parts
+                    )
+                )
 
-            st.link_button(
-                "Open PubMed",
-                pubmed_url,
+
+            c1, c2, c3 = st.columns(
+                3
             )
+
+
+            with c1:
+
+                st.metric(
+                    "Evidence Score",
+                    item[
+                        "evidence_score"
+                    ],
+                )
+
+
+            with c2:
+
+                st.metric(
+                    "Statistics Score",
+                    item[
+                        "statistics_score"
+                    ],
+                )
+
+
+            with c3:
+
+                st.metric(
+                    "Gap Signals",
+                    len(
+                        item["flags"]
+                    ),
+                )
+
+
+            st.markdown(
+                "**Why this paper is flagged**"
+            )
+
+
+            for flag in item[
+                "flags"
+            ]:
+
+                st.write(
+                    f"• {flag}"
+                )
+
+
+            takeaway = (
+                get_practitioner_takeaway(
+                    record
+                )
+            )
+
+            if takeaway:
+
+                with st.expander(
+                    "Practitioner takeaway"
+                ):
+
+                    st.write(
+                        takeaway
+                    )
+
+
+            pubmed_url = (
+                get_pubmed_url(
+                    record
+                )
+            )
+
+            if pubmed_url:
+
+                st.link_button(
+                    "Open PubMed",
+                    pubmed_url,
+                )
