@@ -29,12 +29,19 @@ evidence_db = load_json(
     [],
 )
 
+# Make sure evidence_db is always a list
+if not isinstance(evidence_db, list):
+    evidence_db = []
+
 
 # =========================================================
 # HELPERS
 # =========================================================
 
 def get_metadata(record):
+    if not isinstance(record, dict):
+        return {}
+
     value = record.get(
         "metadata",
         {},
@@ -48,6 +55,9 @@ def get_metadata(record):
 
 
 def get_appraisal(record):
+    if not isinstance(record, dict):
+        return {}
+
     value = record.get(
         "appraisal",
         {},
@@ -61,6 +71,9 @@ def get_appraisal(record):
 
 
 def get_statistics(record):
+    if not isinstance(record, dict):
+        return {}
+
     value = record.get(
         "statistics",
         {},
@@ -74,6 +87,9 @@ def get_statistics(record):
 
 
 def get_translation(record):
+    if not isinstance(record, dict):
+        return {}
+
     value = record.get(
         "clinical_translation",
         {},
@@ -87,6 +103,9 @@ def get_translation(record):
 
 
 def get_specialties(record):
+    if not isinstance(record, dict):
+        return {}
+
     value = record.get(
         "specialties",
         {},
@@ -99,16 +118,34 @@ def get_specialties(record):
     )
 
 
+def clean_text(value):
+    if value is None:
+        return ""
+
+    if isinstance(value, str):
+        return value.strip()
+
+    return str(value).strip()
+
+
 def get_title(record):
     metadata = get_metadata(
         record
     )
 
+    value = metadata.get(
+        "title",
+        "",
+    )
+
+    value = clean_text(
+        value
+    )
+
     return (
-        metadata.get(
-            "title"
-        )
-        or "Untitled paper"
+        value
+        if value
+        else "Untitled paper"
     )
 
 
@@ -117,7 +154,7 @@ def get_year(record):
         record
     )
 
-    return (
+    value = (
         metadata.get(
             "publication_year"
         )
@@ -127,17 +164,34 @@ def get_year(record):
         or ""
     )
 
+    return clean_text(
+        value
+    )
+
+
+def get_year_number(record):
+    year = get_year(
+        record
+    )
+
+    try:
+        return int(
+            str(year)[:4]
+        )
+    except (TypeError, ValueError):
+        return 0
+
 
 def get_journal(record):
     metadata = get_metadata(
         record
     )
 
-    return (
+    return clean_text(
         metadata.get(
-            "journal"
+            "journal",
+            "",
         )
-        or ""
     )
 
 
@@ -146,12 +200,19 @@ def get_pubmed_url(record):
         record
     )
 
-    return (
+    value = clean_text(
         metadata.get(
-            "pubmed_url"
+            "pubmed_url",
+            "",
         )
-        or ""
     )
+
+    if value.startswith(
+        ("http://", "https://")
+    ):
+        return value
+
+    return ""
 
 
 def get_clinical_area(record):
@@ -159,16 +220,15 @@ def get_clinical_area(record):
         record
     )
 
-    value = translation.get(
-        "clinical_area",
-        "",
+    value = clean_text(
+        translation.get(
+            "clinical_area",
+            "",
+        )
     )
 
-    if isinstance(
-        value,
-        str,
-    ) and value.strip():
-        return value.strip()
+    if value:
+        return value
 
     return "Other"
 
@@ -178,31 +238,29 @@ def get_intervention(record):
         record
     )
 
-    value = translation.get(
-        "intervention_or_exposure",
-        "",
+    value = clean_text(
+        translation.get(
+            "intervention_or_exposure",
+            "",
+        )
     )
 
-    if (
-        isinstance(value, str)
-        and value.strip()
-    ):
-        return value.strip()
+    if value:
+        return value
 
     appraisal = get_appraisal(
         record
     )
 
-    value = appraisal.get(
-        "intervention_or_exposure",
-        "",
+    value = clean_text(
+        appraisal.get(
+            "intervention_or_exposure",
+            "",
+        )
     )
 
-    if (
-        isinstance(value, str)
-        and value.strip()
-    ):
-        return value.strip()
+    if value:
+        return value
 
     return "Not clearly identified"
 
@@ -212,29 +270,29 @@ def get_study_design(record):
         record
     )
 
-    value = metadata.get(
-        "study_design"
+    value = clean_text(
+        metadata.get(
+            "study_design",
+            "",
+        )
     )
 
-    if (
-        isinstance(value, str)
-        and value.strip()
-    ):
-        return value.strip()
+    if value:
+        return value
 
     appraisal = get_appraisal(
         record
     )
 
-    value = appraisal.get(
-        "study_design"
+    value = clean_text(
+        appraisal.get(
+            "study_design",
+            "",
+        )
     )
 
-    if (
-        isinstance(value, str)
-        and value.strip()
-    ):
-        return value.strip()
+    if value:
+        return value
 
     return "Unclear"
 
@@ -266,7 +324,13 @@ def get_evidence_score(record):
     ):
         return value
 
-    return 0
+    try:
+        return float(value)
+    except (
+        TypeError,
+        ValueError,
+    ):
+        return 0
 
 
 def get_statistics_score(record):
@@ -296,7 +360,13 @@ def get_statistics_score(record):
     ):
         return value
 
-    return 0
+    try:
+        return float(value)
+    except (
+        TypeError,
+        ValueError,
+    ):
+        return 0
 
 
 def get_practice_readiness(record):
@@ -304,16 +374,15 @@ def get_practice_readiness(record):
         record
     )
 
-    value = translation.get(
-        "practice_readiness",
-        "",
+    value = clean_text(
+        translation.get(
+            "practice_readiness",
+            "",
+        )
     )
 
-    if (
-        isinstance(value, str)
-        and value.strip()
-    ):
-        return value.strip()
+    if value:
+        return value
 
     return "Not classified"
 
@@ -323,27 +392,25 @@ def get_takeaway(record):
         record
     )
 
-    value = translation.get(
-        "practitioner_takeaway",
-        "",
+    value = clean_text(
+        translation.get(
+            "practitioner_takeaway",
+            "",
+        )
     )
 
-    if (
-        isinstance(value, str)
-        and value.strip()
-    ):
-        return value.strip()
+    if value:
+        return value
 
-    value = translation.get(
-        "clinical_summary",
-        "",
+    value = clean_text(
+        translation.get(
+            "clinical_summary",
+            "",
+        )
     )
 
-    if (
-        isinstance(value, str)
-        and value.strip()
-    ):
-        return value.strip()
+    if value:
+        return value
 
     return "No practitioner takeaway available."
 
@@ -356,10 +423,18 @@ def get_specialty_names(record):
     labels = []
 
     mapping = {
-        "regenerative_medicine": "Regenerative Medicine",
-        "sports_performance": "Sports Performance",
-        "biomechanics": "Biomechanics",
-        "womens_athlete_health": "Women's Athlete Health",
+        "regenerative_medicine": (
+            "Regenerative Medicine"
+        ),
+        "sports_performance": (
+            "Sports Performance"
+        ),
+        "biomechanics": (
+            "Biomechanics"
+        ),
+        "womens_athlete_health": (
+            "Women's Athlete Health"
+        ),
     }
 
     for key, label in mapping.items():
@@ -404,37 +479,91 @@ def build_search_text(record):
         [],
     )
 
-    if not isinstance(
+    if isinstance(
+        topics,
+        str,
+    ):
+        topics = [
+            topics
+        ]
+
+    elif not isinstance(
         topics,
         list,
     ):
         topics = []
 
+    authors = metadata.get(
+        "authors",
+        [],
+    )
+
+    if isinstance(
+        authors,
+        str,
+    ):
+        authors = [
+            authors
+        ]
+
+    elif not isinstance(
+        authors,
+        list,
+    ):
+        authors = []
+
     parts = [
-        get_title(record),
-        metadata.get(
-            "abstract",
-            "",
+        get_title(
+            record
         ),
-        get_journal(record),
-        get_clinical_area(record),
-        get_intervention(record),
-        get_study_design(record),
-        translation.get(
-            "clinical_summary",
-            "",
+        clean_text(
+            metadata.get(
+                "abstract",
+                "",
+            )
         ),
-        translation.get(
-            "practitioner_takeaway",
-            "",
+        get_journal(
+            record
         ),
-        appraisal.get(
-            "population",
-            "",
+        get_year(
+            record
+        ),
+        get_clinical_area(
+            record
+        ),
+        get_intervention(
+            record
+        ),
+        get_study_design(
+            record
+        ),
+        clean_text(
+            translation.get(
+                "clinical_summary",
+                "",
+            )
+        ),
+        clean_text(
+            translation.get(
+                "practitioner_takeaway",
+                "",
+            )
+        ),
+        clean_text(
+            appraisal.get(
+                "population",
+                "",
+            )
         ),
         " ".join(
-            str(topic)
+            clean_text(topic)
             for topic in topics
+            if topic
+        ),
+        " ".join(
+            clean_text(author)
+            for author in authors
+            if author
         ),
         " ".join(
             get_specialty_names(
@@ -444,7 +573,7 @@ def build_search_text(record):
     ]
 
     return " ".join(
-        str(part)
+        part
         for part in parts
         if part
     ).lower()
@@ -529,6 +658,7 @@ filter_1, filter_2, filter_3, filter_4 = (
     )
 )
 
+
 with filter_1:
 
     selected_area = st.selectbox(
@@ -581,6 +711,12 @@ with filter_4:
 
 filtered_records = []
 
+query = (
+    search.lower().strip()
+    if search
+    else ""
+)
+
 for record in evidence_db:
 
     if not isinstance(
@@ -589,9 +725,7 @@ for record in evidence_db:
     ):
         continue
 
-    if search:
-
-        query = search.lower().strip()
+    if query:
 
         if query not in build_search_text(
             record
@@ -643,11 +777,7 @@ if (
 ):
 
     filtered_records.sort(
-        key=lambda record: (
-            get_evidence_score(
-                record
-            )
-        ),
+        key=get_evidence_score,
         reverse=True,
     )
 
@@ -658,23 +788,18 @@ elif (
 ):
 
     filtered_records.sort(
-        key=lambda record: (
-            get_statistics_score(
-                record
-            )
-        ),
+        key=get_statistics_score,
         reverse=True,
     )
 
 
-elif sort_option == "Newest":
+elif (
+    sort_option
+    == "Newest"
+):
 
     filtered_records.sort(
-        key=lambda record: str(
-            get_year(
-                record
-            )
-        ),
+        key=get_year_number,
         reverse=True,
     )
 
@@ -694,13 +819,8 @@ else:
 # SUMMARY METRICS
 # =========================================================
 
-total_indexed = (
-    len(evidence_db)
-    if isinstance(
-        evidence_db,
-        list,
-    )
-    else 0
+total_indexed = len(
+    evidence_db
 )
 
 practice_informing = sum(
@@ -708,18 +828,20 @@ practice_informing = sum(
     for record in filtered_records
     if get_practice_readiness(
         record
-    )
-    == "Practice-informing"
+    ).lower()
+    == "practice-informing"
 )
 
 needs_full_text = sum(
     1
     for record in filtered_records
-    if get_translation(
-        record
-    ).get(
-        "requires_full_text_review",
-        False,
+    if bool(
+        get_translation(
+            record
+        ).get(
+            "requires_full_text_review",
+            False,
+        )
     )
 )
 
@@ -737,6 +859,7 @@ m1, m2, m3, m4 = st.columns(
     4,
     gap="medium",
 )
+
 
 with m1:
 
@@ -793,6 +916,7 @@ results_left, results_right = (
     )
 )
 
+
 with results_left:
 
     st.subheader(
@@ -817,207 +941,213 @@ if not filtered_records:
         "No papers match the current search and filters."
     )
 
-    st.stop()
+else:
 
+    # =====================================================
+    # PAPER CARDS
+    # =====================================================
 
-# =========================================================
-# PAPER CARDS
-# =========================================================
-
-for index, record in enumerate(
-    filtered_records,
-    start=1,
-):
-
-    metadata = get_metadata(
-        record
-    )
-
-    title = get_title(
-        record
-    )
-
-    year = get_year(
-        record
-    )
-
-    journal = get_journal(
-        record
-    )
-
-    design = get_study_design(
-        record
-    )
-
-    area = get_clinical_area(
-        record
-    )
-
-    intervention = get_intervention(
-        record
-    )
-
-    evidence_score = (
-        get_evidence_score(
-            record
-        )
-    )
-
-    statistics_score = (
-        get_statistics_score(
-            record
-        )
-    )
-
-    readiness = (
-        get_practice_readiness(
-            record
-        )
-    )
-
-    specialty_names = (
-        get_specialty_names(
-            record
-        )
-    )
-
-    with st.container(
-        border=True,
+    for index, record in enumerate(
+        filtered_records,
+        start=1,
     ):
 
-        st.caption(
-            f"RESULT {index}"
-        )
-
-        st.markdown(
-            f"### {title}"
-        )
-
-        source_parts = []
-
-        if journal:
-            source_parts.append(
-                str(journal)
-            )
-
-        if year:
-            source_parts.append(
-                str(year)
-            )
-
-        if design:
-            source_parts.append(
-                str(design)
-            )
-
-        if source_parts:
-
-            st.caption(
-                " • ".join(
-                    source_parts
-                )
-            )
-
-        st.write("")
-
-        c1, c2, c3, c4 = st.columns(
-            4,
-            gap="small",
-        )
-
-        with c1:
-
-            st.metric(
-                "Evidence",
-                evidence_score,
-            )
-
-
-        with c2:
-
-            st.metric(
-                "Statistics",
-                statistics_score,
-            )
-
-
-        with c3:
-
-            st.metric(
-                "Clinical Area",
-                area,
-            )
-
-
-        with c4:
-
-            st.metric(
-                "Practice Readiness",
-                readiness,
-            )
-
-
-        st.markdown(
-            "**Intervention / exposure**"
-        )
-
-        st.write(
-            intervention
-        )
-
-
-        if specialty_names:
-
-            st.caption(
-                "Specialists: "
-                + " • ".join(
-                    specialty_names
-                )
-            )
-
-
-        takeaway = get_takeaway(
+        metadata = get_metadata(
             record
         )
 
-        with st.expander(
-            "Practitioner takeaway"
-        ):
-
-            st.write(
-                takeaway
-            )
-
-
-        abstract = metadata.get(
-            "abstract",
-            "",
+        title = get_title(
+            record
         )
 
-        if (
-            isinstance(
-                abstract,
-                str,
+        year = get_year(
+            record
+        )
+
+        journal = get_journal(
+            record
+        )
+
+        design = get_study_design(
+            record
+        )
+
+        area = get_clinical_area(
+            record
+        )
+
+        intervention = get_intervention(
+            record
+        )
+
+        evidence_score = (
+            get_evidence_score(
+                record
             )
-            and abstract.strip()
+        )
+
+        statistics_score = (
+            get_statistics_score(
+                record
+            )
+        )
+
+        readiness = (
+            get_practice_readiness(
+                record
+            )
+        )
+
+        specialty_names = (
+            get_specialty_names(
+                record
+            )
+        )
+
+
+        with st.container(
+            border=True,
         ):
 
+            st.caption(
+                f"RESULT {index}"
+            )
+
+            st.markdown(
+                f"### {title}"
+            )
+
+
+            source_parts = []
+
+            if journal:
+                source_parts.append(
+                    str(journal)
+                )
+
+            if year:
+                source_parts.append(
+                    str(year)
+                )
+
+            if (
+                design
+                and design != "Unclear"
+            ):
+                source_parts.append(
+                    str(design)
+                )
+
+
+            if source_parts:
+
+                st.caption(
+                    " • ".join(
+                        source_parts
+                    )
+                )
+
+
+            st.write("")
+
+
+            c1, c2, c3, c4 = (
+                st.columns(
+                    4,
+                    gap="small",
+                )
+            )
+
+
+            with c1:
+
+                st.metric(
+                    "Evidence",
+                    evidence_score,
+                )
+
+
+            with c2:
+
+                st.metric(
+                    "Statistics",
+                    statistics_score,
+                )
+
+
+            with c3:
+
+                st.metric(
+                    "Clinical Area",
+                    area,
+                )
+
+
+            with c4:
+
+                st.metric(
+                    "Practice Readiness",
+                    readiness,
+                )
+
+
+            st.markdown(
+                "**Intervention / exposure**"
+            )
+
+            st.write(
+                intervention
+            )
+
+
+            if specialty_names:
+
+                st.caption(
+                    "Specialists: "
+                    + " • ".join(
+                        specialty_names
+                    )
+                )
+
+
+            takeaway = get_takeaway(
+                record
+            )
+
             with st.expander(
-                "Abstract"
+                "Practitioner takeaway"
             ):
 
                 st.write(
-                    abstract
+                    takeaway
                 )
 
 
-        pubmed_url = get_pubmed_url(
-            record
-        )
-
-        if pubmed_url:
-
-            st.link_button(
-                "Open PubMed",
-                pubmed_url,
+            abstract = clean_text(
+                metadata.get(
+                    "abstract",
+                    "",
+                )
             )
+
+            if abstract:
+
+                with st.expander(
+                    "Abstract"
+                ):
+
+                    st.write(
+                        abstract
+                    )
+
+
+            pubmed_url = get_pubmed_url(
+                record
+            )
+
+            if pubmed_url:
+
+                st.link_button(
+                    "Open PubMed",
+                    pubmed_url,
+                )
