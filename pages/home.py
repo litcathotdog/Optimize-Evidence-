@@ -500,6 +500,7 @@ with main_col:
         )
 
     with link_col:
+
         st.page_link(
             "pages/1_Clinical_Problems.py",
             label="View all →",
@@ -591,7 +592,7 @@ with main_col:
                         ] = problem
 
                         st.switch_page(
-                            "pages/problem_detail.py"
+                            "pages/2_Problem_Detail.py"
                         )
 
     else:
@@ -621,7 +622,7 @@ with main_col:
     with link_col:
 
         st.page_link(
-            "pages/ai_specialists.py",
+            "pages/3_AI_Specialists.py",
             label="Meet team →",
         )
 
@@ -704,7 +705,7 @@ with main_col:
                     ] = name
 
                     st.switch_page(
-                        "pages/ai_specialists.py"
+                        "pages/3_AI_Specialists.py"
                     )
 
 
@@ -729,7 +730,7 @@ with main_col:
 
 
     # -----------------------------------------------------
-    # Evidence Overview
+    # EVIDENCE OVERVIEW
     # -----------------------------------------------------
 
     with evidence_col:
@@ -780,7 +781,7 @@ with main_col:
 
 
     # -----------------------------------------------------
-    # Paper of Week
+    # PAPER OF WEEK
     # -----------------------------------------------------
 
     with paper_col:
@@ -835,13 +836,13 @@ with main_col:
                 )
 
             st.page_link(
-                "pages/journal_club.py",
+                "pages/5_Journal_Club.py",
                 label="Read summary →",
             )
 
 
     # -----------------------------------------------------
-    # Trending
+    # TRENDING
     # -----------------------------------------------------
 
     with trend_col:
@@ -887,7 +888,7 @@ with main_col:
                 )
 
             st.page_link(
-                "pages/evidence_library.py",
+                "pages/4_Evidence_Library.py",
                 label="Explore research →",
             )
 
@@ -1074,7 +1075,7 @@ with right_col:
 
 
         st.page_link(
-            "pages/evidence_gaps.py",
+            "pages/7_Evidence_Gaps.py",
             label="View all gaps →",
         )
 
