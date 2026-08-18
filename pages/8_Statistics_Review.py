@@ -26,12 +26,29 @@ evidence_db = load_json(
     [],
 )
 
+# Protect against malformed top-level JSON
+if not isinstance(evidence_db, list):
+    evidence_db = []
+
 
 # =========================================================
 # HELPERS
 # =========================================================
 
+def clean_text(value):
+    if value is None:
+        return ""
+
+    if isinstance(value, str):
+        return value.strip()
+
+    return str(value).strip()
+
+
 def get_metadata(record):
+    if not isinstance(record, dict):
+        return {}
+
     value = record.get(
         "metadata",
         {},
@@ -45,6 +62,9 @@ def get_metadata(record):
 
 
 def get_statistics(record):
+    if not isinstance(record, dict):
+        return {}
+
     value = record.get(
         "statistics",
         {},
@@ -58,6 +78,9 @@ def get_statistics(record):
 
 
 def get_appraisal(record):
+    if not isinstance(record, dict):
+        return {}
+
     value = record.get(
         "appraisal",
         {},
@@ -71,6 +94,9 @@ def get_appraisal(record):
 
 
 def get_translation(record):
+    if not isinstance(record, dict):
+        return {}
+
     value = record.get(
         "clinical_translation",
         {},
@@ -88,9 +114,17 @@ def get_title(record):
         record
     )
 
+    title = clean_text(
+        metadata.get(
+            "title",
+            "",
+        )
+    )
+
     return (
-        metadata.get("title")
-        or "Untitled paper"
+        title
+        if title
+        else "Untitled paper"
     )
 
 
@@ -99,7 +133,7 @@ def get_year(record):
         record
     )
 
-    return (
+    value = (
         metadata.get(
             "publication_year"
         )
@@ -109,27 +143,58 @@ def get_year(record):
         or ""
     )
 
+    return clean_text(
+        value
+    )
+
+
+def get_year_number(record):
+    year = get_year(
+        record
+    )
+
+    try:
+        return int(
+            str(year)[:4]
+        )
+    except (
+        TypeError,
+        ValueError,
+    ):
+        return 0
+
 
 def get_journal(record):
-    return (
-        get_metadata(
-            record
-        ).get(
-            "journal"
+    metadata = get_metadata(
+        record
+    )
+
+    return clean_text(
+        metadata.get(
+            "journal",
+            "",
         )
-        or ""
     )
 
 
 def get_pubmed_url(record):
-    return (
-        get_metadata(
-            record
-        ).get(
-            "pubmed_url"
-        )
-        or ""
+    metadata = get_metadata(
+        record
     )
+
+    url = clean_text(
+        metadata.get(
+            "pubmed_url",
+            "",
+        )
+    )
+
+    if url.startswith(
+        ("http://", "https://")
+    ):
+        return url
+
+    return ""
 
 
 def get_clinical_area(record):
@@ -137,16 +202,15 @@ def get_clinical_area(record):
         record
     )
 
-    value = translation.get(
-        "clinical_area",
-        "",
+    value = clean_text(
+        translation.get(
+            "clinical_area",
+            "",
+        )
     )
 
-    if (
-        isinstance(value, str)
-        and value.strip()
-    ):
-        return value.strip()
+    if value:
+        return value
 
     return "Other"
 
@@ -178,7 +242,13 @@ def get_statistics_score(record):
     ):
         return value
 
-    return 0
+    try:
+        return float(value)
+    except (
+        TypeError,
+        ValueError,
+    ):
+        return 0
 
 
 def get_evidence_score(record):
@@ -208,7 +278,40 @@ def get_evidence_score(record):
     ):
         return value
 
-    return 0
+    try:
+        return float(value)
+    except (
+        TypeError,
+        ValueError,
+    ):
+        return 0
+
+
+def normalize_confidence(value):
+    value = clean_text(
+        value
+    )
+
+    if not value:
+        return "Unknown"
+
+    normalized = value.lower()
+
+    mapping = {
+        "high": "High",
+        "moderate": "Moderate",
+        "medium": "Moderate",
+        "low": "Low",
+        "very low": "Very Low",
+        "very-low": "Very Low",
+        "very_low": "Very Low",
+        "unknown": "Unknown",
+    }
+
+    return mapping.get(
+        normalized,
+        value,
+    )
 
 
 def get_statistical_confidence(record):
@@ -216,18 +319,12 @@ def get_statistical_confidence(record):
         record
     )
 
-    value = statistics.get(
-        "statistical_confidence",
-        "",
+    return normalize_confidence(
+        statistics.get(
+            "statistical_confidence",
+            "",
+        )
     )
-
-    if (
-        isinstance(value, str)
-        and value.strip()
-    ):
-        return value.strip()
-
-    return "Unknown"
 
 
 def get_reporting_flags(record):
@@ -245,9 +342,18 @@ def get_reporting_flags(record):
         list,
     ):
         return [
-            str(flag)
+            clean_text(flag)
             for flag in value
-            if flag
+            if clean_text(flag)
+        ]
+
+    if isinstance(
+        value,
+        str,
+    ) and value.strip():
+
+        return [
+            value.strip()
         ]
 
     return []
@@ -258,16 +364,15 @@ def get_review_summary(record):
         record
     )
 
-    value = statistics.get(
-        "review_summary",
-        "",
+    value = clean_text(
+        statistics.get(
+            "review_summary",
+            "",
+        )
     )
 
-    if (
-        isinstance(value, str)
-        and value.strip()
-    ):
-        return value.strip()
+    if value:
+        return value
 
     return "No statistical review summary available."
 
@@ -277,12 +382,31 @@ def needs_full_text(record):
         record
     )
 
-    return bool(
-        translation.get(
-            "requires_full_text_review",
-            False,
-        )
+    value = translation.get(
+        "requires_full_text_review",
+        False,
     )
+
+    if isinstance(
+        value,
+        bool,
+    ):
+        return value
+
+    if isinstance(
+        value,
+        str,
+    ):
+        return (
+            value.strip().lower()
+            in {
+                "true",
+                "yes",
+                "1",
+            }
+        )
+
+    return bool(value)
 
 
 # =========================================================
@@ -338,7 +462,8 @@ high_confidence = sum(
     for record in reviewed_records
     if get_statistical_confidence(
         record
-    ) == "High"
+    )
+    == "High"
 )
 
 moderate_confidence = sum(
@@ -346,7 +471,8 @@ moderate_confidence = sum(
     for record in reviewed_records
     if get_statistical_confidence(
         record
-    ) == "Moderate"
+    )
+    == "Moderate"
 )
 
 flagged_records = sum(
@@ -370,6 +496,7 @@ m1, m2, m3, m4, m5 = st.columns(
     5,
     gap="medium",
 )
+
 
 with m1:
 
@@ -437,6 +564,7 @@ score_buckets = {
     "Unscored": 0,
 }
 
+
 for record in reviewed_records:
 
     score = get_statistics_score(
@@ -444,16 +572,24 @@ for record in reviewed_records:
     )
 
     if score >= 8:
-        score_buckets["8–10"] += 1
+        score_buckets[
+            "8–10"
+        ] += 1
 
     elif score >= 6:
-        score_buckets["6–7"] += 1
+        score_buckets[
+            "6–7"
+        ] += 1
 
     elif score >= 4:
-        score_buckets["4–5"] += 1
+        score_buckets[
+            "4–5"
+        ] += 1
 
     elif score >= 1:
-        score_buckets["1–3"] += 1
+        score_buckets[
+            "1–3"
+        ] += 1
 
     else:
         score_buckets[
@@ -465,6 +601,7 @@ bucket_cols = st.columns(
     5,
     gap="small",
 )
+
 
 for col, (
     label,
@@ -502,11 +639,12 @@ clinical_areas = sorted(
     }
 )
 
+
 confidence_options = [
     "High",
     "Moderate",
     "Low",
-    "Very low",
+    "Very Low",
     "Unknown",
 ]
 
@@ -515,6 +653,7 @@ f1, f2, f3, f4 = st.columns(
     4,
     gap="medium",
 )
+
 
 with f1:
 
@@ -574,6 +713,7 @@ with f4:
 
 filtered_records = []
 
+
 for record in reviewed_records:
 
     if (
@@ -586,6 +726,7 @@ for record in reviewed_records:
     ):
         continue
 
+
     if (
         selected_confidence
         != "All Confidence Levels"
@@ -596,9 +737,11 @@ for record in reviewed_records:
     ):
         continue
 
+
     flags = get_reporting_flags(
         record
     )
+
 
     if (
         selected_flag_status
@@ -607,12 +750,14 @@ for record in reviewed_records:
     ):
         continue
 
+
     if (
         selected_flag_status
         == "No Flags"
         and flags
     ):
         continue
+
 
     filtered_records.append(
         record
@@ -636,7 +781,7 @@ if (
             if get_statistics_score(
                 record
             ) > 0
-            else 999
+            else float("inf")
         )
     )
 
@@ -647,16 +792,15 @@ elif (
 ):
 
     filtered_records.sort(
-        key=lambda record: (
-            get_statistics_score(
-                record
-            )
-        ),
+        key=get_statistics_score,
         reverse=True,
     )
 
 
-elif sort_option == "Most Flags":
+elif (
+    sort_option
+    == "Most Flags"
+):
 
     filtered_records.sort(
         key=lambda record: len(
@@ -674,11 +818,7 @@ elif (
 ):
 
     filtered_records.sort(
-        key=lambda record: (
-            get_evidence_score(
-                record
-            )
-        ),
+        key=get_evidence_score,
         reverse=True,
     )
 
@@ -686,11 +826,7 @@ elif (
 else:
 
     filtered_records.sort(
-        key=lambda record: str(
-            get_year(
-                record
-            )
-        ),
+        key=get_year_number,
         reverse=True,
     )
 
@@ -704,6 +840,7 @@ st.subheader(
 )
 
 flag_counts = {}
+
 
 for record in reviewed_records:
 
@@ -736,6 +873,7 @@ if top_flags:
         gap="medium",
     )
 
+
     for index, (
         flag,
         count,
@@ -746,6 +884,7 @@ if top_flags:
         col = flag_cols[
             index % 3
         ]
+
 
         with col:
 
@@ -792,171 +931,179 @@ if not filtered_records:
         "No papers match the current filters."
     )
 
-    st.stop()
 
+else:
 
-for index, record in enumerate(
-    filtered_records,
-    start=1,
-):
-
-    title = get_title(
-        record
-    )
-
-    journal = get_journal(
-        record
-    )
-
-    year = get_year(
-        record
-    )
-
-    area = get_clinical_area(
-        record
-    )
-
-    stats_score = (
-        get_statistics_score(
-            record
-        )
-    )
-
-    evidence_score = (
-        get_evidence_score(
-            record
-        )
-    )
-
-    confidence = (
-        get_statistical_confidence(
-            record
-        )
-    )
-
-    flags = get_reporting_flags(
-        record
-    )
-
-    with st.expander(
-        f"{index}. {title}"
+    for index, record in enumerate(
+        filtered_records,
+        start=1,
     ):
 
-        source_parts = []
-
-        if journal:
-            source_parts.append(
-                str(journal)
-            )
-
-        if year:
-            source_parts.append(
-                str(year)
-            )
-
-        if area:
-            source_parts.append(
-                area
-            )
-
-        if source_parts:
-
-            st.caption(
-                " • ".join(
-                    source_parts
-                )
-            )
-
-
-        c1, c2, c3, c4 = (
-            st.columns(4)
+        title = get_title(
+            record
         )
 
-
-        with c1:
-
-            st.metric(
-                "Statistics Score",
-                stats_score,
-            )
-
-
-        with c2:
-
-            st.metric(
-                "Evidence Score",
-                evidence_score,
-            )
-
-
-        with c3:
-
-            st.metric(
-                "Confidence",
-                confidence,
-            )
-
-
-        with c4:
-
-            st.metric(
-                "Reporting Flags",
-                len(flags),
-            )
-
-
-        st.markdown(
-            "**Euler's review**"
+        journal = get_journal(
+            record
         )
 
-        st.write(
-            get_review_summary(
+        year = get_year(
+            record
+        )
+
+        area = get_clinical_area(
+            record
+        )
+
+        stats_score = (
+            get_statistics_score(
                 record
             )
         )
 
-
-        if flags:
-
-            st.markdown(
-                "**Statistical concerns**"
+        evidence_score = (
+            get_evidence_score(
+                record
             )
+        )
 
-            for flag in flags:
-
-                st.write(
-                    f"• {flag}"
-                )
-
-        else:
-
-            st.success(
-                "No statistical reporting flags were identified."
+        confidence = (
+            get_statistical_confidence(
+                record
             )
+        )
 
-
-        if needs_full_text(
+        flags = get_reporting_flags(
             record
+        )
+
+
+        with st.expander(
+            f"{index}. {title}"
         ):
 
-            st.warning(
-                "Full-text review is recommended before drawing "
-                "strong statistical conclusions."
+            source_parts = []
+
+
+            if journal:
+                source_parts.append(
+                    journal
+                )
+
+            if year:
+                source_parts.append(
+                    year
+                )
+
+            if area:
+                source_parts.append(
+                    area
+                )
+
+
+            if source_parts:
+
+                st.caption(
+                    " • ".join(
+                        source_parts
+                    )
+                )
+
+
+            c1, c2, c3, c4 = (
+                st.columns(
+                    4
+                )
             )
 
 
-        pubmed_url = (
-            get_pubmed_url(
+            with c1:
+
+                st.metric(
+                    "Statistics Score",
+                    stats_score,
+                )
+
+
+            with c2:
+
+                st.metric(
+                    "Evidence Score",
+                    evidence_score,
+                )
+
+
+            with c3:
+
+                st.metric(
+                    "Confidence",
+                    confidence,
+                )
+
+
+            with c4:
+
+                st.metric(
+                    "Reporting Flags",
+                    len(
+                        flags
+                    ),
+                )
+
+
+            st.markdown(
+                "**Euler's review**"
+            )
+
+            st.write(
+                get_review_summary(
+                    record
+                )
+            )
+
+
+            if flags:
+
+                st.markdown(
+                    "**Statistical concerns**"
+                )
+
+                for flag in flags:
+
+                    st.write(
+                        f"• {flag}"
+                    )
+
+
+            else:
+
+                st.success(
+                    "No statistical reporting flags were identified."
+                )
+
+
+            if needs_full_text(
                 record
-            )
-        )
+            ):
 
-        if pubmed_url:
+                st.warning(
+                    "Full-text review is recommended before drawing "
+                    "strong statistical conclusions."
+                )
 
-            st.link_button(
-                "Open PubMed",
-                pubmed_url,
+
+            pubmed_url = (
+                get_pubmed_url(
+                    record
+                )
             )
+
+            if pubmed_url:
+
+                st.link_button(
+                    "Open PubMed",
+                    pubmed_url,
+                )
 
 
 # =========================================================
@@ -979,7 +1126,9 @@ st.write(
 
 
 workspace_1, workspace_2 = (
-    st.columns(2)
+    st.columns(
+        2
+    )
 )
 
 
@@ -1027,12 +1176,14 @@ variables = st.text_area(
         "Example: body fat percentage measured by DXA and "
         "AI-estimated body fat percentage measured once per participant."
     ),
+    key="euler_variables",
 )
 
 
 if st.button(
     "Review analysis setup",
     width="stretch",
+    key="euler_review_setup",
 ):
 
     if not variables.strip():
@@ -1040,6 +1191,7 @@ if st.button(
         st.warning(
             "Describe the variables first."
         )
+
 
     else:
 
