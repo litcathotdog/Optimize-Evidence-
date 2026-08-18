@@ -31,12 +31,32 @@ evidence_db = load_json(
     [],
 )
 
+# Protect against malformed JSON structures
+if not isinstance(journal_club, dict):
+    journal_club = {}
+
+if not isinstance(evidence_db, list):
+    evidence_db = []
+
 
 # =========================================================
 # HELPERS
 # =========================================================
 
+def clean_text(value):
+    if value is None:
+        return ""
+
+    if isinstance(value, str):
+        return value.strip()
+
+    return str(value).strip()
+
+
 def get_metadata(record):
+    if not isinstance(record, dict):
+        return {}
+
     value = record.get(
         "metadata",
         {},
@@ -50,6 +70,9 @@ def get_metadata(record):
 
 
 def get_translation(record):
+    if not isinstance(record, dict):
+        return {}
+
     value = record.get(
         "clinical_translation",
         {},
@@ -63,6 +86,9 @@ def get_translation(record):
 
 
 def get_appraisal(record):
+    if not isinstance(record, dict):
+        return {}
+
     value = record.get(
         "appraisal",
         {},
@@ -76,6 +102,9 @@ def get_appraisal(record):
 
 
 def get_statistics(record):
+    if not isinstance(record, dict):
+        return {}
+
     value = record.get(
         "statistics",
         {},
@@ -93,11 +122,17 @@ def get_title(record):
         record
     )
 
-    return (
+    title = clean_text(
         metadata.get(
-            "title"
+            "title",
+            "",
         )
-        or "Untitled paper"
+    )
+
+    return (
+        title
+        if title
+        else "Untitled paper"
     )
 
 
@@ -106,7 +141,7 @@ def get_year(record):
         record
     )
 
-    return (
+    value = (
         metadata.get(
             "publication_year"
         )
@@ -116,17 +151,21 @@ def get_year(record):
         or ""
     )
 
+    return clean_text(
+        value
+    )
+
 
 def get_journal(record):
     metadata = get_metadata(
         record
     )
 
-    return (
+    return clean_text(
         metadata.get(
-            "journal"
+            "journal",
+            "",
         )
-        or ""
     )
 
 
@@ -135,12 +174,19 @@ def get_pubmed_url(record):
         record
     )
 
-    return (
+    url = clean_text(
         metadata.get(
-            "pubmed_url"
+            "pubmed_url",
+            "",
         )
-        or ""
     )
+
+    if url.startswith(
+        ("http://", "https://")
+    ):
+        return url
+
+    return ""
 
 
 def get_evidence_score(record):
@@ -170,7 +216,13 @@ def get_evidence_score(record):
     ):
         return value
 
-    return 0
+    try:
+        return float(value)
+    except (
+        TypeError,
+        ValueError,
+    ):
+        return 0
 
 
 def get_statistics_score(record):
@@ -200,7 +252,13 @@ def get_statistics_score(record):
     ):
         return value
 
-    return 0
+    try:
+        return float(value)
+    except (
+        TypeError,
+        ValueError,
+    ):
+        return 0
 
 
 def get_practice_readiness(record):
@@ -208,16 +266,15 @@ def get_practice_readiness(record):
         record
     )
 
-    value = translation.get(
-        "practice_readiness",
-        "",
+    value = clean_text(
+        translation.get(
+            "practice_readiness",
+            "",
+        )
     )
 
-    if (
-        isinstance(value, str)
-        and value.strip()
-    ):
-        return value.strip()
+    if value:
+        return value
 
     return "Not classified"
 
@@ -227,27 +284,25 @@ def get_takeaway(record):
         record
     )
 
-    value = translation.get(
-        "practitioner_takeaway",
-        "",
+    value = clean_text(
+        translation.get(
+            "practitioner_takeaway",
+            "",
+        )
     )
 
-    if (
-        isinstance(value, str)
-        and value.strip()
-    ):
-        return value.strip()
+    if value:
+        return value
 
-    value = translation.get(
-        "clinical_summary",
-        "",
+    value = clean_text(
+        translation.get(
+            "clinical_summary",
+            "",
+        )
     )
 
-    if (
-        isinstance(value, str)
-        and value.strip()
-    ):
-        return value.strip()
+    if value:
+        return value
 
     return "No practitioner takeaway available."
 
@@ -257,16 +312,15 @@ def get_clinical_area(record):
         record
     )
 
-    value = translation.get(
-        "clinical_area",
-        "",
+    value = clean_text(
+        translation.get(
+            "clinical_area",
+            "",
+        )
     )
 
-    if (
-        isinstance(value, str)
-        and value.strip()
-    ):
-        return value.strip()
+    if value:
+        return value
 
     return "Other"
 
@@ -275,9 +329,12 @@ def find_record_by_title(title):
     if not title:
         return None
 
-    title_lower = str(
+    title_lower = clean_text(
         title
-    ).strip().lower()
+    ).lower()
+
+    if not title_lower:
+        return None
 
     for record in evidence_db:
 
@@ -290,7 +347,7 @@ def find_record_by_title(title):
         if (
             get_title(
                 record
-            ).strip().lower()
+            ).lower()
             == title_lower
         ):
             return record
@@ -339,6 +396,7 @@ m1, m2, m3, m4 = st.columns(
     gap="medium",
 )
 
+
 with m1:
 
     st.metric(
@@ -381,12 +439,7 @@ with m4:
         "Indexed Papers",
         len(
             evidence_db
-        )
-        if isinstance(
-            evidence_db,
-            list,
-        )
-        else 0,
+        ),
         border=True,
     )
 
@@ -416,16 +469,22 @@ if not isinstance(
 
 if paper_of_week:
 
-    title = paper_of_week.get(
-        "title",
-        "Paper of the Week",
+    title = clean_text(
+        paper_of_week.get(
+            "title",
+            "Paper of the Week",
+        )
     )
+
+    if not title:
+        title = "Paper of the Week"
 
     matching_record = (
         find_record_by_title(
             title
         )
     )
+
 
     with st.container(
         border=True,
@@ -439,21 +498,22 @@ if paper_of_week:
             f"## {title}"
         )
 
-        study_design = paper_of_week.get(
-            "study_design",
-            "",
+
+        study_design = clean_text(
+            paper_of_week.get(
+                "study_design",
+                "",
+            )
         )
 
         if study_design:
+
             st.caption(
                 study_design
             )
 
-        if matching_record:
 
-            metadata = get_metadata(
-                matching_record
-            )
+        if matching_record:
 
             source_parts = []
 
@@ -467,24 +527,27 @@ if paper_of_week:
 
             if journal:
                 source_parts.append(
-                    str(journal)
+                    journal
                 )
 
             if year:
                 source_parts.append(
-                    str(year)
+                    year
                 )
 
             if source_parts:
+
                 st.caption(
                     " • ".join(
                         source_parts
                     )
                 )
 
+
             c1, c2, c3 = st.columns(
                 3
             )
+
 
             with c1:
 
@@ -495,6 +558,7 @@ if paper_of_week:
                     ),
                 )
 
+
             with c2:
 
                 st.metric(
@@ -503,6 +567,7 @@ if paper_of_week:
                         matching_record
                     ),
                 )
+
 
             with c3:
 
@@ -513,20 +578,25 @@ if paper_of_week:
                     ),
                 )
 
-        practitioner_takeaway = (
+
+        practitioner_takeaway = clean_text(
             paper_of_week.get(
                 "practitioner_takeaway",
                 "",
             )
         )
 
-        if not practitioner_takeaway and matching_record:
+        if (
+            not practitioner_takeaway
+            and matching_record
+        ):
 
             practitioner_takeaway = (
                 get_takeaway(
                     matching_record
                 )
             )
+
 
         if practitioner_takeaway:
 
@@ -538,9 +608,12 @@ if paper_of_week:
                 practitioner_takeaway
             )
 
-        controversy = paper_of_week.get(
-            "controversy",
-            "",
+
+        controversy = clean_text(
+            paper_of_week.get(
+                "controversy",
+                "",
+            )
         )
 
         if controversy:
@@ -552,6 +625,7 @@ if paper_of_week:
             st.warning(
                 controversy
             )
+
 
         if matching_record:
 
@@ -568,12 +642,16 @@ if paper_of_week:
 
         else:
 
-            paper_url = paper_of_week.get(
-                "pubmed_url",
-                "",
+            paper_url = clean_text(
+                paper_of_week.get(
+                    "pubmed_url",
+                    "",
+                )
             )
 
-            if paper_url:
+            if paper_url.startswith(
+                ("http://", "https://")
+            ):
 
                 st.link_button(
                     "Open Paper",
@@ -618,13 +696,22 @@ if (
         gap="medium",
     )
 
+
     for index, question in enumerate(
         questions
     ):
 
+        question_text = clean_text(
+            question
+        )
+
+        if not question_text:
+            continue
+
         col = question_cols[
             index % 2
         ]
+
 
         with col:
 
@@ -637,8 +724,9 @@ if (
                 )
 
                 st.write(
-                    question
+                    question_text
                 )
+
 
 else:
 
@@ -670,8 +758,9 @@ if not isinstance(
     priority_papers = []
 
 
-# If journal_club.json doesn't contain a list, build one
-# from the strongest indexed evidence instead.
+# =========================================================
+# FALLBACK TO STRONGEST INDEXED PAPERS
+# =========================================================
 
 if not priority_papers:
 
@@ -701,30 +790,52 @@ if not priority_papers:
     )
 
 
+# =========================================================
+# DISPLAY HIGH-PRIORITY PAPERS
+# =========================================================
+
 for index, item in enumerate(
     priority_papers[:10],
     start=1,
 ):
 
-    if isinstance(
-        item,
-        dict,
-    ) and "metadata" in item:
+    record = None
+
+
+    if (
+        isinstance(
+            item,
+            dict,
+        )
+        and isinstance(
+            item.get(
+                "metadata"
+            ),
+            dict,
+        )
+    ):
 
         record = item
+
         title = get_title(
             record
         )
+
 
     elif isinstance(
         item,
         dict,
     ):
 
-        title = item.get(
-            "title",
-            "Untitled paper",
+        title = clean_text(
+            item.get(
+                "title",
+                "Untitled paper",
+            )
         )
+
+        if not title:
+            title = "Untitled paper"
 
         record = (
             find_record_by_title(
@@ -732,11 +843,15 @@ for index, item in enumerate(
             )
         )
 
+
     else:
 
-        title = str(
+        title = clean_text(
             item
         )
+
+        if not title:
+            title = "Untitled paper"
 
         record = (
             find_record_by_title(
@@ -765,20 +880,22 @@ for index, item in enumerate(
                 record
             )
 
+
             if journal:
                 source_parts.append(
-                    str(journal)
+                    journal
                 )
 
             if year:
                 source_parts.append(
-                    str(year)
+                    year
                 )
 
             if area:
                 source_parts.append(
                     area
                 )
+
 
             if source_parts:
 
@@ -788,9 +905,11 @@ for index, item in enumerate(
                     )
                 )
 
+
             c1, c2, c3 = st.columns(
                 3
             )
+
 
             with c1:
 
@@ -801,6 +920,7 @@ for index, item in enumerate(
                     ),
                 )
 
+
             with c2:
 
                 st.metric(
@@ -809,6 +929,7 @@ for index, item in enumerate(
                         record
                     ),
                 )
+
 
             with c3:
 
@@ -819,6 +940,7 @@ for index, item in enumerate(
                     ),
                 )
 
+
             st.markdown(
                 "**Practitioner takeaway**"
             )
@@ -828,6 +950,7 @@ for index, item in enumerate(
                     record
                 )
             )
+
 
             pubmed_url = get_pubmed_url(
                 record
@@ -840,17 +963,21 @@ for index, item in enumerate(
                     pubmed_url,
                 )
 
+
         elif isinstance(
             item,
             dict,
         ):
 
-            takeaway = item.get(
-                "practitioner_takeaway",
-                "",
+            takeaway = clean_text(
+                item.get(
+                    "practitioner_takeaway",
+                    "",
+                )
             )
 
             if takeaway:
+
                 st.write(
                     takeaway
                 )
@@ -873,6 +1000,7 @@ st.subheader(
 )
 
 area_counts = {}
+
 
 for record in evidence_db:
 
@@ -911,6 +1039,7 @@ if sorted_areas:
         gap="medium",
     )
 
+
     for index, (
         area,
         count,
@@ -921,6 +1050,7 @@ if sorted_areas:
         col = area_cols[
             index % 3
         ]
+
 
         with col:
 
@@ -937,6 +1067,7 @@ if sorted_areas:
                     count,
                 )
 
+
                 if st.button(
                     "Explore evidence →",
                     key=f"journal_area_{index}",
@@ -948,8 +1079,9 @@ if sorted_areas:
                     ] = area
 
                     st.switch_page(
-                        "pages/evidence_library.py"
+                        "pages/4_Evidence_Library.py"
                     )
+
 
 else:
 
