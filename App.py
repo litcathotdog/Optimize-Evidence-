@@ -34,6 +34,7 @@ problem_detail = st.Page(
     "pages/2_Problem_Detail.py",
     title="Problem Detail",
     icon=":material/article:",
+    visibility="hidden",
 )
 
 ai_specialists = st.Page(
