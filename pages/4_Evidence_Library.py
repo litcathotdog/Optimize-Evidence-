@@ -29,7 +29,6 @@ evidence_db = load_json(
     [],
 )
 
-# Make sure evidence_db is always a list
 if not isinstance(evidence_db, list):
     evidence_db = []
 
@@ -47,11 +46,7 @@ def get_metadata(record):
         {},
     )
 
-    return (
-        value
-        if isinstance(value, dict)
-        else {}
-    )
+    return value if isinstance(value, dict) else {}
 
 
 def get_appraisal(record):
@@ -63,11 +58,7 @@ def get_appraisal(record):
         {},
     )
 
-    return (
-        value
-        if isinstance(value, dict)
-        else {}
-    )
+    return value if isinstance(value, dict) else {}
 
 
 def get_statistics(record):
@@ -79,11 +70,7 @@ def get_statistics(record):
         {},
     )
 
-    return (
-        value
-        if isinstance(value, dict)
-        else {}
-    )
+    return value if isinstance(value, dict) else {}
 
 
 def get_translation(record):
@@ -95,11 +82,7 @@ def get_translation(record):
         {},
     )
 
-    return (
-        value
-        if isinstance(value, dict)
-        else {}
-    )
+    return value if isinstance(value, dict) else {}
 
 
 def get_specialties(record):
@@ -111,11 +94,7 @@ def get_specialties(record):
         {},
     )
 
-    return (
-        value
-        if isinstance(value, dict)
-        else {}
-    )
+    return value if isinstance(value, dict) else {}
 
 
 def clean_text(value):
@@ -129,63 +108,41 @@ def clean_text(value):
 
 
 def get_title(record):
-    metadata = get_metadata(
-        record
-    )
-
-    value = metadata.get(
-        "title",
-        "",
-    )
+    metadata = get_metadata(record)
 
     value = clean_text(
-        value
+        metadata.get(
+            "title",
+            "",
+        )
     )
 
-    return (
-        value
-        if value
-        else "Untitled paper"
-    )
+    return value if value else "Untitled paper"
 
 
 def get_year(record):
-    metadata = get_metadata(
-        record
-    )
+    metadata = get_metadata(record)
 
     value = (
-        metadata.get(
-            "publication_year"
-        )
-        or metadata.get(
-            "year"
-        )
+        metadata.get("publication_year")
+        or metadata.get("year")
         or ""
     )
 
-    return clean_text(
-        value
-    )
+    return clean_text(value)
 
 
 def get_year_number(record):
-    year = get_year(
-        record
-    )
+    year = get_year(record)
 
     try:
-        return int(
-            str(year)[:4]
-        )
+        return int(str(year)[:4])
     except (TypeError, ValueError):
         return 0
 
 
 def get_journal(record):
-    metadata = get_metadata(
-        record
-    )
+    metadata = get_metadata(record)
 
     return clean_text(
         metadata.get(
@@ -196,9 +153,7 @@ def get_journal(record):
 
 
 def get_pubmed_url(record):
-    metadata = get_metadata(
-        record
-    )
+    metadata = get_metadata(record)
 
     value = clean_text(
         metadata.get(
@@ -216,9 +171,7 @@ def get_pubmed_url(record):
 
 
 def get_clinical_area(record):
-    translation = get_translation(
-        record
-    )
+    translation = get_translation(record)
 
     value = clean_text(
         translation.get(
@@ -234,9 +187,7 @@ def get_clinical_area(record):
 
 
 def get_intervention(record):
-    translation = get_translation(
-        record
-    )
+    translation = get_translation(record)
 
     value = clean_text(
         translation.get(
@@ -248,9 +199,7 @@ def get_intervention(record):
     if value:
         return value
 
-    appraisal = get_appraisal(
-        record
-    )
+    appraisal = get_appraisal(record)
 
     value = clean_text(
         appraisal.get(
@@ -266,9 +215,7 @@ def get_intervention(record):
 
 
 def get_study_design(record):
-    metadata = get_metadata(
-        record
-    )
+    metadata = get_metadata(record)
 
     value = clean_text(
         metadata.get(
@@ -280,9 +227,7 @@ def get_study_design(record):
     if value:
         return value
 
-    appraisal = get_appraisal(
-        record
-    )
+    appraisal = get_appraisal(record)
 
     value = clean_text(
         appraisal.get(
@@ -298,19 +243,14 @@ def get_study_design(record):
 
 
 def get_evidence_score(record):
-    appraisal = get_appraisal(
-        record
-    )
+    appraisal = get_appraisal(record)
 
     scores = appraisal.get(
         "scores",
         {},
     )
 
-    if not isinstance(
-        scores,
-        dict,
-    ):
+    if not isinstance(scores, dict):
         return 0
 
     value = scores.get(
@@ -318,35 +258,24 @@ def get_evidence_score(record):
         0,
     )
 
-    if isinstance(
-        value,
-        (int, float),
-    ):
+    if isinstance(value, (int, float)):
         return value
 
     try:
         return float(value)
-    except (
-        TypeError,
-        ValueError,
-    ):
+    except (TypeError, ValueError):
         return 0
 
 
 def get_statistics_score(record):
-    statistics = get_statistics(
-        record
-    )
+    statistics = get_statistics(record)
 
     scores = statistics.get(
         "scores",
         {},
     )
 
-    if not isinstance(
-        scores,
-        dict,
-    ):
+    if not isinstance(scores, dict):
         return 0
 
     value = scores.get(
@@ -354,25 +283,17 @@ def get_statistics_score(record):
         0,
     )
 
-    if isinstance(
-        value,
-        (int, float),
-    ):
+    if isinstance(value, (int, float)):
         return value
 
     try:
         return float(value)
-    except (
-        TypeError,
-        ValueError,
-    ):
+    except (TypeError, ValueError):
         return 0
 
 
 def get_practice_readiness(record):
-    translation = get_translation(
-        record
-    )
+    translation = get_translation(record)
 
     value = clean_text(
         translation.get(
@@ -388,9 +309,7 @@ def get_practice_readiness(record):
 
 
 def get_takeaway(record):
-    translation = get_translation(
-        record
-    )
+    translation = get_translation(record)
 
     value = clean_text(
         translation.get(
@@ -416,25 +335,15 @@ def get_takeaway(record):
 
 
 def get_specialty_names(record):
-    specialties = get_specialties(
-        record
-    )
+    specialties = get_specialties(record)
 
     labels = []
 
     mapping = {
-        "regenerative_medicine": (
-            "Regenerative Medicine"
-        ),
-        "sports_performance": (
-            "Sports Performance"
-        ),
-        "biomechanics": (
-            "Biomechanics"
-        ),
-        "womens_athlete_health": (
-            "Women's Athlete Health"
-        ),
+        "regenerative_medicine": "Regenerative Medicine",
+        "sports_performance": "Sports Performance",
+        "biomechanics": "Biomechanics",
+        "womens_athlete_health": "Women's Athlete Health",
     }
 
     for key, label in mapping.items():
@@ -445,52 +354,31 @@ def get_specialty_names(record):
         )
 
         if (
-            isinstance(
-                review,
-                dict,
-            )
+            isinstance(review, dict)
             and review.get(
                 "relevant",
                 False,
             )
         ):
-            labels.append(
-                label
-            )
+            labels.append(label)
 
     return labels
 
 
 def build_search_text(record):
-    metadata = get_metadata(
-        record
-    )
-
-    translation = get_translation(
-        record
-    )
-
-    appraisal = get_appraisal(
-        record
-    )
+    metadata = get_metadata(record)
+    translation = get_translation(record)
+    appraisal = get_appraisal(record)
 
     topics = metadata.get(
         "topics",
         [],
     )
 
-    if isinstance(
-        topics,
-        str,
-    ):
-        topics = [
-            topics
-        ]
+    if isinstance(topics, str):
+        topics = [topics]
 
-    elif not isinstance(
-        topics,
-        list,
-    ):
+    elif not isinstance(topics, list):
         topics = []
 
     authors = metadata.get(
@@ -498,45 +386,25 @@ def build_search_text(record):
         [],
     )
 
-    if isinstance(
-        authors,
-        str,
-    ):
-        authors = [
-            authors
-        ]
+    if isinstance(authors, str):
+        authors = [authors]
 
-    elif not isinstance(
-        authors,
-        list,
-    ):
+    elif not isinstance(authors, list):
         authors = []
 
     parts = [
-        get_title(
-            record
-        ),
+        get_title(record),
         clean_text(
             metadata.get(
                 "abstract",
                 "",
             )
         ),
-        get_journal(
-            record
-        ),
-        get_year(
-            record
-        ),
-        get_clinical_area(
-            record
-        ),
-        get_intervention(
-            record
-        ),
-        get_study_design(
-            record
-        ),
+        get_journal(record),
+        get_year(record),
+        get_clinical_area(record),
+        get_intervention(record),
+        get_study_design(record),
         clean_text(
             translation.get(
                 "clinical_summary",
@@ -566,9 +434,7 @@ def build_search_text(record):
             if author
         ),
         " ".join(
-            get_specialty_names(
-                record
-            )
+            get_specialty_names(record)
         ),
     ]
 
@@ -619,27 +485,17 @@ search = st.text_input(
 
 clinical_areas = sorted(
     {
-        get_clinical_area(
-            record
-        )
+        get_clinical_area(record)
         for record in evidence_db
-        if isinstance(
-            record,
-            dict,
-        )
+        if isinstance(record, dict)
     }
 )
 
 study_designs = sorted(
     {
-        get_study_design(
-            record
-        )
+        get_study_design(record)
         for record in evidence_db
-        if isinstance(
-            record,
-            dict,
-        )
+        if isinstance(record, dict)
     }
 )
 
@@ -651,11 +507,38 @@ specialty_options = [
 ]
 
 
-filter_1, filter_2, filter_3, filter_4 = (
-    st.columns(
-        4,
-        gap="medium",
+# =========================================================
+# READ FILTER PASSED FROM OTHER PAGES
+# =========================================================
+
+requested_area = st.session_state.pop(
+    "evidence_library_area",
+    None,
+)
+
+area_options = [
+    "All Clinical Areas",
+    *clinical_areas,
+]
+
+default_area_index = 0
+
+if (
+    requested_area
+    and requested_area in area_options
+):
+    default_area_index = area_options.index(
+        requested_area
     )
+
+
+# =========================================================
+# FILTER CONTROLS
+# =========================================================
+
+filter_1, filter_2, filter_3, filter_4 = st.columns(
+    4,
+    gap="medium",
 )
 
 
@@ -663,10 +546,8 @@ with filter_1:
 
     selected_area = st.selectbox(
         "Clinical Area",
-        [
-            "All Clinical Areas",
-            *clinical_areas,
-        ],
+        area_options,
+        index=default_area_index,
     )
 
 
@@ -706,6 +587,37 @@ with filter_4:
 
 
 # =========================================================
+# ACTIVE FILTER NOTICE
+# =========================================================
+
+if selected_area != "All Clinical Areas":
+
+    notice_col, clear_col = st.columns(
+        [5, 1],
+    )
+
+    with notice_col:
+
+        st.info(
+            f"Showing evidence for: **{selected_area}**"
+        )
+
+    with clear_col:
+
+        if st.button(
+            "Clear filter",
+            width="stretch",
+        ):
+
+            st.session_state.pop(
+                "evidence_library_area",
+                None,
+            )
+
+            st.rerun()
+
+
+# =========================================================
 # FILTER RECORDS
 # =========================================================
 
@@ -719,10 +631,7 @@ query = (
 
 for record in evidence_db:
 
-    if not isinstance(
-        record,
-        dict,
-    ):
+    if not isinstance(record, dict):
         continue
 
     if query:
@@ -735,9 +644,7 @@ for record in evidence_db:
     if (
         selected_area
         != "All Clinical Areas"
-        and get_clinical_area(
-            record
-        )
+        and get_clinical_area(record)
         != selected_area
     ):
         continue
@@ -745,9 +652,7 @@ for record in evidence_db:
     if (
         selected_design
         != "All Study Designs"
-        and get_study_design(
-            record
-        )
+        and get_study_design(record)
         != selected_design
     ):
         continue
@@ -756,25 +661,18 @@ for record in evidence_db:
         selected_specialty
         != "All Specialties"
         and selected_specialty
-        not in get_specialty_names(
-            record
-        )
+        not in get_specialty_names(record)
     ):
         continue
 
-    filtered_records.append(
-        record
-    )
+    filtered_records.append(record)
 
 
 # =========================================================
 # SORT
 # =========================================================
 
-if (
-    sort_option
-    == "Highest Evidence Score"
-):
+if sort_option == "Highest Evidence Score":
 
     filtered_records.sort(
         key=get_evidence_score,
@@ -782,10 +680,7 @@ if (
     )
 
 
-elif (
-    sort_option
-    == "Highest Statistics Score"
-):
+elif sort_option == "Highest Statistics Score":
 
     filtered_records.sort(
         key=get_statistics_score,
@@ -793,10 +688,7 @@ elif (
     )
 
 
-elif (
-    sort_option
-    == "Newest"
-):
+elif sort_option == "Newest":
 
     filtered_records.sort(
         key=get_year_number,
@@ -808,9 +700,7 @@ else:
 
     filtered_records.sort(
         key=lambda record: (
-            get_title(
-                record
-            ).lower()
+            get_title(record).lower()
         )
     )
 
@@ -848,10 +738,7 @@ needs_full_text = sum(
 high_evidence = sum(
     1
     for record in filtered_records
-    if get_evidence_score(
-        record
-    )
-    >= 8
+    if get_evidence_score(record) >= 8
 )
 
 
@@ -874,9 +761,7 @@ with m2:
 
     st.metric(
         "Results",
-        len(
-            filtered_records
-        ),
+        len(filtered_records),
         border=True,
     )
 
@@ -910,10 +795,8 @@ st.write("")
 # RESULT CONTROLS
 # =========================================================
 
-results_left, results_right = (
-    st.columns(
-        [4, 1],
-    )
+results_left, results_right = st.columns(
+    [4, 1],
 )
 
 
@@ -941,6 +824,7 @@ if not filtered_records:
         "No papers match the current search and filters."
     )
 
+
 else:
 
     # =====================================================
@@ -952,56 +836,29 @@ else:
         start=1,
     ):
 
-        metadata = get_metadata(
+        metadata = get_metadata(record)
+
+        title = get_title(record)
+        year = get_year(record)
+        journal = get_journal(record)
+        design = get_study_design(record)
+        area = get_clinical_area(record)
+        intervention = get_intervention(record)
+
+        evidence_score = get_evidence_score(
             record
         )
 
-        title = get_title(
+        statistics_score = get_statistics_score(
             record
         )
 
-        year = get_year(
+        readiness = get_practice_readiness(
             record
         )
 
-        journal = get_journal(
+        specialty_names = get_specialty_names(
             record
-        )
-
-        design = get_study_design(
-            record
-        )
-
-        area = get_clinical_area(
-            record
-        )
-
-        intervention = get_intervention(
-            record
-        )
-
-        evidence_score = (
-            get_evidence_score(
-                record
-            )
-        )
-
-        statistics_score = (
-            get_statistics_score(
-                record
-            )
-        )
-
-        readiness = (
-            get_practice_readiness(
-                record
-            )
-        )
-
-        specialty_names = (
-            get_specialty_names(
-                record
-            )
         )
 
 
@@ -1051,11 +908,9 @@ else:
             st.write("")
 
 
-            c1, c2, c3, c4 = (
-                st.columns(
-                    4,
-                    gap="small",
-                )
+            c1, c2, c3, c4 = st.columns(
+                4,
+                gap="small",
             )
 
 
