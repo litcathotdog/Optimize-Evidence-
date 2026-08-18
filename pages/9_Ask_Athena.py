@@ -18,6 +18,31 @@ if "athena_last_result" not in st.session_state:
 
 
 # =========================================================
+# HELPERS
+# =========================================================
+
+def clean_text(value):
+    if value is None:
+        return ""
+
+    if isinstance(value, str):
+        return value.strip()
+
+    return str(value).strip()
+
+
+def valid_url(value):
+    url = clean_text(value)
+
+    if url.startswith(
+        ("http://", "https://")
+    ):
+        return url
+
+    return ""
+
+
+# =========================================================
 # HEADER
 # =========================================================
 
@@ -42,14 +67,24 @@ st.write("")
 # ATHENA STATUS
 # =========================================================
 
-status = athena_status()
+try:
+    status = athena_status()
+
+    if not isinstance(status, dict):
+        status = {}
+
+except Exception:
+    status = {}
+
 
 s1, s2, s3 = st.columns(
     3,
     gap="medium",
 )
 
+
 with s1:
+
     st.metric(
         "Indexed Papers",
         status.get(
@@ -59,7 +94,9 @@ with s1:
         border=True,
     )
 
+
 with s2:
+
     st.metric(
         "API",
         (
@@ -73,7 +110,9 @@ with s2:
         border=True,
     )
 
+
 with s3:
+
     st.metric(
         "Model",
         status.get(
@@ -88,6 +127,7 @@ if not status.get(
     "api_configured",
     False,
 ):
+
     st.error(
         "OpenAI is not configured for Athena. "
         "Add OPENAI_API_KEY to Streamlit Secrets."
@@ -112,10 +152,12 @@ suggestions = [
     "Where do the strongest studies disagree?",
 ]
 
+
 suggestion_cols = st.columns(
     2,
     gap="medium",
 )
+
 
 for index, suggestion in enumerate(
     suggestions,
@@ -124,6 +166,7 @@ for index, suggestion in enumerate(
     col = suggestion_cols[
         index % 2
     ]
+
 
     with col:
 
@@ -151,28 +194,60 @@ st.subheader(
 )
 
 
-if not st.session_state[
-    "athena_messages"
-]:
+messages = st.session_state.get(
+    "athena_messages",
+    [],
+)
+
+if not isinstance(
+    messages,
+    list,
+):
+    messages = []
+
+    st.session_state[
+        "athena_messages"
+    ] = messages
+
+
+if not messages:
 
     st.info(
         "Athena is ready. Ask a question below."
     )
 
 
-for message in st.session_state[
-    "athena_messages"
-]:
+for message in messages:
 
-    role = message.get(
-        "role",
+    if not isinstance(
+        message,
+        dict,
+    ):
+        continue
+
+    role = clean_text(
+        message.get(
+            "role",
+            "assistant",
+        )
+    )
+
+    if role not in {
+        "user",
         "assistant",
+    }:
+        role = "assistant"
+
+    content = clean_text(
+        message.get(
+            "content",
+            "",
+        )
     )
 
-    content = message.get(
-        "content",
-        "",
-    )
+    if not content:
+        continue
+
 
     with st.chat_message(
         role
@@ -199,7 +274,14 @@ question = st.chat_input(
 )
 
 if pending_question:
-    question = pending_question
+    question = clean_text(
+        pending_question
+    )
+
+else:
+    question = clean_text(
+        question
+    )
 
 
 # =========================================================
@@ -217,6 +299,7 @@ if question:
         }
     )
 
+
     with st.spinner(
         "Athena is reviewing the evidence..."
     ):
@@ -227,12 +310,29 @@ if question:
                 question
             )
 
-        except Exception as error:
+            if not isinstance(
+                result,
+                dict,
+            ):
+                result = {
+                    "answer": (
+                        "Athena did not return a valid synthesis."
+                    ),
+                    "papers": [],
+                    "paper_count": 0,
+                    "model": status.get(
+                        "model",
+                        "Unknown",
+                    ),
+                }
+
+
+        except Exception:
 
             result = {
                 "answer": (
-                    "Athena could not complete the synthesis.\n\n"
-                    f"Technical error: {error}"
+                    "Athena could not complete the synthesis. "
+                    "Please try again or check the app logs."
                 ),
                 "papers": [],
                 "paper_count": 0,
@@ -242,21 +342,34 @@ if question:
                 ),
             }
 
+
+    answer = clean_text(
+        result.get(
+            "answer",
+            "",
+        )
+    )
+
+    if not answer:
+        answer = (
+            "No synthesis was returned."
+        )
+
+
     st.session_state[
         "athena_last_result"
     ] = result
+
 
     st.session_state[
         "athena_messages"
     ].append(
         {
             "role": "assistant",
-            "content": result.get(
-                "answer",
-                "No synthesis was returned.",
-            ),
+            "content": answer,
         }
     )
+
 
     st.rerun()
 
@@ -268,6 +381,7 @@ if question:
 last_result = st.session_state.get(
     "athena_last_result"
 )
+
 
 if (
     isinstance(
@@ -288,6 +402,7 @@ if (
     ):
         papers = []
 
+
     st.write("")
 
     st.divider()
@@ -303,55 +418,79 @@ if (
 
     if papers:
 
-        for paper in papers:
+        for paper_index, paper in enumerate(
+            papers,
+            start=1,
+        ):
 
-            number = paper.get(
-                "number",
-                "",
+            if not isinstance(
+                paper,
+                dict,
+            ):
+                continue
+
+
+            number = clean_text(
+                paper.get(
+                    "number",
+                    paper_index,
+                )
             )
 
-            title = paper.get(
-                "title",
-                "Untitled paper",
+            title = clean_text(
+                paper.get(
+                    "title",
+                    "Untitled paper",
+                )
             )
+
+            if not title:
+                title = "Untitled paper"
+
 
             with st.expander(
                 f"[{number}] {title}"
             ):
 
-                journal = paper.get(
-                    "journal",
-                    "",
+                journal = clean_text(
+                    paper.get(
+                        "journal",
+                        "",
+                    )
                 )
 
-                year = paper.get(
-                    "year",
-                    "",
+                year = clean_text(
+                    paper.get(
+                        "year",
+                        "",
+                    )
                 )
 
-                clinical_area = paper.get(
-                    "clinical_area",
-                    "",
+                clinical_area = clean_text(
+                    paper.get(
+                        "clinical_area",
+                        "",
+                    )
                 )
+
 
                 source_parts = []
 
                 if journal:
                     source_parts.append(
-                        str(journal)
+                        journal
                     )
 
                 if year:
                     source_parts.append(
-                        str(year)
+                        year
                     )
 
                 if clinical_area:
                     source_parts.append(
-                        str(
-                            clinical_area
-                        )
+                        clinical_area
                     )
+
 
                 if source_parts:
 
@@ -361,9 +500,11 @@ if (
                         )
                     )
 
+
                 c1, c2, c3 = st.columns(
                     3
                 )
+
 
                 with c1:
 
@@ -375,6 +516,7 @@ if (
                         ),
                     )
 
+
                 with c2:
 
                     st.metric(
@@ -385,20 +527,26 @@ if (
                         ),
                     )
 
+
                 with c3:
 
                     st.metric(
                         "Practice Readiness",
-                        paper.get(
-                            "practice_readiness",
-                            "Unknown",
-                        ),
+                        clean_text(
+                            paper.get(
+                                "practice_readiness",
+                                "Unknown",
+                            )
+                        )
+                        or "Unknown",
                     )
 
 
-                if paper.get(
-                    "requires_full_text",
-                    False,
+                if bool(
+                    paper.get(
+                        "requires_full_text",
+                        False,
+                    )
                 ):
 
                     st.warning(
@@ -406,9 +554,11 @@ if (
                     )
 
 
-                pubmed_url = paper.get(
-                    "pubmed_url",
-                    "",
+                pubmed_url = valid_url(
+                    paper.get(
+                        "pubmed_url",
+                        "",
+                    )
                 )
 
                 if pubmed_url:
@@ -417,6 +567,7 @@ if (
                         "Open PubMed",
                         pubmed_url,
                     )
+
 
     else:
 
@@ -439,16 +590,29 @@ if (
 
     st.write("")
 
+
     with st.expander(
         "Athena response details"
     ):
 
         st.write(
-            f"Model: {last_result.get('model', 'Unknown')}"
+            "Model: "
+            + clean_text(
+                last_result.get(
+                    "model",
+                    "Unknown",
+                )
+            )
         )
 
         st.write(
-            f"Papers used: {last_result.get('paper_count', 0)}"
+            "Papers used: "
+            + clean_text(
+                last_result.get(
+                    "paper_count",
+                    0,
+                )
+            )
         )
 
 
@@ -458,8 +622,10 @@ if (
 
 st.write("")
 
+
 if st.button(
-    "Clear conversation"
+    "Clear conversation",
+    key="athena_clear_conversation",
 ):
 
     st.session_state[
@@ -469,5 +635,10 @@ if st.button(
     st.session_state[
         "athena_last_result"
     ] = None
+
+    st.session_state.pop(
+        "athena_pending_question",
+        None,
+    )
 
     st.rerun()
