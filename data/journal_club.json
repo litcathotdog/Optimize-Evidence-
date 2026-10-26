@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generated_at": "2026-10-23T18:23:33.565039+00:00",
+    "generated_at": "2026-10-26T19:57:55.667695+00:00",
     "journal_club_version": "1.0",
     "source_graph": "data/knowledge_graph.json",
     "source_database": "data/evidence_database.json",
@@ -9,46 +9,45 @@
   "executive_summary": {
     "papers_reviewed": 150,
     "high_priority_papers": 14,
-    "practice_informing_papers": 4,
+    "practice_informing_papers": 3,
     "conflicting_evidence_topics": 10,
     "evidence_gaps_highlighted": 10,
     "papers_flagged_for_full_text_review": 150
   },
   "paper_of_the_week": {
-    "paper_id": "paper:pmid:42865115",
-    "pmid": "42865115",
-    "doi": "10.1177/19417381261491843",
-    "title": "Female Athletes Are Half as Likely to Return to High-Risk Sports Compared With Male Athletes After Anterior Cruciate Ligament Reconstruction: An Exploration of Return-to-Sport Outcomes Between Sexes.",
-    "journal": "Sports health",
-    "publication_date": "2026 10 12",
-    "pubmed_url": "https://pubmed.ncbi.nlm.nih.gov/42865115/",
-    "study_design": "Randomized controlled trial",
-    "sample_size": null,
-    "evidence_strength": "Strong",
-    "risk_of_bias": "Low or unclear",
+    "paper_id": "paper:pmid:42879163",
+    "pmid": "42879163",
+    "doi": "10.1002/ksa.70651",
+    "title": "Sex-related differences after ACL reconstruction differ between early functional recovery and 5-year outcomes.",
+    "journal": "Knee surgery, sports traumatology, arthroscopy : official journal of the ESSKA",
+    "publication_date": "2026 10 15",
+    "pubmed_url": "https://pubmed.ncbi.nlm.nih.gov/42879163/",
+    "study_design": "Retrospective cohort study",
+    "sample_size": 479,
+    "evidence_strength": "Moderate",
+    "risk_of_bias": "Moderate",
     "statistical_confidence": "Moderate",
     "practice_readiness": "Practice-informing",
     "clinical_area": "Ligament and return-to-sport rehabilitation",
-    "result_direction": "unclear",
-    "clinical_summary": "This randomized controlled trial addresses Ligament and return-to-sport rehabilitation. The reported population was: Population not clearly extractable from the abstract. The intervention or exposure was: ACLR and participated in high-risk (jumping, pivoting, cutting) sport before injury were included in the study The direction and clinical magnitude of the findings are not reliably extractable.",
-    "practitioner_takeaway": "This study may meaningfully inform practice in Ligament and return-to-sport rehabilitation. The direction and clinical magnitude of the findings are not reliably extractable. Full-text review should still confirm the methods, intervention details, comparator, effect magnitude, adverse events, and applicability to the patient population.",
+    "result_direction": "neutral",
+    "clinical_summary": "This retrospective cohort study addresses Ligament and return-to-sport rehabilitation. The reported population was: analyzed according to sex The intervention or exposure was: primary ACLR between January 2017 and December 2019, with standardized 6-month functional and psychological assessment and available 5-year follow-up No clear between-group advantage was reported.",
+    "practitioner_takeaway": "This study may meaningfully inform practice in Ligament and return-to-sport rehabilitation. No clear between-group advantage was reported. Full-text review should still confirm the methods, intervention details, comparator, effect magnitude, adverse events, and applicability to the patient population.",
     "research_takeaway": "Future studies should address the identified reporting and methodological limitations, particularly around effect estimates, precision, confounding, and clinical importance where applicable.",
     "major_cautions": [
-      "The abstract does not provide enough information for a complete risk-of-bias assessment.",
-      "The abstract does not report an a priori power or sample-size calculation.",
-      "The abstract does not identify an intention-to-treat analysis.",
+      "The retrospective design increases the risk of selection bias and incomplete data.",
+      "Retrospective data may contain selection bias, missing data, and uncontrolled confounding.",
       "Clinical importance or a minimally important difference is not clearly discussed."
     ],
     "specialist_takeaways": {
-      "sports_performance": "The study is relevant to Return to sport. Sports-performance confidence is high. Transfer to competitive athletes depends on training status, intervention specificity, outcome validity, and similarity to real competition demands.",
+      "sports_performance": "The study is relevant to Strength, Recovery, Return to sport. Sports-performance confidence is high. Transfer to competitive athletes depends on training status, intervention specificity, outcome validity, and similarity to real competition demands.",
       "womens_athlete_health": "This paper addresses Female injury risk. Women's-athlete-health confidence is high. Interpretation should consider whether female participants were adequately represented, whether sex-specific analyses were performed, and whether menstrual, hormonal, bone-health, and training variables were measured appropriately."
     },
-    "evidence_score": 9,
+    "evidence_score": 8,
     "statistics_score": 7,
     "practitioner_relevance": 10,
     "translation_priority": 9,
     "requires_full_text_review": true,
-    "journal_club_priority": 9.35,
+    "journal_club_priority": 9.3,
     "why_selected": [
       "High evidence-quality score.",
       "Strong statistical-reporting score.",
@@ -58,42 +57,6 @@
     ]
   },
   "top_papers": [
-    {
-      "paper_id": "paper:pmid:42865115",
-      "pmid": "42865115",
-      "doi": "10.1177/19417381261491843",
-      "title": "Female Athletes Are Half as Likely to Return to High-Risk Sports Compared With Male Athletes After Anterior Cruciate Ligament Reconstruction: An Exploration of Return-to-Sport Outcomes Between Sexes.",
-      "journal": "Sports health",
-      "publication_date": "2026 10 12",
-      "pubmed_url": "https://pubmed.ncbi.nlm.nih.gov/42865115/",
-      "study_design": "Randomized controlled trial",
-      "sample_size": null,
-      "evidence_strength": "Strong",
-      "risk_of_bias": "Low or unclear",
-      "statistical_confidence": "Moderate",
-      "practice_readiness": "Practice-informing",
-      "clinical_area": "Ligament and return-to-sport rehabilitation",
-      "result_direction": "unclear",
-      "clinical_summary": "This randomized controlled trial addresses Ligament and return-to-sport rehabilitation. The reported population was: Population not clearly extractable from the abstract. The intervention or exposure was: ACLR and participated in high-risk (jumping, pivoting, cutting) sport before injury were included in the study The direction and clinical magnitude of the findings are not reliably extractable.",
-      "practitioner_takeaway": "This study may meaningfully inform practice in Ligament and return-to-sport rehabilitation. The direction and clinical magnitude of the findings are not reliably extractable. Full-text review should still confirm the methods, intervention details, comparator, effect magnitude, adverse events, and applicability to the patient population.",
-      "research_takeaway": "Future studies should address the identified reporting and methodological limitations, particularly around effect estimates, precision, confounding, and clinical importance where applicable.",
-      "major_cautions": [
-        "The abstract does not provide enough information for a complete risk-of-bias assessment.",
-        "The abstract does not report an a priori power or sample-size calculation.",
-        "The abstract does not identify an intention-to-treat analysis.",
-        "Clinical importance or a minimally important difference is not clearly discussed."
-      ],
-      "specialist_takeaways": {
-        "sports_performance": "The study is relevant to Return to sport. Sports-performance confidence is high. Transfer to competitive athletes depends on training status, intervention specificity, outcome validity, and similarity to real competition demands.",
-        "womens_athlete_health": "This paper addresses Female injury risk. Women's-athlete-health confidence is high. Interpretation should consider whether female participants were adequately represented, whether sex-specific analyses were performed, and whether menstrual, hormonal, bone-health, and training variables were measured appropriately."
-      },
-      "evidence_score": 9,
-      "statistics_score": 7,
-      "practitioner_relevance": 10,
-      "translation_priority": 9,
-      "requires_full_text_review": true,
-      "journal_club_priority": 9.35
-    },
     {
       "paper_id": "paper:pmid:42879163",
       "pmid": "42879163",
@@ -199,6 +162,73 @@
       "journal_club_priority": 9.0
     },
     {
+      "paper_id": "paper:pmid:42888637",
+      "pmid": "42888637",
+      "doi": "10.1097/md.0000000000051205",
+      "title": "Effects of blood flow restriction training in adult upper-limb musculoskeletal rehabilitation: A systematic review.",
+      "journal": "Medicine",
+      "publication_date": "2026 Oct 16",
+      "pubmed_url": "https://pubmed.ncbi.nlm.nih.gov/42888637/",
+      "study_design": "Systematic review",
+      "sample_size": 340,
+      "evidence_strength": "Strong",
+      "risk_of_bias": "Low or unclear",
+      "statistical_confidence": "Low",
+      "practice_readiness": "Promising but preliminary",
+      "clinical_area": "Cartilage and joint health",
+      "result_direction": "favorable",
+      "clinical_summary": "This systematic review addresses Cartilage and joint health. The reported population was: enrolled or randomized and 326 contributed to the analyzed/treated clinical samples The intervention or exposure was: Intervention or exposure not clearly extractable from the abstract. The abstract reports a favorable association or treatment effect.",
+      "practitioner_takeaway": "This paper provides potentially useful evidence in Cartilage and joint health, but the findings should be treated as preliminary. The abstract reports a favorable association or treatment effect. It should support rather than replace established clinical reasoning and guidelines.",
+      "research_takeaway": "Future studies should address the identified reporting and methodological limitations, particularly around effect estimates, precision, confounding, and clinical importance where applicable.",
+      "major_cautions": [
+        "The study may have limited statistical power because of its small sample.",
+        "Substantial heterogeneity may reduce confidence in the pooled estimate.",
+        "The statistical test or model is not clearly identifiable from the abstract.",
+        "Clinical importance or a minimally important difference is not clearly discussed."
+      ],
+      "specialist_takeaways": {},
+      "evidence_score": 10,
+      "statistics_score": 6,
+      "practitioner_relevance": 10,
+      "translation_priority": 8,
+      "requires_full_text_review": true,
+      "journal_club_priority": 8.7
+    },
+    {
+      "paper_id": "paper:pmid:42929654",
+      "pmid": "42929654",
+      "doi": "10.1177/03635465261486945",
+      "title": "Clinical Pathway Management for Platelet-Rich Plasma Therapy in Kellgren-Lawrence Grade I and II Knee Osteoarthritis: A Prospective, Multicenter, Double-Blind Randomized Controlled Trial.",
+      "journal": "The American journal of sports medicine",
+      "publication_date": "2026 10 26",
+      "pubmed_url": "https://pubmed.ncbi.nlm.nih.gov/42929654/",
+      "study_design": "Randomized controlled trial",
+      "sample_size": 240,
+      "evidence_strength": "Strong",
+      "risk_of_bias": "Low or unclear",
+      "statistical_confidence": "Low",
+      "practice_readiness": "Promising but preliminary",
+      "clinical_area": "Cartilage and joint health",
+      "result_direction": "unclear",
+      "clinical_summary": "This randomized controlled trial addresses Cartilage and joint health. The reported population was: randomized 1:1 to a standardized PRP clinical pathway (PRP-CP The intervention or exposure was: Intervention or exposure not clearly extractable from the abstract. The direction and clinical magnitude of the findings are not reliably extractable.",
+      "practitioner_takeaway": "This paper provides potentially useful evidence in Cartilage and joint health, but the findings should be treated as preliminary. The direction and clinical magnitude of the findings are not reliably extractable. It should support rather than replace established clinical reasoning and guidelines.",
+      "research_takeaway": "Future studies should address the identified reporting and methodological limitations, particularly around effect estimates, precision, confounding, and clinical importance where applicable.",
+      "major_cautions": [
+        "The abstract does not provide enough information for a complete risk-of-bias assessment.",
+        "The abstract does not report an a priori power or sample-size calculation.",
+        "The abstract does not identify an intention-to-treat analysis."
+      ],
+      "specialist_takeaways": {
+        "regenerative_medicine": "This paper evaluates Platelet-rich plasma in relation to Cartilage, Joint / osteoarthritis. Domain confidence is high. Full-text review should verify preparation, dose, comparator, safety, and clinical applicability before treatment decisions."
+      },
+      "evidence_score": 10,
+      "statistics_score": 6,
+      "practitioner_relevance": 10,
+      "translation_priority": 8,
+      "requires_full_text_review": true,
+      "journal_club_priority": 8.45
+    },
+    {
       "paper_id": "paper:pmid:42901593",
       "pmid": "42901593",
       "doi": "10.1136/bmjopen-2026-118506",
@@ -234,43 +264,6 @@
       "translation_priority": 8,
       "requires_full_text_review": true,
       "journal_club_priority": 7.9
-    },
-    {
-      "paper_id": "paper:pmid:42897970",
-      "pmid": "42897970",
-      "doi": "10.1080/09593985.2026.2749509",
-      "title": "Effects of adding sustained natural apophyseal glides on neuropathic pain-related symptoms and clinical outcomes in patients with lateral elbow tendinopathy: A randomized controlled trial.",
-      "journal": "Physiotherapy theory and practice",
-      "publication_date": "2026 10 20",
-      "pubmed_url": "https://pubmed.ncbi.nlm.nih.gov/42897970/",
-      "study_design": "Randomized controlled trial",
-      "sample_size": null,
-      "evidence_strength": "Strong",
-      "risk_of_bias": "Low or unclear",
-      "statistical_confidence": "Very low",
-      "practice_readiness": "Research-generating",
-      "clinical_area": "Tendon rehabilitation",
-      "result_direction": "neutral",
-      "clinical_summary": "This randomized controlled trial addresses Tendon rehabilitation. The reported population was: Population not clearly extractable from the abstract. The intervention or exposure was: aCRP, whereas the study group received the same program plus cervical SNAGS No clear between-group advantage was reported.",
-      "practitioner_takeaway": "This paper currently provides limited practice-changing evidence in Tendon rehabilitation. No clear between-group advantage was reported. It is more useful for hypothesis generation or identifying future research needs.",
-      "research_takeaway": "Future studies should address the identified reporting and methodological limitations, particularly around effect estimates, precision, confounding, and clinical importance where applicable.",
-      "major_cautions": [
-        "The abstract does not provide enough information for a complete risk-of-bias assessment.",
-        "P-values are reported without a clearly identified effect-size estimate.",
-        "Statistical significance is reported without a clearly identified confidence interval.",
-        "The statistical test or model is not clearly identifiable from the abstract.",
-        "The total analyzed sample size could not be reliably identified.",
-        "The abstract does not report an a priori power or sample-size calculation.",
-        "The abstract does not identify an intention-to-treat analysis.",
-        "Clinical importance or a minimally important difference is not clearly discussed."
-      ],
-      "specialist_takeaways": {},
-      "evidence_score": 9,
-      "statistics_score": 3,
-      "practitioner_relevance": 10,
-      "translation_priority": 7,
-      "requires_full_text_review": true,
-      "journal_club_priority": 7.55
     },
     {
       "paper_id": "paper:pmid:42852644",
@@ -346,35 +339,38 @@
       "journal_club_priority": 7.3
     },
     {
-      "paper_id": "paper:pmid:42891790",
-      "pmid": "42891790",
-      "doi": "10.1007/s11845-026-04695-3",
-      "title": "Clinical and functional predictors of delayed return to sport after first-time patellar dislocation in adolescents: A prospective cohort study.",
-      "journal": "Irish journal of medical science",
-      "publication_date": "2026 10 17",
-      "pubmed_url": "https://pubmed.ncbi.nlm.nih.gov/42891790/",
-      "study_design": "Prospective cohort study",
-      "sample_size": null,
-      "evidence_strength": "Moderate",
-      "risk_of_bias": "Moderate",
-      "statistical_confidence": "Low",
-      "practice_readiness": "Promising but preliminary",
-      "clinical_area": "Ligament and return-to-sport rehabilitation",
+      "paper_id": "paper:pmid:42924980",
+      "pmid": "42924980",
+      "doi": "10.36721/pjps/2026.40.15329.1",
+      "title": "Efficacy and safety study of diclofenac epolamine topical patch in accelerating rehabilitation of moderate hamstring strain: A randomized controlled trial.",
+      "journal": "Pakistan journal of pharmaceutical sciences",
+      "publication_date": "2027 Jan 01",
+      "pubmed_url": "https://pubmed.ncbi.nlm.nih.gov/42924980/",
+      "study_design": "Randomized controlled trial",
+      "sample_size": 120,
+      "evidence_strength": "Strong",
+      "risk_of_bias": "Low or unclear",
+      "statistical_confidence": "Very low",
+      "practice_readiness": "Research-generating",
+      "clinical_area": "Muscle injury and recovery",
       "result_direction": "unclear",
-      "clinical_summary": "This prospective cohort study addresses Ligament and return-to-sport rehabilitation. The reported population was: adolescents aged 12-18 years (97 females, 63 males) with first-time traumatic lateral patellar dislocation managed nonoperatively The intervention or exposure was: standardized rehabilitation and were followed for 12 months The direction and clinical magnitude of the findings are not reliably extractable.",
-      "practitioner_takeaway": "This paper provides potentially useful evidence in Ligament and return-to-sport rehabilitation, but the findings should be treated as preliminary. The direction and clinical magnitude of the findings are not reliably extractable. It should support rather than replace established clinical reasoning and guidelines.",
+      "clinical_summary": "This randomized controlled trial addresses Muscle injury and recovery. The reported population was: randomized to an experimental group (diclofenac patch twice daily for 14 days plus rehabilitation) or a control group (placebo patch plus identical re The intervention or exposure was: an experimental group (diclofenac patch twice daily for 14 days plus rehabilitation) or a control group (placebo patch plus identical rehabilitation) The direction and clinical magnitude of the findings are not reliably extractable.",
+      "practitioner_takeaway": "This paper currently provides limited practice-changing evidence in Muscle injury and recovery. The direction and clinical magnitude of the findings are not reliably extractable. It is more useful for hypothesis generation or identifying future research needs.",
       "research_takeaway": "Future studies should address the identified reporting and methodological limitations, particularly around effect estimates, precision, confounding, and clinical importance where applicable.",
       "major_cautions": [
-        "The abstract does not provide enough information for a complete risk-of-bias assessment.",
-        "The total analyzed sample size could not be reliably identified.",
+        "The single-center design may limit generalizability.",
+        "P-values are reported without a clearly identified effect-size estimate.",
+        "Statistical significance is reported without a clearly identified confidence interval.",
+        "The statistical test or model is not clearly identifiable from the abstract.",
+        "The abstract does not report an a priori power or sample-size calculation.",
+        "The abstract does not identify an intention-to-treat analysis.",
         "Clinical importance or a minimally important difference is not clearly discussed."
       ],
       "specialist_takeaways": {
-        "sports_performance": "The study is relevant to Recovery, Return to sport. Sports-performance confidence is high. Transfer to competitive athletes depends on training status, intervention specificity, outcome validity, and similarity to real competition demands.",
-        "womens_athlete_health": "This paper addresses female-athlete health. Women's-athlete-health confidence is high. Interpretation should consider whether female participants were adequately represented, whether sex-specific analyses were performed, and whether menstrual, hormonal, bone-health, and training variables were measured appropriately."
+        "sports_performance": "The study is relevant to Strength, Recovery. Sports-performance confidence is high. Transfer to competitive athletes depends on training status, intervention specificity, outcome validity, and similarity to real competition demands."
       },
-      "evidence_score": 7,
-      "statistics_score": 6,
+      "evidence_score": 9,
+      "statistics_score": 3,
       "practitioner_relevance": 10,
       "translation_priority": 7,
       "requires_full_text_review": true,
@@ -417,14 +413,6 @@
   ],
   "practice_informing_papers": [
     {
-      "paper_id": "paper:pmid:42865115",
-      "title": "Female Athletes Are Half as Likely to Return to High-Risk Sports Compared With Male Athletes After Anterior Cruciate Ligament Reconstruction: An Exploration of Return-to-Sport Outcomes Between Sexes.",
-      "clinical_area": "Ligament and return-to-sport rehabilitation",
-      "evidence_strength": "Strong",
-      "statistical_confidence": "Moderate",
-      "practitioner_takeaway": "This study may meaningfully inform practice in Ligament and return-to-sport rehabilitation. The direction and clinical magnitude of the findings are not reliably extractable. Full-text review should still confirm the methods, intervention details, comparator, effect magnitude, adverse events, and applicability to the patient population."
-    },
-    {
       "paper_id": "paper:pmid:42879163",
       "title": "Sex-related differences after ACL reconstruction differ between early functional recovery and 5-year outcomes.",
       "clinical_area": "Ligament and return-to-sport rehabilitation",
@@ -451,14 +439,6 @@
   ],
   "specialty_highlights": {
     "sports_performance": [
-      {
-        "paper_id": "paper:pmid:42865115",
-        "title": "Female Athletes Are Half as Likely to Return to High-Risk Sports Compared With Male Athletes After Anterior Cruciate Ligament Reconstruction: An Exploration of Return-to-Sport Outcomes Between Sexes.",
-        "journal_club_priority": 9.35,
-        "evidence_score": 9,
-        "specialist_confidence": "High",
-        "specialist_takeaway": "The study is relevant to Return to sport. Sports-performance confidence is high. Transfer to competitive athletes depends on training status, intervention specificity, outcome validity, and similarity to real competition demands."
-      },
       {
         "paper_id": "paper:pmid:42879163",
         "title": "Sex-related differences after ACL reconstruction differ between early functional recovery and 5-year outcomes.",
@@ -490,17 +470,17 @@
         "evidence_score": 9,
         "specialist_confidence": "High",
         "specialist_takeaway": "The study is relevant to Strength. Sports-performance confidence is high. Transfer to competitive athletes depends on training status, intervention specificity, outcome validity, and similarity to real competition demands."
+      },
+      {
+        "paper_id": "paper:pmid:42852644",
+        "title": "Effectiveness of aerobic exercise on motor function and functional capacity in children and adolescents with neuromuscular diseases: a systematic review and meta-analysis.",
+        "journal_club_priority": 7.4,
+        "evidence_score": 9,
+        "specialist_confidence": "High",
+        "specialist_takeaway": "The study is relevant to Strength, Recovery. Sports-performance confidence is high. Transfer to competitive athletes depends on training status, intervention specificity, outcome validity, and similarity to real competition demands."
       }
     ],
     "womens_athlete_health": [
-      {
-        "paper_id": "paper:pmid:42865115",
-        "title": "Female Athletes Are Half as Likely to Return to High-Risk Sports Compared With Male Athletes After Anterior Cruciate Ligament Reconstruction: An Exploration of Return-to-Sport Outcomes Between Sexes.",
-        "journal_club_priority": 9.35,
-        "evidence_score": 9,
-        "specialist_confidence": "High",
-        "specialist_takeaway": "This paper addresses Female injury risk. Women's-athlete-health confidence is high. Interpretation should consider whether female participants were adequately represented, whether sex-specific analyses were performed, and whether menstrual, hormonal, bone-health, and training variables were measured appropriately."
-      },
       {
         "paper_id": "paper:pmid:42879163",
         "title": "Sex-related differences after ACL reconstruction differ between early functional recovery and 5-year outcomes.",
@@ -518,65 +498,39 @@
         "specialist_takeaway": "This paper addresses Female injury risk. Women's-athlete-health confidence is high. Interpretation should consider whether female participants were adequately represented, whether sex-specific analyses were performed, and whether menstrual, hormonal, bone-health, and training variables were measured appropriately."
       },
       {
-        "paper_id": "paper:pmid:42891790",
-        "title": "Clinical and functional predictors of delayed return to sport after first-time patellar dislocation in adolescents: A prospective cohort study.",
-        "journal_club_priority": 7.3,
-        "evidence_score": 7,
-        "specialist_confidence": "High",
-        "specialist_takeaway": "This paper addresses female-athlete health. Women's-athlete-health confidence is high. Interpretation should consider whether female participants were adequately represented, whether sex-specific analyses were performed, and whether menstrual, hormonal, bone-health, and training variables were measured appropriately."
-      },
-      {
-        "paper_id": "paper:pmid:42841334",
-        "title": "Effect of tangeretin supplements on simulated precompetition weight loss in female combat sports athletes.",
-        "journal_club_priority": 7.05,
-        "evidence_score": 9,
-        "specialist_confidence": "High",
-        "specialist_takeaway": "This paper addresses female-athlete health. Women's-athlete-health confidence is high. Interpretation should consider whether female participants were adequately represented, whether sex-specific analyses were performed, and whether menstrual, hormonal, bone-health, and training variables were measured appropriately."
-      }
-    ],
-    "biomechanics": [
-      {
-        "paper_id": "paper:pmid:42901593",
-        "title": "Immobilisation versus early active motion following primary flexor pollicis longus tendon zones 1-2 repair: protocol for a registry-based multicentre randomised controlled trial in Sweden.",
-        "journal_club_priority": 7.9,
-        "evidence_score": 9,
-        "specialist_confidence": "High",
-        "specialist_takeaway": "This study evaluates Kinematics. Biomechanics confidence is high. Interpret mechanical changes separately from clinical significance; changes in joint angles, forces, or stiffness do not necessarily translate into better performance or lower injury risk."
-      },
-      {
-        "paper_id": "paper:pmid:42815174",
-        "title": "Shear wave elastography for assessing lower extremity muscle stiffness after anterior cruciate ligament reconstruction: A systematic review.",
-        "journal_club_priority": 7.2,
-        "evidence_score": 8,
-        "specialist_confidence": "High",
-        "specialist_takeaway": "This study evaluates Stiffness, Landing mechanics. Biomechanics confidence is high. Interpret mechanical changes separately from clinical significance; changes in joint angles, forces, or stiffness do not necessarily translate into better performance or lower injury risk."
-      },
-      {
-        "paper_id": "paper:pmid:42894572",
-        "title": "Non-Surgical Therapies for Knee Osteoarthritis: Current Evidence and Emerging Strategies.",
-        "journal_club_priority": 7.1,
-        "evidence_score": 9,
-        "specialist_confidence": "High",
-        "specialist_takeaway": "This study evaluates Landing mechanics. Biomechanics confidence is high. Interpret mechanical changes separately from clinical significance; changes in joint angles, forces, or stiffness do not necessarily translate into better performance or lower injury risk."
-      },
-      {
-        "paper_id": "paper:pmid:42841334",
-        "title": "Effect of tangeretin supplements on simulated precompetition weight loss in female combat sports athletes.",
-        "journal_club_priority": 7.05,
-        "evidence_score": 9,
-        "specialist_confidence": "High",
-        "specialist_takeaway": "This study evaluates biomechanical outcomes. Biomechanics confidence is high. Interpret mechanical changes separately from clinical significance; changes in joint angles, forces, or stiffness do not necessarily translate into better performance or lower injury risk."
-      },
-      {
         "paper_id": "paper:pmid:42899516",
         "title": "Selective recovery effects of short-term beetroot juice supplementation after exercise-induced muscle damage in trained female volleyball players.",
         "journal_club_priority": 6.85,
         "evidence_score": 9,
+        "specialist_confidence": "High",
+        "specialist_takeaway": "This paper addresses female-athlete health. Women's-athlete-health confidence is high. Interpretation should consider whether female participants were adequately represented, whether sex-specific analyses were performed, and whether menstrual, hormonal, bone-health, and training variables were measured appropriately."
+      },
+      {
+        "paper_id": "paper:pmid:42879451",
+        "title": "Short-term Rhodiola rosea supplementation improves premenstrual symptoms, reaction time, and perceived exertion in female taekwondo athletes: a randomised double-blind placebo-controlled trial.",
+        "journal_club_priority": 6.45,
+        "evidence_score": 8,
+        "specialist_confidence": "High",
+        "specialist_takeaway": "This paper addresses Menstrual health. Women's-athlete-health confidence is high. Interpretation should consider whether female participants were adequately represented, whether sex-specific analyses were performed, and whether menstrual, hormonal, bone-health, and training variables were measured appropriately."
+      },
+      {
+        "paper_id": "paper:pmid:42908189",
+        "title": "Quantitative UTE MRI Differences in the Meniscus Following ACL Reconstruction: A Prospective Cohort Study Using 3D Ultrashort Echo Time Adiabatic T1rho and Magnetization Transfer Imaging.",
+        "journal_club_priority": 6.45,
+        "evidence_score": 7,
         "specialist_confidence": "Moderate",
-        "specialist_takeaway": "This study evaluates biomechanical outcomes. Biomechanics confidence is moderate. Interpret mechanical changes separately from clinical significance; changes in joint angles, forces, or stiffness do not necessarily translate into better performance or lower injury risk."
+        "specialist_takeaway": "This paper addresses female-athlete health. Women's-athlete-health confidence is moderate. Interpretation should consider whether female participants were adequately represented, whether sex-specific analyses were performed, and whether menstrual, hormonal, bone-health, and training variables were measured appropriately."
       }
     ],
     "regenerative_medicine": [
+      {
+        "paper_id": "paper:pmid:42929654",
+        "title": "Clinical Pathway Management for Platelet-Rich Plasma Therapy in Kellgren-Lawrence Grade I and II Knee Osteoarthritis: A Prospective, Multicenter, Double-Blind Randomized Controlled Trial.",
+        "journal_club_priority": 8.45,
+        "evidence_score": 10,
+        "specialist_confidence": "High",
+        "specialist_takeaway": "This paper evaluates Platelet-rich plasma in relation to Cartilage, Joint / osteoarthritis. Domain confidence is high. Full-text review should verify preparation, dose, comparator, safety, and clinical applicability before treatment decisions."
+      },
       {
         "paper_id": "paper:pmid:42791219",
         "title": "Comparative efficacy of ultrasound-guided intra-articular injection of platelet-rich plasma (PRP), hydrolyzed type I collagen, and hyaluronic acid in patients with knee osteoarthritis: a randomized controlled trial.",
@@ -602,20 +556,54 @@
         "specialist_takeaway": "This paper evaluates Platelet-rich plasma in relation to Joint / osteoarthritis, Bone. Domain confidence is high. Full-text review should verify preparation, dose, comparator, safety, and clinical applicability before treatment decisions."
       },
       {
-        "paper_id": "paper:pmid:42894546",
-        "title": "Autologous Peripheral Blood-Derived Stem Cells Combined with Platelet-Rich Plasma is Associated With Clinical and Radiological Improvement in Anterior Cruciate Ligament Ruptures-Preliminary Clinical and MRI Findings in 47 Consecutive Patients.",
-        "journal_club_priority": 6.05,
-        "evidence_score": 5,
+        "paper_id": "paper:pmid:42920771",
+        "title": "Efficacy of combined therapies on degenerative joint disease of the temporomandibular joint: A systematic review and meta-analysis.",
+        "journal_club_priority": 6.1,
+        "evidence_score": 8,
         "specialist_confidence": "High",
-        "specialist_takeaway": "This paper evaluates Platelet-rich plasma in relation to Tendon, Ligament, Cartilage, Joint / osteoarthritis. Domain confidence is high. Full-text review should verify preparation, dose, comparator, safety, and clinical applicability before treatment decisions."
+        "specialist_takeaway": "This paper evaluates Hyaluronic acid in relation to Joint / osteoarthritis. Domain confidence is high. Full-text review should verify preparation, dose, comparator, safety, and clinical applicability before treatment decisions."
+      }
+    ],
+    "biomechanics": [
+      {
+        "paper_id": "paper:pmid:42901593",
+        "title": "Immobilisation versus early active motion following primary flexor pollicis longus tendon zones 1-2 repair: protocol for a registry-based multicentre randomised controlled trial in Sweden.",
+        "journal_club_priority": 7.9,
+        "evidence_score": 9,
+        "specialist_confidence": "High",
+        "specialist_takeaway": "This study evaluates Kinematics. Biomechanics confidence is high. Interpret mechanical changes separately from clinical significance; changes in joint angles, forces, or stiffness do not necessarily translate into better performance or lower injury risk."
       },
       {
-        "paper_id": "paper:pmid:42894516",
-        "title": "Orthobiologics in Focus: Current Evidence, Clinical Applications, and Future Directions, A Scoping Review.",
-        "journal_club_priority": 5.95,
-        "evidence_score": 6,
+        "paper_id": "paper:pmid:42894572",
+        "title": "Non-Surgical Therapies for Knee Osteoarthritis: Current Evidence and Emerging Strategies.",
+        "journal_club_priority": 7.1,
+        "evidence_score": 9,
+        "specialist_confidence": "High",
+        "specialist_takeaway": "This study evaluates Landing mechanics. Biomechanics confidence is high. Interpret mechanical changes separately from clinical significance; changes in joint angles, forces, or stiffness do not necessarily translate into better performance or lower injury risk."
+      },
+      {
+        "paper_id": "paper:pmid:42895359",
+        "title": "Clinical and functional outcomes of aquatic plyometrics in adolescent patellofemoral pain syndrome: a dual-arm randomized controlled trial.",
+        "journal_club_priority": 7.0,
+        "evidence_score": 8,
         "specialist_confidence": "Moderate",
-        "specialist_takeaway": "This paper evaluates Platelet-rich plasma, Bone marrow aspirate concentrate in relation to Joint / osteoarthritis. Domain confidence is moderate. Full-text review should verify preparation, dose, comparator, safety, and clinical applicability before treatment decisions."
+        "specialist_takeaway": "This study evaluates biomechanical outcomes. Biomechanics confidence is moderate. Interpret mechanical changes separately from clinical significance; changes in joint angles, forces, or stiffness do not necessarily translate into better performance or lower injury risk."
+      },
+      {
+        "paper_id": "paper:pmid:42899516",
+        "title": "Selective recovery effects of short-term beetroot juice supplementation after exercise-induced muscle damage in trained female volleyball players.",
+        "journal_club_priority": 6.85,
+        "evidence_score": 9,
+        "specialist_confidence": "Moderate",
+        "specialist_takeaway": "This study evaluates biomechanical outcomes. Biomechanics confidence is moderate. Interpret mechanical changes separately from clinical significance; changes in joint angles, forces, or stiffness do not necessarily translate into better performance or lower injury risk."
+      },
+      {
+        "paper_id": "paper:pmid:42913286",
+        "title": "Comparison of short-foot and toe-curl exercises on movement control during single-leg landing after ACL reconstruction: An exploratory randomized controlled trial.",
+        "journal_club_priority": 6.75,
+        "evidence_score": 9,
+        "specialist_confidence": "High",
+        "specialist_takeaway": "This study evaluates Landing mechanics. Biomechanics confidence is high. Interpret mechanical changes separately from clinical significance; changes in joint angles, forces, or stiffness do not necessarily translate into better performance or lower injury risk."
       }
     ]
   },
@@ -623,101 +611,101 @@
     {
       "concept": "Sports Performance",
       "concept_type": "specialty",
-      "paper_count": 108,
-      "favorable": 6,
+      "paper_count": 101,
+      "favorable": 4,
       "neutral": 9,
       "unfavorable": 3,
-      "average_evidence_score": 5.16,
+      "average_evidence_score": 5.12,
       "discussion_point": "Evidence direction is inconsistent across the currently indexed studies. Differences in study design, population, intervention protocol, comparator, or outcome definition should be examined."
     },
     {
       "concept": "Recovery",
       "concept_type": "performance_outcome",
-      "paper_count": 84,
-      "favorable": 6,
-      "neutral": 6,
+      "paper_count": 79,
+      "favorable": 3,
+      "neutral": 5,
       "unfavorable": 2,
-      "average_evidence_score": 5.18,
+      "average_evidence_score": 5.13,
       "discussion_point": "Evidence direction is inconsistent across the currently indexed studies. Differences in study design, population, intervention protocol, comparator, or outcome definition should be examined."
     },
     {
       "concept": "Function",
       "concept_type": "outcome",
-      "paper_count": 70,
-      "favorable": 5,
-      "neutral": 4,
+      "paper_count": 73,
+      "favorable": 8,
+      "neutral": 1,
       "unfavorable": 0,
-      "average_evidence_score": 5.09,
-      "discussion_point": "Evidence direction is inconsistent across the currently indexed studies. Differences in study design, population, intervention protocol, comparator, or outcome definition should be examined."
-    },
-    {
-      "concept": "Womens Athlete Health",
-      "concept_type": "specialty",
-      "paper_count": 48,
-      "favorable": 2,
-      "neutral": 6,
-      "unfavorable": 2,
-      "average_evidence_score": 5.21,
+      "average_evidence_score": 5.4,
       "discussion_point": "Evidence direction is inconsistent across the currently indexed studies. Differences in study design, population, intervention protocol, comparator, or outcome definition should be examined."
     },
     {
       "concept": "Recovery",
       "concept_type": "outcome",
-      "paper_count": 47,
+      "paper_count": 48,
       "favorable": 2,
-      "neutral": 3,
+      "neutral": 2,
       "unfavorable": 2,
-      "average_evidence_score": 5.04,
-      "discussion_point": "Evidence direction is inconsistent across the currently indexed studies. Differences in study design, population, intervention protocol, comparator, or outcome definition should be examined."
-    },
-    {
-      "concept": "Performance",
-      "concept_type": "outcome",
-      "paper_count": 43,
-      "favorable": 6,
-      "neutral": 3,
-      "unfavorable": 1,
-      "average_evidence_score": 5.72,
+      "average_evidence_score": 5.4,
       "discussion_point": "Evidence direction is inconsistent across the currently indexed studies. Differences in study design, population, intervention protocol, comparator, or outcome definition should be examined."
     },
     {
       "concept": "Strength",
       "concept_type": "outcome",
-      "paper_count": 36,
-      "favorable": 2,
-      "neutral": 2,
+      "paper_count": 41,
+      "favorable": 3,
+      "neutral": 3,
       "unfavorable": 2,
       "average_evidence_score": 5.78,
       "discussion_point": "Evidence direction is inconsistent across the currently indexed studies. Differences in study design, population, intervention protocol, comparator, or outcome definition should be examined."
     },
     {
-      "concept": "Ligament and return-to-sport rehabilitation",
-      "concept_type": "clinical_area",
-      "paper_count": 32,
-      "favorable": 1,
-      "neutral": 3,
+      "concept": "Performance",
+      "concept_type": "outcome",
+      "paper_count": 39,
+      "favorable": 4,
+      "neutral": 4,
       "unfavorable": 1,
-      "average_evidence_score": 5.56,
-      "discussion_point": "Evidence direction is inconsistent across the currently indexed studies. Differences in study design, population, intervention protocol, comparator, or outcome definition should be examined."
-    },
-    {
-      "concept": "Strength",
-      "concept_type": "performance_outcome",
-      "paper_count": 29,
-      "favorable": 2,
-      "neutral": 1,
-      "unfavorable": 1,
-      "average_evidence_score": 5.72,
+      "average_evidence_score": 5.74,
       "discussion_point": "Evidence direction is inconsistent across the currently indexed studies. Differences in study design, population, intervention protocol, comparator, or outcome definition should be examined."
     },
     {
       "concept": "Pain",
       "concept_type": "outcome",
-      "paper_count": 29,
-      "favorable": 2,
-      "neutral": 2,
+      "paper_count": 38,
+      "favorable": 5,
+      "neutral": 1,
       "unfavorable": 2,
-      "average_evidence_score": 5.62,
+      "average_evidence_score": 6.08,
+      "discussion_point": "Evidence direction is inconsistent across the currently indexed studies. Differences in study design, population, intervention protocol, comparator, or outcome definition should be examined."
+    },
+    {
+      "concept": "Womens Athlete Health",
+      "concept_type": "specialty",
+      "paper_count": 36,
+      "favorable": 2,
+      "neutral": 6,
+      "unfavorable": 3,
+      "average_evidence_score": 5.22,
+      "discussion_point": "Evidence direction is inconsistent across the currently indexed studies. Differences in study design, population, intervention protocol, comparator, or outcome definition should be examined."
+    },
+    {
+      "concept": "Ligament and return-to-sport rehabilitation",
+      "concept_type": "clinical_area",
+      "paper_count": 33,
+      "favorable": 1,
+      "neutral": 3,
+      "unfavorable": 2,
+      "average_evidence_score": 5.36,
+      "discussion_point": "Evidence direction is inconsistent across the currently indexed studies. Differences in study design, population, intervention protocol, comparator, or outcome definition should be examined."
+    },
+    {
+      "concept": "Strength",
+      "concept_type": "performance_outcome",
+      "paper_count": 31,
+      "favorable": 1,
+      "neutral": 2,
+      "unfavorable": 1,
+      "average_evidence_score": 5.68,
       "discussion_point": "Evidence direction is inconsistent across the currently indexed studies. Differences in study design, population, intervention protocol, comparator, or outcome definition should be examined."
     }
   ],
@@ -726,7 +714,7 @@
       "concept_id": "specialty:sports-performance",
       "concept_type": "specialty",
       "concept": "Sports Performance",
-      "paper_count": 108,
+      "paper_count": 101,
       "reasons": [
         "The available papers contain potentially conflicting result directions."
       ]
@@ -735,7 +723,7 @@
       "concept_id": "performance_outcome:recovery",
       "concept_type": "performance_outcome",
       "concept": "Recovery",
-      "paper_count": 84,
+      "paper_count": 79,
       "reasons": [
         "The available papers contain potentially conflicting result directions."
       ]
@@ -744,16 +732,7 @@
       "concept_id": "outcome:function",
       "concept_type": "outcome",
       "concept": "Function",
-      "paper_count": 70,
-      "reasons": [
-        "The available papers contain potentially conflicting result directions."
-      ]
-    },
-    {
-      "concept_id": "specialty:womens-athlete-health",
-      "concept_type": "specialty",
-      "concept": "Womens Athlete Health",
-      "paper_count": 48,
+      "paper_count": 73,
       "reasons": [
         "The available papers contain potentially conflicting result directions."
       ]
@@ -762,16 +741,7 @@
       "concept_id": "outcome:recovery",
       "concept_type": "outcome",
       "concept": "Recovery",
-      "paper_count": 47,
-      "reasons": [
-        "The available papers contain potentially conflicting result directions."
-      ]
-    },
-    {
-      "concept_id": "outcome:performance",
-      "concept_type": "outcome",
-      "concept": "Performance",
-      "paper_count": 43,
+      "paper_count": 48,
       "reasons": [
         "The available papers contain potentially conflicting result directions."
       ]
@@ -780,25 +750,16 @@
       "concept_id": "outcome:strength",
       "concept_type": "outcome",
       "concept": "Strength",
-      "paper_count": 36,
+      "paper_count": 41,
       "reasons": [
         "The available papers contain potentially conflicting result directions."
       ]
     },
     {
-      "concept_id": "clinical_area:ligament-and-return-to-sport-rehabilitation",
-      "concept_type": "clinical_area",
-      "concept": "Ligament and return-to-sport rehabilitation",
-      "paper_count": 32,
-      "reasons": [
-        "The available papers contain potentially conflicting result directions."
-      ]
-    },
-    {
-      "concept_id": "performance_outcome:strength",
-      "concept_type": "performance_outcome",
-      "concept": "Strength",
-      "paper_count": 29,
+      "concept_id": "outcome:performance",
+      "concept_type": "outcome",
+      "concept": "Performance",
+      "paper_count": 39,
       "reasons": [
         "The available papers contain potentially conflicting result directions."
       ]
@@ -807,15 +768,42 @@
       "concept_id": "outcome:pain",
       "concept_type": "outcome",
       "concept": "Pain",
-      "paper_count": 29,
+      "paper_count": 38,
       "reasons": [
         "No paper is currently classified as practice-informing.",
+        "The available papers contain potentially conflicting result directions."
+      ]
+    },
+    {
+      "concept_id": "specialty:womens-athlete-health",
+      "concept_type": "specialty",
+      "concept": "Womens Athlete Health",
+      "paper_count": 36,
+      "reasons": [
+        "The available papers contain potentially conflicting result directions."
+      ]
+    },
+    {
+      "concept_id": "specialty:biomechanics",
+      "concept_type": "specialty",
+      "concept": "Biomechanics",
+      "paper_count": 34,
+      "reasons": [
+        "No paper is currently classified as practice-informing."
+      ]
+    },
+    {
+      "concept_id": "clinical_area:ligament-and-return-to-sport-rehabilitation",
+      "concept_type": "clinical_area",
+      "concept": "Ligament and return-to-sport rehabilitation",
+      "paper_count": 33,
+      "reasons": [
         "The available papers contain potentially conflicting result directions."
       ]
     }
   ],
   "discussion_questions": [
-    "Does the randomized controlled trial design justify the strength of the authors' conclusions?",
+    "Does the retrospective cohort study design justify the strength of the authors' conclusions?",
     "Are the reported effects large enough to be clinically meaningful, rather than merely statistically significant?",
     "How closely does the study population resemble the patients or athletes seen in actual practice?",
     "Which methodological details must be confirmed in the full text before this evidence should influence practice?",
