@@ -1,61 +1,101 @@
 {
   "metadata": {
-    "generated_at": "2026-11-11T21:26:31.656762+00:00",
+    "generated_at": "2026-11-12T21:28:53.742372+00:00",
     "dashboard_version": "1.0"
   },
   "overview": {
     "total_papers": 150,
-    "knowledge_graph_nodes": 345,
-    "knowledge_graph_edges": 1253,
-    "practice_informing_papers": 0,
-    "high_priority_papers": 9,
+    "knowledge_graph_nodes": 346,
+    "knowledge_graph_edges": 1247,
+    "practice_informing_papers": 1,
+    "high_priority_papers": 10,
     "conflicting_evidence_topics": 10,
     "evidence_gaps": 10
   },
   "paper_of_the_week": {
-    "paper_id": "paper:pmid:43009638",
-    "pmid": "43009638",
-    "doi": "10.1007/s40279-026-02575-5",
-    "title": "Interval Between Injury and Surgery Influences Knee Biomechanics During Walking in Anterior Cruciate Ligament Reconstructed Patients: A Systematic Review with Meta-analysis.",
-    "journal": "Sports medicine (Auckland, N.Z.)",
-    "publication_date": "2026 11 10",
-    "pubmed_url": "https://pubmed.ncbi.nlm.nih.gov/43009638/",
+    "paper_id": "paper:pmid:42970020",
+    "pmid": "42970020",
+    "doi": "10.1186/s40798-026-01136-4",
+    "title": "Female Team-Sport Athletes' Physical Fitness and Jump Performance Kinematics After Plyometric Jump Training: A Systematic Review and Meta-analysis.",
+    "journal": "Sports medicine - open",
+    "publication_date": "2026 11 02",
+    "pubmed_url": "https://pubmed.ncbi.nlm.nih.gov/42970020/",
     "study_design": "Systematic review and meta-analysis",
-    "sample_size": null,
+    "sample_size": 609,
     "evidence_strength": "Strong",
     "risk_of_bias": "Low or unclear",
-    "statistical_confidence": "Low",
-    "practice_readiness": "Promising but preliminary",
-    "clinical_area": "Ligament and return-to-sport rehabilitation",
+    "statistical_confidence": "Moderate",
+    "practice_readiness": "Practice-informing",
+    "clinical_area": "Women's athlete health",
     "result_direction": "unclear",
-    "clinical_summary": "This systematic review and meta-analysis addresses Ligament and return-to-sport rehabilitation. The reported population was: Population not clearly extractable from the abstract. The intervention or exposure was: ACLR and healthy controls and reporting the interval between anterior cruciate ligament injury and reconstructive surgery were included The direction and clinical magnitude of the findings are not reliably extractable.",
-    "practitioner_takeaway": "This paper provides potentially useful evidence in Ligament and return-to-sport rehabilitation, but the findings should be treated as preliminary. The direction and clinical magnitude of the findings are not reliably extractable. It should support rather than replace established clinical reasoning and guidelines.",
+    "clinical_summary": "This systematic review and meta-analysis addresses Women's athlete health. The reported population was: Population not clearly extractable from the abstract. The intervention or exposure was: Intervention or exposure not clearly extractable from the abstract. The direction and clinical magnitude of the findings are not reliably extractable.",
+    "practitioner_takeaway": "This study may meaningfully inform practice in Women's athlete health. The direction and clinical magnitude of the findings are not reliably extractable. Full-text review should still confirm the methods, intervention details, comparator, effect magnitude, adverse events, and applicability to the patient population.",
     "research_takeaway": "Future studies should address the identified reporting and methodological limitations, particularly around effect estimates, precision, confounding, and clinical importance where applicable.",
     "major_cautions": [
-      "The abstract does not provide enough information for a complete risk-of-bias assessment.",
-      "The total analyzed sample size could not be reliably identified.",
+      "Substantial heterogeneity may reduce confidence in the pooled estimate.",
       "The abstract does not clearly report an assessment of publication bias.",
       "Multiple testing may have occurred without a clearly reported correction.",
       "Clinical importance or a minimally important difference is not clearly discussed."
     ],
     "specialist_takeaways": {
-      "sports_performance": "The study is relevant to Recovery. Sports-performance confidence is high. Transfer to competitive athletes depends on training status, intervention specificity, outcome validity, and similarity to real competition demands.",
-      "biomechanics": "This study evaluates biomechanical outcomes. Biomechanics confidence is high. Interpret mechanical changes separately from clinical significance; changes in joint angles, forces, or stiffness do not necessarily translate into better performance or lower injury risk.",
-      "womens_athlete_health": "This paper addresses Female injury risk. Women's-athlete-health confidence is high. Interpretation should consider whether female participants were adequately represented, whether sex-specific analyses were performed, and whether menstrual, hormonal, bone-health, and training variables were measured appropriately."
+      "sports_performance": "The study is relevant to Sprint speed, Jump performance, Strength. Sports-performance confidence is high. Transfer to competitive athletes depends on training status, intervention specificity, outcome validity, and similarity to real competition demands.",
+      "biomechanics": "This study evaluates Kinematics, Landing mechanics. Biomechanics confidence is high. Interpret mechanical changes separately from clinical significance; changes in joint angles, forces, or stiffness do not necessarily translate into better performance or lower injury risk.",
+      "womens_athlete_health": "This paper addresses female-athlete health. Women's-athlete-health confidence is high. Interpretation should consider whether female participants were adequately represented, whether sex-specific analyses were performed, and whether menstrual, hormonal, bone-health, and training variables were measured appropriately."
     },
     "evidence_score": 9,
-    "statistics_score": 5,
-    "practitioner_relevance": 9,
-    "translation_priority": 8,
+    "statistics_score": 7,
+    "practitioner_relevance": 8,
+    "translation_priority": 9,
     "requires_full_text_review": true,
-    "journal_club_priority": 7.7,
+    "journal_club_priority": 8.85,
     "why_selected": [
       "High evidence-quality score.",
+      "Strong statistical-reporting score.",
       "Highly relevant to practitioners.",
+      "Classified as potentially practice-informing.",
       "Received relevant specialty review."
     ]
   },
   "top_papers": [
+    {
+      "paper_id": "paper:pmid:42970020",
+      "title": "Female Team-Sport Athletes' Physical Fitness and Jump Performance Kinematics After Plyometric Jump Training: A Systematic Review and Meta-analysis.",
+      "clinical_area": "Women's athlete health",
+      "study_design": "Systematic review and meta-analysis",
+      "evidence_score": 9,
+      "statistics_score": 7,
+      "practitioner_relevance": 8,
+      "journal_club_priority": 8.85,
+      "practice_readiness": "Practice-informing",
+      "result_direction": "unclear",
+      "pubmed_url": "https://pubmed.ncbi.nlm.nih.gov/42970020/"
+    },
+    {
+      "paper_id": "paper:pmid:42987491",
+      "title": "Effect of percutaneous electrolysis combined with exercise on pain and function in chronic lateral epicondylitis: A randomized controlled trial.",
+      "clinical_area": "Ligament and return-to-sport rehabilitation",
+      "study_design": "Randomized controlled trial",
+      "evidence_score": 10,
+      "statistics_score": 6,
+      "practitioner_relevance": 9,
+      "journal_club_priority": 8.45,
+      "practice_readiness": "Promising but preliminary",
+      "result_direction": "favorable",
+      "pubmed_url": "https://pubmed.ncbi.nlm.nih.gov/42987491/"
+    },
+    {
+      "paper_id": "paper:pmid:43015197",
+      "title": "The role of scapular muscles strengthening in lateral epicondylalgia rehabilitation: A systematic review with meta-analysis.",
+      "clinical_area": "Tendon rehabilitation",
+      "study_design": "Systematic review and meta-analysis",
+      "evidence_score": 9,
+      "statistics_score": 4,
+      "practitioner_relevance": 10,
+      "journal_club_priority": 7.75,
+      "practice_readiness": "Research-generating",
+      "result_direction": "unclear",
+      "pubmed_url": "https://pubmed.ncbi.nlm.nih.gov/43015197/"
+    },
     {
       "paper_id": "paper:pmid:43009638",
       "title": "Interval Between Injury and Surgery Influences Knee Biomechanics During Walking in Anterior Cruciate Ligament Reconstructed Patients: A Systematic Review with Meta-analysis.",
@@ -109,19 +149,6 @@
       "pubmed_url": "https://pubmed.ncbi.nlm.nih.gov/43012382/"
     },
     {
-      "paper_id": "paper:pmid:42973118",
-      "title": "Minimally Invasive Zadek Osteotomy vs Open Achilles Debridement for Insertional Achilles Tendinopathy in Athletes: A Retrospective Comparative Cohort Study.",
-      "clinical_area": "Tendon rehabilitation",
-      "study_design": "Cohort study",
-      "evidence_score": 6,
-      "statistics_score": 6,
-      "practitioner_relevance": 10,
-      "journal_club_priority": 7.25,
-      "practice_readiness": "Promising but preliminary",
-      "result_direction": "neutral",
-      "pubmed_url": "https://pubmed.ncbi.nlm.nih.gov/42973118/"
-    },
-    {
       "paper_id": "paper:pmid:43012808",
       "title": "Effects of caffeine supplementation on exercise-induced muscle damage: A systematic review.",
       "clinical_area": "Muscle injury and recovery",
@@ -133,19 +160,6 @@
       "practice_readiness": "Research-generating",
       "result_direction": "neutral",
       "pubmed_url": "https://pubmed.ncbi.nlm.nih.gov/43012808/"
-    },
-    {
-      "paper_id": "paper:pmid:42975569",
-      "title": "Gracilis tendon harvest for ACL reconstruction impairs gracilis muscle volume recovery and may adversely affect adjacent thigh musculature. MRI-based outcomes from a subgroup of patients enroled in the DOSTAR randomized controlled trial.",
-      "clinical_area": "Ligament and return-to-sport rehabilitation",
-      "study_design": "Randomized controlled trial",
-      "evidence_score": 9,
-      "statistics_score": 3,
-      "practitioner_relevance": 8,
-      "journal_club_priority": 7.05,
-      "practice_readiness": "Research-generating",
-      "result_direction": "neutral",
-      "pubmed_url": "https://pubmed.ncbi.nlm.nih.gov/42975569/"
     },
     {
       "paper_id": "paper:pmid:43002992",
@@ -172,99 +186,54 @@
       "practice_readiness": "Research-generating",
       "result_direction": "unclear",
       "pubmed_url": "https://pubmed.ncbi.nlm.nih.gov/42985783/"
-    },
-    {
-      "paper_id": "paper:pmid:42899516",
-      "title": "Selective recovery effects of short-term beetroot juice supplementation after exercise-induced muscle damage in trained female volleyball players.",
-      "clinical_area": "Muscle injury and recovery",
-      "study_design": "Randomized controlled trial",
-      "evidence_score": 9,
-      "statistics_score": 2,
-      "practitioner_relevance": 9,
-      "journal_club_priority": 6.85,
-      "practice_readiness": "Research-generating",
-      "result_direction": "unclear",
-      "pubmed_url": "https://pubmed.ncbi.nlm.nih.gov/42899516/"
     }
   ],
   "specialty_summary": [
     {
       "specialty": "sports_performance",
-      "paper_count": 111
+      "paper_count": 113
     },
     {
       "specialty": "womens_athlete_health",
-      "paper_count": 48
-    },
-    {
-      "specialty": "biomechanics",
-      "paper_count": 29
+      "paper_count": 49
     },
     {
       "specialty": "regenerative_medicine",
-      "paper_count": 24
+      "paper_count": 27
+    },
+    {
+      "specialty": "biomechanics",
+      "paper_count": 25
     }
   ],
   "practice_readiness": [
     {
       "category": "Research-generating",
-      "paper_count": 136
+      "paper_count": 138
     },
     {
       "category": "Promising but preliminary",
-      "paper_count": 14
+      "paper_count": 11
+    },
+    {
+      "category": "Practice-informing",
+      "paper_count": 1
     }
   ],
   "evidence_gaps": [
     {
       "concept": "Sports Performance",
       "concept_type": "specialty",
-      "paper_count": 111,
+      "paper_count": 113,
       "reasons": [
-        "No paper is currently classified as practice-informing.",
+        "Average evidence quality is low.",
         "The available papers contain potentially conflicting result directions."
       ]
     },
     {
       "concept": "Recovery",
       "concept_type": "performance_outcome",
-      "paper_count": 69,
-      "reasons": [
-        "No paper is currently classified as practice-informing.",
-        "The available papers contain potentially conflicting result directions."
-      ]
-    },
-    {
-      "concept": "Function",
-      "concept_type": "outcome",
-      "paper_count": 55,
-      "reasons": [
-        "No paper is currently classified as practice-informing.",
-        "The available papers contain potentially conflicting result directions."
-      ]
-    },
-    {
-      "concept": "Performance",
-      "concept_type": "outcome",
-      "paper_count": 54,
-      "reasons": [
-        "No paper is currently classified as practice-informing.",
-        "The available papers contain potentially conflicting result directions."
-      ]
-    },
-    {
-      "concept": "Recovery",
-      "concept_type": "outcome",
-      "paper_count": 48,
-      "reasons": [
-        "No paper is currently classified as practice-informing.",
-        "The available papers contain potentially conflicting result directions."
-      ]
-    },
-    {
-      "concept": "Womens Athlete Health",
-      "concept_type": "specialty",
-      "paper_count": 48,
+      "paper_count": 74,
       "reasons": [
         "Average evidence quality is low.",
         "No paper is currently classified as practice-informing.",
@@ -272,36 +241,76 @@
       ]
     },
     {
-      "concept": "Pain",
+      "concept": "Performance",
       "concept_type": "outcome",
-      "paper_count": 34,
+      "paper_count": 60,
+      "reasons": [
+        "Average evidence quality is low.",
+        "The available papers contain potentially conflicting result directions."
+      ]
+    },
+    {
+      "concept": "Recovery",
+      "concept_type": "outcome",
+      "paper_count": 50,
       "reasons": [
         "No paper is currently classified as practice-informing.",
         "The available papers contain potentially conflicting result directions."
       ]
     },
     {
-      "concept": "Ligament and return-to-sport rehabilitation",
-      "concept_type": "clinical_area",
-      "paper_count": 30,
+      "concept": "Function",
+      "concept_type": "outcome",
+      "paper_count": 49,
       "reasons": [
-        "No paper is currently classified as practice-informing."
+        "No paper is currently classified as practice-informing.",
+        "The available papers contain potentially conflicting result directions."
       ]
     },
     {
-      "concept": "Biomechanics",
+      "concept": "Womens Athlete Health",
       "concept_type": "specialty",
-      "paper_count": 29,
+      "paper_count": 49,
       "reasons": [
-        "No paper is currently classified as practice-informing."
+        "Average evidence quality is low.",
+        "The available papers contain potentially conflicting result directions."
+      ]
+    },
+    {
+      "concept": "Pain",
+      "concept_type": "outcome",
+      "paper_count": 31,
+      "reasons": [
+        "No paper is currently classified as practice-informing.",
+        "The available papers contain potentially conflicting result directions."
       ]
     },
     {
       "concept": "Strength",
       "concept_type": "outcome",
-      "paper_count": 28,
+      "paper_count": 29,
       "reasons": [
-        "No paper is currently classified as practice-informing."
+        "The available papers contain potentially conflicting result directions."
+      ]
+    },
+    {
+      "concept": "Recovery physiology",
+      "concept_type": "clinical_area",
+      "paper_count": 27,
+      "reasons": [
+        "Average evidence quality is low.",
+        "No paper is currently classified as practice-informing.",
+        "The available papers contain potentially conflicting result directions."
+      ]
+    },
+    {
+      "concept": "Regenerative Medicine",
+      "concept_type": "specialty",
+      "paper_count": 27,
+      "reasons": [
+        "Average evidence quality is low.",
+        "No paper is currently classified as practice-informing.",
+        "The available papers contain potentially conflicting result directions."
       ]
     }
   ],
@@ -309,91 +318,91 @@
     {
       "concept": "Sports Performance",
       "concept_type": "specialty",
-      "paper_count": 111,
-      "favorable": 1,
-      "neutral": 13,
-      "unfavorable": 5,
+      "paper_count": 113,
+      "favorable": 3,
+      "neutral": 10,
+      "unfavorable": 3,
       "discussion_point": "Evidence direction is inconsistent across the currently indexed studies. Differences in study design, population, intervention protocol, comparator, or outcome definition should be examined."
     },
     {
       "concept": "Recovery",
       "concept_type": "performance_outcome",
-      "paper_count": 69,
+      "paper_count": 74,
       "favorable": 1,
-      "neutral": 8,
-      "unfavorable": 4,
-      "discussion_point": "Evidence direction is inconsistent across the currently indexed studies. Differences in study design, population, intervention protocol, comparator, or outcome definition should be examined."
-    },
-    {
-      "concept": "Function",
-      "concept_type": "outcome",
-      "paper_count": 55,
-      "favorable": 1,
-      "neutral": 6,
-      "unfavorable": 2,
+      "neutral": 7,
+      "unfavorable": 3,
       "discussion_point": "Evidence direction is inconsistent across the currently indexed studies. Differences in study design, population, intervention protocol, comparator, or outcome definition should be examined."
     },
     {
       "concept": "Performance",
       "concept_type": "outcome",
-      "paper_count": 54,
-      "favorable": 1,
-      "neutral": 6,
-      "unfavorable": 4,
+      "paper_count": 60,
+      "favorable": 2,
+      "neutral": 5,
+      "unfavorable": 2,
       "discussion_point": "Evidence direction is inconsistent across the currently indexed studies. Differences in study design, population, intervention protocol, comparator, or outcome definition should be examined."
     },
     {
       "concept": "Recovery",
       "concept_type": "outcome",
-      "paper_count": 48,
+      "paper_count": 50,
       "favorable": 1,
-      "neutral": 5,
-      "unfavorable": 3,
+      "neutral": 3,
+      "unfavorable": 2,
+      "discussion_point": "Evidence direction is inconsistent across the currently indexed studies. Differences in study design, population, intervention protocol, comparator, or outcome definition should be examined."
+    },
+    {
+      "concept": "Function",
+      "concept_type": "outcome",
+      "paper_count": 49,
+      "favorable": 3,
+      "neutral": 4,
+      "unfavorable": 2,
       "discussion_point": "Evidence direction is inconsistent across the currently indexed studies. Differences in study design, population, intervention protocol, comparator, or outcome definition should be examined."
     },
     {
       "concept": "Womens Athlete Health",
       "concept_type": "specialty",
-      "paper_count": 48,
+      "paper_count": 49,
       "favorable": 1,
-      "neutral": 5,
+      "neutral": 4,
       "unfavorable": 1,
       "discussion_point": "Evidence direction is inconsistent across the currently indexed studies. Differences in study design, population, intervention protocol, comparator, or outcome definition should be examined."
     },
     {
       "concept": "Pain",
       "concept_type": "outcome",
-      "paper_count": 34,
-      "favorable": 1,
-      "neutral": 4,
-      "unfavorable": 2,
-      "discussion_point": "Evidence direction is inconsistent across the currently indexed studies. Differences in study design, population, intervention protocol, comparator, or outcome definition should be examined."
-    },
-    {
-      "concept": "Ligament and return-to-sport rehabilitation",
-      "concept_type": "clinical_area",
-      "paper_count": 30,
-      "favorable": 0,
-      "neutral": 5,
+      "paper_count": 31,
+      "favorable": 3,
+      "neutral": 3,
       "unfavorable": 1,
       "discussion_point": "Evidence direction is inconsistent across the currently indexed studies. Differences in study design, population, intervention protocol, comparator, or outcome definition should be examined."
     },
     {
-      "concept": "Biomechanics",
-      "concept_type": "specialty",
+      "concept": "Strength",
+      "concept_type": "outcome",
       "paper_count": 29,
-      "favorable": 0,
-      "neutral": 6,
+      "favorable": 1,
+      "neutral": 2,
+      "unfavorable": 0,
+      "discussion_point": "Evidence direction is inconsistent across the currently indexed studies. Differences in study design, population, intervention protocol, comparator, or outcome definition should be examined."
+    },
+    {
+      "concept": "Recovery physiology",
+      "concept_type": "clinical_area",
+      "paper_count": 27,
+      "favorable": 1,
+      "neutral": 2,
       "unfavorable": 1,
       "discussion_point": "Evidence direction is inconsistent across the currently indexed studies. Differences in study design, population, intervention protocol, comparator, or outcome definition should be examined."
     },
     {
-      "concept": "Return to sport",
-      "concept_type": "performance_outcome",
-      "paper_count": 28,
-      "favorable": 0,
-      "neutral": 5,
-      "unfavorable": 1,
+      "concept": "Regenerative Medicine",
+      "concept_type": "specialty",
+      "paper_count": 27,
+      "favorable": 3,
+      "neutral": 0,
+      "unfavorable": 2,
       "discussion_point": "Evidence direction is inconsistent across the currently indexed studies. Differences in study design, population, intervention protocol, comparator, or outcome definition should be examined."
     }
   ],
