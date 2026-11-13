@@ -1,12 +1,12 @@
 {
   "metadata": {
-    "generated_at": "2026-11-12T21:28:53.742372+00:00",
+    "generated_at": "2026-11-13T20:55:09.213806+00:00",
     "dashboard_version": "1.0"
   },
   "overview": {
     "total_papers": 150,
-    "knowledge_graph_nodes": 346,
-    "knowledge_graph_edges": 1247,
+    "knowledge_graph_nodes": 354,
+    "knowledge_graph_edges": 1263,
     "practice_informing_papers": 1,
     "high_priority_papers": 10,
     "conflicting_evidence_topics": 10,
@@ -162,17 +162,17 @@
       "pubmed_url": "https://pubmed.ncbi.nlm.nih.gov/43012808/"
     },
     {
-      "paper_id": "paper:pmid:43002992",
-      "title": "Is the number of strength and hop tests passed at the time of return to pre-injury sport level associated with second ACL injury? A registry study of 458 patients.",
+      "paper_id": "paper:pmid:43022592",
+      "title": "Ultrasound-Guided Focused Extracorporeal Shock Wave Therapy for Hemiplegic Shoulder Pain: A Randomized Controlled Trial.",
       "clinical_area": "Ligament and return-to-sport rehabilitation",
-      "study_design": "Cohort study",
-      "evidence_score": 7,
-      "statistics_score": 6,
-      "practitioner_relevance": 9,
-      "journal_club_priority": 7.05,
-      "practice_readiness": "Promising but preliminary",
+      "study_design": "Randomized controlled trial",
+      "evidence_score": 9,
+      "statistics_score": 4,
+      "practitioner_relevance": 8,
+      "journal_club_priority": 7.0,
+      "practice_readiness": "Research-generating",
       "result_direction": "unclear",
-      "pubmed_url": "https://pubmed.ncbi.nlm.nih.gov/43002992/"
+      "pubmed_url": "https://pubmed.ncbi.nlm.nih.gov/43022592/"
     },
     {
       "paper_id": "paper:pmid:42985783",
@@ -191,29 +191,29 @@
   "specialty_summary": [
     {
       "specialty": "sports_performance",
-      "paper_count": 113
+      "paper_count": 118
     },
     {
       "specialty": "womens_athlete_health",
-      "paper_count": 49
-    },
-    {
-      "specialty": "regenerative_medicine",
-      "paper_count": 27
+      "paper_count": 46
     },
     {
       "specialty": "biomechanics",
-      "paper_count": 25
+      "paper_count": 30
+    },
+    {
+      "specialty": "regenerative_medicine",
+      "paper_count": 16
     }
   ],
   "practice_readiness": [
     {
       "category": "Research-generating",
-      "paper_count": 138
+      "paper_count": 136
     },
     {
       "category": "Promising but preliminary",
-      "paper_count": 11
+      "paper_count": 13
     },
     {
       "category": "Practice-informing",
@@ -224,18 +224,16 @@
     {
       "concept": "Sports Performance",
       "concept_type": "specialty",
-      "paper_count": 113,
+      "paper_count": 118,
       "reasons": [
-        "Average evidence quality is low.",
         "The available papers contain potentially conflicting result directions."
       ]
     },
     {
       "concept": "Recovery",
       "concept_type": "performance_outcome",
-      "paper_count": 74,
+      "paper_count": 80,
       "reasons": [
-        "Average evidence quality is low.",
         "No paper is currently classified as practice-informing.",
         "The available papers contain potentially conflicting result directions."
       ]
@@ -243,16 +241,15 @@
     {
       "concept": "Performance",
       "concept_type": "outcome",
-      "paper_count": 60,
+      "paper_count": 63,
       "reasons": [
-        "Average evidence quality is low.",
         "The available papers contain potentially conflicting result directions."
       ]
     },
     {
       "concept": "Recovery",
       "concept_type": "outcome",
-      "paper_count": 50,
+      "paper_count": 58,
       "reasons": [
         "No paper is currently classified as practice-informing.",
         "The available papers contain potentially conflicting result directions."
@@ -261,56 +258,53 @@
     {
       "concept": "Function",
       "concept_type": "outcome",
-      "paper_count": 49,
+      "paper_count": 56,
       "reasons": [
         "No paper is currently classified as practice-informing.",
-        "The available papers contain potentially conflicting result directions."
-      ]
-    },
-    {
-      "concept": "Womens Athlete Health",
-      "concept_type": "specialty",
-      "paper_count": 49,
-      "reasons": [
-        "Average evidence quality is low.",
         "The available papers contain potentially conflicting result directions."
       ]
     },
     {
       "concept": "Pain",
       "concept_type": "outcome",
-      "paper_count": 31,
+      "paper_count": 37,
       "reasons": [
         "No paper is currently classified as practice-informing.",
         "The available papers contain potentially conflicting result directions."
       ]
     },
     {
-      "concept": "Strength",
-      "concept_type": "outcome",
-      "paper_count": 29,
+      "concept": "Ligament and return-to-sport rehabilitation",
+      "concept_type": "clinical_area",
+      "paper_count": 28,
       "reasons": [
+        "No paper is currently classified as practice-informing.",
         "The available papers contain potentially conflicting result directions."
+      ]
+    },
+    {
+      "concept": "Muscle injury and recovery",
+      "concept_type": "clinical_area",
+      "paper_count": 24,
+      "reasons": [
+        "No paper is currently classified as practice-informing."
       ]
     },
     {
       "concept": "Recovery physiology",
       "concept_type": "clinical_area",
-      "paper_count": 27,
+      "paper_count": 23,
       "reasons": [
         "Average evidence quality is low.",
-        "No paper is currently classified as practice-informing.",
-        "The available papers contain potentially conflicting result directions."
+        "No paper is currently classified as practice-informing."
       ]
     },
     {
-      "concept": "Regenerative Medicine",
-      "concept_type": "specialty",
-      "paper_count": 27,
+      "concept": "Return to sport",
+      "concept_type": "performance_outcome",
+      "paper_count": 21,
       "reasons": [
-        "Average evidence quality is low.",
-        "No paper is currently classified as practice-informing.",
-        "The available papers contain potentially conflicting result directions."
+        "No paper is currently classified as practice-informing."
       ]
     }
   ],
@@ -318,53 +312,44 @@
     {
       "concept": "Sports Performance",
       "concept_type": "specialty",
-      "paper_count": 113,
+      "paper_count": 118,
       "favorable": 3,
-      "neutral": 10,
+      "neutral": 7,
       "unfavorable": 3,
       "discussion_point": "Evidence direction is inconsistent across the currently indexed studies. Differences in study design, population, intervention protocol, comparator, or outcome definition should be examined."
     },
     {
       "concept": "Recovery",
       "concept_type": "performance_outcome",
-      "paper_count": 74,
+      "paper_count": 80,
       "favorable": 1,
-      "neutral": 7,
-      "unfavorable": 3,
+      "neutral": 4,
+      "unfavorable": 2,
       "discussion_point": "Evidence direction is inconsistent across the currently indexed studies. Differences in study design, population, intervention protocol, comparator, or outcome definition should be examined."
     },
     {
       "concept": "Performance",
       "concept_type": "outcome",
-      "paper_count": 60,
+      "paper_count": 63,
       "favorable": 2,
-      "neutral": 5,
+      "neutral": 2,
       "unfavorable": 2,
       "discussion_point": "Evidence direction is inconsistent across the currently indexed studies. Differences in study design, population, intervention protocol, comparator, or outcome definition should be examined."
     },
     {
       "concept": "Recovery",
       "concept_type": "outcome",
-      "paper_count": 50,
+      "paper_count": 58,
       "favorable": 1,
-      "neutral": 3,
+      "neutral": 2,
       "unfavorable": 2,
       "discussion_point": "Evidence direction is inconsistent across the currently indexed studies. Differences in study design, population, intervention protocol, comparator, or outcome definition should be examined."
     },
     {
       "concept": "Function",
       "concept_type": "outcome",
-      "paper_count": 49,
+      "paper_count": 56,
       "favorable": 3,
-      "neutral": 4,
-      "unfavorable": 2,
-      "discussion_point": "Evidence direction is inconsistent across the currently indexed studies. Differences in study design, population, intervention protocol, comparator, or outcome definition should be examined."
-    },
-    {
-      "concept": "Womens Athlete Health",
-      "concept_type": "specialty",
-      "paper_count": 49,
-      "favorable": 1,
       "neutral": 4,
       "unfavorable": 1,
       "discussion_point": "Evidence direction is inconsistent across the currently indexed studies. Differences in study design, population, intervention protocol, comparator, or outcome definition should be examined."
@@ -372,37 +357,46 @@
     {
       "concept": "Pain",
       "concept_type": "outcome",
-      "paper_count": 31,
+      "paper_count": 37,
       "favorable": 3,
       "neutral": 3,
       "unfavorable": 1,
       "discussion_point": "Evidence direction is inconsistent across the currently indexed studies. Differences in study design, population, intervention protocol, comparator, or outcome definition should be examined."
     },
     {
-      "concept": "Strength",
-      "concept_type": "outcome",
-      "paper_count": 29,
-      "favorable": 1,
-      "neutral": 2,
-      "unfavorable": 0,
-      "discussion_point": "Evidence direction is inconsistent across the currently indexed studies. Differences in study design, population, intervention protocol, comparator, or outcome definition should be examined."
-    },
-    {
-      "concept": "Recovery physiology",
+      "concept": "Ligament and return-to-sport rehabilitation",
       "concept_type": "clinical_area",
-      "paper_count": 27,
+      "paper_count": 28,
       "favorable": 1,
       "neutral": 2,
       "unfavorable": 1,
       "discussion_point": "Evidence direction is inconsistent across the currently indexed studies. Differences in study design, population, intervention protocol, comparator, or outcome definition should be examined."
     },
     {
-      "concept": "Regenerative Medicine",
-      "concept_type": "specialty",
-      "paper_count": 27,
-      "favorable": 3,
-      "neutral": 0,
-      "unfavorable": 2,
+      "concept": "Muscle injury and recovery",
+      "concept_type": "clinical_area",
+      "paper_count": 24,
+      "favorable": 0,
+      "neutral": 2,
+      "unfavorable": 1,
+      "discussion_point": "Evidence direction is inconsistent across the currently indexed studies. Differences in study design, population, intervention protocol, comparator, or outcome definition should be examined."
+    },
+    {
+      "concept": "Return to sport",
+      "concept_type": "performance_outcome",
+      "paper_count": 21,
+      "favorable": 0,
+      "neutral": 2,
+      "unfavorable": 1,
+      "discussion_point": "Evidence direction is inconsistent across the currently indexed studies. Differences in study design, population, intervention protocol, comparator, or outcome definition should be examined."
+    },
+    {
+      "concept": "Cartilage and joint health",
+      "concept_type": "clinical_area",
+      "paper_count": 17,
+      "favorable": 1,
+      "neutral": 3,
+      "unfavorable": 0,
       "discussion_point": "Evidence direction is inconsistent across the currently indexed studies. Differences in study design, population, intervention protocol, comparator, or outcome definition should be examined."
     }
   ],
